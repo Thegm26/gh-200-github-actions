@@ -1,0 +1,117 @@
+name: CI lab
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+    inputs:
+      run_extended:
+        description: Run the optional container smoke test.
+        required: true
+        default: false
+        type: boolean
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    name: Test Node ${{ matrix.node }} on ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      max-parallel: 2
+      matrix:
+        node: [20, 22]
+        os: [ubuntu-latest, windows-latest]
+        exclude:
+          - node: 22
+            os: windows-latest
+        include:
+          - node: 20
+            os: ubuntu-latest
+            track: lts
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - uses: actions/setup-node@1e60f620b9541d83559d0ca4496e1ccbc79a5b0b # v4.0.4
+        with:
+          node-version: ${{ matrix.node }}
+          cache: npm
+      - run: npm ci
+      - run: npm test
+      - name: Validate workflow safety
+        if: ${{ runner.os == 'Linux' && matrix.node == 22 }}
+        run: npm run validate:workflows
+      - name: Save test evidence
+        if: ${{ always() && runner.os == 'Linux' }}
+        shell: bash
+        run: printf 'node=%s\nos=%s\n' '${{ matrix.node }}' '${{ runner.os }}' > test-evidence.txt
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        if: ${{ always() && runner.os == 'Linux' }}
+        with:
+          name: test-evidence-node-${{ matrix.node }}
+          path: test-evidence.txt
+          if-no-files-found: error
+
+  risk:
+    uses: ./.github/workflows/reusable-risk.yml
+    with:
+      sample_size: 3
+    secrets:
+      optional_token: ${{ secrets.OPTIONAL_LAB_TOKEN }}
+
+  integration:
+    needs: [test, risk]
+    runs-on: ubuntu-latest
+    outputs:
+      smoke_result: ${{ steps.smoke.outputs.result }}
+    services:
+      redis:
+        image: redis:7-alpine
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 6379:6379
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - uses: actions/setup-node@1e60f620b9541d83559d0ca4496e1ccbc79a5b0b # v4.0.4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: Download matrix evidence
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
+        with:
+          pattern: test-evidence-node-*
+          merge-multiple: true
+      - name: Start service and smoke test it
+        id: smoke
+        shell: bash
+        run: |
+          npm start > service.log 2>&1 &
+          service_pid=$!
+          trap 'kill "$service_pid"' EXIT
+          for _ in {1..20}; do curl --fail --silent http://127.0.0.1:3000/health && break; sleep 1; done
+          curl --fail --silent --show-error \
+            --request POST http://127.0.0.1:3000/v1/build-risk \
+            --header 'content-type: application/json' \
+            --data '{"failedJobs":1,"totalJobs":4,"openIncidents":1,"changeFailureRate":0.1}'
+          echo 'result=passed' >> "$GITHUB_OUTPUT"
+      - uses: ./.github/actions/lab-summary
+        with:
+          title: Integration result (${{ needs.risk.outputs.level }})
+      - name: Publish job summary
+        shell: bash
+        run: |
+          echo '### CI lab result' >> "$GITHUB_STEP_SUMMARY"
+          echo "Reusable score: ${{ needs.risk.outputs.score }}" >> "$GITHUB_STEP_SUMMARY"
+          echo "Smoke result: ${{ steps.smoke.outputs.result }}" >> "$GITHUB_STEP_SUMMARY"

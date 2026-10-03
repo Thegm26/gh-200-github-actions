@@ -1,0 +1,3 @@
+# One defensible decision set
+
+Put finance repositories in a restricted production runner group with an approved static-egress/network design; keep web on standard hosted runners. Permit only selected/verified actions and `shared-release` through policy; runner groups allocate runner access, they do not decide allowed actions. Put `REGION` in an org/repo variable as appropriate, `NPM_TOKEN` in a scoped encrypted secret, and `DEPLOY_KEY` in a protected production environment with reviewers. Use Actions REST APIs for variables/secrets/retention within authorized scope. Read runner-image release notes/toolcache; pin or install needed compiler/setup tool rather than trusting `windows-latest`.

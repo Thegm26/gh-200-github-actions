@@ -1,0 +1,16 @@
+name: Build stamp
+description: Produce a stamped build identifier.
+inputs:
+  prefix:
+    description: Identifier prefix
+    required: true
+outputs:
+  stamp:
+    description: Generated stamp
+    value: ${{ steps.make.outputs.stamp }}
+runs:
+  using: composite
+  steps:
+    - id: make
+      shell: bash
+      run: echo "stamp=${{ inputs.prefix }}-42" >> "$GITHUB_OUTPUT"

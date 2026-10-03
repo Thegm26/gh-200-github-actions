@@ -1,0 +1,44 @@
+name: Reusable risk evaluation
+
+on:
+  workflow_call:
+    inputs:
+      sample_size:
+        description: A non-negative sample size used for the deterministic lab score.
+        required: true
+        type: number
+    secrets:
+      optional_token:
+        description: Optional training token; its presence is reported but never read or printed.
+        required: false
+    outputs:
+      score:
+        description: Deterministic score from the local JavaScript action.
+        value: ${{ jobs.evaluate.outputs.score }}
+      level:
+        description: Deterministic level from the local JavaScript action.
+        value: ${{ jobs.evaluate.outputs.level }}
+
+permissions:
+  contents: read
+
+jobs:
+  evaluate:
+    runs-on: ubuntu-latest
+    outputs:
+      score: ${{ steps.risk.outputs.score }}
+      level: ${{ steps.risk.outputs.level }}
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - id: risk
+        uses: ./.github/actions/risk-summary
+        with:
+          sample-size: ${{ inputs.sample_size }}
+      - name: Show safe secret context pattern
+        shell: bash
+        run: |
+          if [[ '${{ secrets.optional_token != '' }}' == 'true' ]]; then
+            echo 'An optional secret was mapped by the caller.' >> "$GITHUB_STEP_SUMMARY"
+          else
+            echo 'No optional secret was supplied; this workflow remains runnable.' >> "$GITHUB_STEP_SUMMARY"
+          fi

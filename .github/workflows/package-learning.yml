@@ -1,0 +1,43 @@
+name: Manual package, attestation, and OIDC learning lab
+
+on:
+  workflow_dispatch:
+    inputs:
+      lesson:
+        description: Select the safe learning exercise.
+        required: true
+        default: package-preview
+        type: choice
+        options: [package-preview, attestation-oidc-notes]
+
+permissions:
+  contents: read
+  id-token: write
+  attestations: write
+
+concurrency:
+  group: package-learning-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  preview:
+    runs-on: ubuntu-latest
+    environment:
+      name: training
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - uses: actions/setup-node@1e60f620b9541d83559d0ca4496e1ccbc79a5b0b # v4.0.4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: Create an unpublished package preview
+        if: ${{ inputs.lesson == 'package-preview' }}
+        run: npm pack --dry-run
+      - name: Explain attestation and OIDC without issuing credentials
+        if: ${{ inputs.lesson == 'attestation-oidc-notes' }}
+        shell: bash
+        run: |
+          echo '### Attestation and OIDC learning notes' >> "$GITHUB_STEP_SUMMARY"
+          echo 'This manual-only exercise grants the minimal permissions needed to study the concepts.' >> "$GITHUB_STEP_SUMMARY"
+          echo 'It intentionally does not request a cloud token, publish a package, deploy, or create an attestation.' >> "$GITHUB_STEP_SUMMARY"

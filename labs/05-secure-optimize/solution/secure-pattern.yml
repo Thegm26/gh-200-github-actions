@@ -1,0 +1,16 @@
+name: secure build pattern
+on: pull_request
+permissions: { contents: read, id-token: write, attestations: write }
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+      - name: Treat untrusted title as data
+        env: { PR_TITLE: ${{ github.event.pull_request.title }} }
+        run: printf '%s\n' "$PR_TITLE"
+      - name: Federate to cloud
+        run: echo "Use provider action pinned to its reviewed full commit SHA"
+      - name: Verify before deploy
+        run: gh attestation verify artifact.tar.gz --repo "$GITHUB_REPOSITORY"

@@ -1,0 +1,88 @@
+import { existsSync, readdirSync, readFileSync } from 'node:fs';
+import { resolve } from 'node:path';
+import { fileURLToPath } from 'node:url';
+
+const root = resolve(fileURLToPath(new URL('..', import.meta.url)));
+const workflowsDir = resolve(root, '.github/workflows');
+const requiredFiles = ['ci.yml', 'reusable-risk.yml', 'package-learning.yml'];
+const failures = [];
+
+function requireMatch(text, pattern, description) {
+  if (!pattern.test(text)) failures.push(description);
+}
+
+function file(name) {
+  const path = resolve(workflowsDir, name);
+  if (!existsSync(path)) {
+    failures.push(`Missing required workflow: ${name}`);
+    return '';
+  }
+  return readFileSync(path, 'utf8');
+}
+
+if (!existsSync(workflowsDir)) failures.push('Missing .github/workflows directory.');
+
+const activeFiles = existsSync(workflowsDir)
+  ? readdirSync(workflowsDir).filter((name) => /\.ya?ml$/i.test(name)).sort()
+  : [];
+for (const name of requiredFiles) {
+  if (!activeFiles.includes(name)) failures.push(`Required active workflow is absent: ${name}`);
+}
+
+const allWorkflows = activeFiles.map((name) => ({ name, text: file(name) }));
+const allText = allWorkflows.map(({ text }) => text).join('\n');
+const ci = file('ci.yml');
+const reusable = file('reusable-risk.yml');
+const learning = file('package-learning.yml');
+
+requireMatch(ci, /\bpush:/, 'CI must trigger on push.');
+requireMatch(ci, /\bpull_request:/, 'CI must trigger on pull_request.');
+requireMatch(ci, /\bworkflow_dispatch:/, 'CI must offer workflow_dispatch.');
+requireMatch(ci, /type:\s*boolean/, 'CI dispatch input must be typed.');
+requireMatch(ci, /permissions:\s*\n\s+contents:\s*read/, 'CI must declare least-privilege contents: read.');
+requireMatch(ci, /fail-fast:\s*false/, 'CI must demonstrate fail-fast.');
+requireMatch(ci, /max-parallel:\s*2/, 'CI must limit matrix parallelism.');
+requireMatch(ci, /\binclude:/, 'CI matrix must include an include example.');
+requireMatch(ci, /\bexclude:/, 'CI matrix must include an exclude example.');
+requireMatch(ci, /cache:\s*npm/, 'CI must use setup-node npm caching.');
+requireMatch(ci, /services:\s*\n\s+redis:/, 'CI must provide a service container.');
+requireMatch(ci, /--health-cmd/, 'Service container must have a health check.');
+requireMatch(ci, /outputs:\s*\n\s+smoke_result:/, 'CI must map a step output to a job output.');
+requireMatch(ci, /GITHUB_STEP_SUMMARY/, 'CI must write a job summary.');
+requireMatch(ci, /actions\/upload-artifact@/, 'CI must upload an artifact.');
+requireMatch(ci, /actions\/download-artifact@/, 'CI must download an artifact.');
+requireMatch(ci, /\.\/\.github\/workflows\/reusable-risk\.yml/, 'CI must call the reusable workflow.');
+requireMatch(reusable, /workflow_call:/, 'Reusable workflow must use workflow_call.');
+requireMatch(reusable, /type:\s*number/, 'Reusable workflow input must be typed.');
+requireMatch(reusable, /secrets:\s*\n\s+optional_token:/, 'Reusable workflow must declare its optional secret.');
+requireMatch(reusable, /\.\/\.github\/actions\/risk-summary/, 'Reusable workflow must run the local JavaScript action.');
+requireMatch(ci, /\.\/\.github\/actions\/lab-summary/, 'CI must run the local composite action.');
+requireMatch(allText, /concurrency:/, 'At least one active workflow must use concurrency.');
+requireMatch(learning, /environment:\s*\n\s+name:\s*training/, 'Manual learning workflow must demonstrate a non-blocking environment.');
+requireMatch(learning, /id-token:\s*write/, 'Manual learning workflow must demonstrate OIDC permission.');
+requireMatch(learning, /attestations:\s*write/, 'Manual learning workflow must demonstrate attestation permission.');
+
+for (const { name, text } of allWorkflows) {
+  if (/pull_request_target\s*:/.test(text)) failures.push(`${name} must not use pull_request_target.`);
+  if (/permissions:\s*(?:write-all|\{\s*\})/.test(text)) failures.push(`${name} has unsafe permissions.`);
+  if (!/\bpermissions:/.test(text)) failures.push(`${name} must declare permissions explicitly.`);
+  if (/::set-output|::add-path/.test(text)) failures.push(`${name} uses a deprecated workflow command.`);
+  for (const match of text.matchAll(/^\s*-?\s*uses:\s*([^\s#]+)(?:\s+#.*)?$/gm)) {
+    const reference = match[1];
+    if (reference.startsWith('./')) continue;
+    const revision = reference.slice(reference.lastIndexOf('@') + 1);
+    if (!/^[0-9a-f]{40}$/i.test(revision)) failures.push(`${name} has an unpinned action reference: ${reference}`);
+  }
+}
+
+for (const actionPath of ['.github/actions/risk-summary/action.yml', '.github/actions/lab-summary/action.yml']) {
+  if (!existsSync(resolve(root, actionPath))) failures.push(`Missing local action: ${actionPath}`);
+}
+
+if (failures.length) {
+  console.error('Workflow validation failed:');
+  for (const failure of failures) console.error(`- ${failure}`);
+  process.exitCode = 1;
+} else {
+  console.log(`Workflow validation passed (${activeFiles.length} active workflows checked).`);
+}

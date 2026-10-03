@@ -1,0 +1,18 @@
+{
+  "name": "gh-200-github-actions-lab",
+  "version": "1.0.0",
+  "private": true,
+  "description": "A dependency-light GitHub Actions hands-on lab service.",
+  "type": "module",
+  "engines": {
+    "node": ">=18"
+  },
+  "scripts": {
+    "start": "node src/server.js",
+    "test": "node --test test",
+    "quiz": "node scripts/quiz.mjs",
+    "validate:content": "node scripts/validate-content.mjs",
+    "validate:workflows": "node scripts/verify-workflows.mjs",
+    "check": "npm test && npm run validate:content && npm run validate:workflows"
+  }
+}

@@ -1,0 +1,14 @@
+# Run 481 evidence
+
+Trigger: push to `main`; artifact `coverage-node-22` exists for 14 days.
+
+Jobs: `test (ubuntu-latest, 20)` passed; `test (ubuntu-latest, 22)` failed; `test (windows-latest, 20)` passed; `test (windows-latest, 22)` passed.
+
+```yaml
+base: &base { timeout-minutes: 10, shell: bash }
+jobs:
+  lint:
+    defaults: { run: { <<: *base, shell: pwsh } }
+```
+
+Log: `node 22: npm test -> expected 200, got 500`.

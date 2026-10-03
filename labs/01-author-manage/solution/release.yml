@@ -1,0 +1,43 @@
+name: release lab solution
+on:
+  workflow_dispatch:
+    inputs:
+      deploy: { description: Deploy, required: true, type: boolean }
+      region: { description: Region, required: true, default: test, type: string }
+defaults: &bash-defaults
+  run: { shell: bash }
+jobs:
+  prepare:
+    runs-on: ubuntu-latest
+    outputs: { version: ${{ steps.version.outputs.version }} }
+    steps:
+      - id: version
+        run: echo "version=1.4.0" >> "$GITHUB_OUTPUT"
+  test:
+    needs: prepare
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      max-parallel: 2
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+        node: [20, 22]
+        exclude: [{ os: windows-latest, node: 20 }]
+    services:
+      postgres:
+        image: postgres:16
+        env: { POSTGRES_PASSWORD: postgres }
+        ports: [5432:5432]
+        options: >-
+          --health-cmd "pg_isready -U postgres" --health-interval 10s --health-timeout 5s --health-retries 5
+    defaults: *bash-defaults
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+      - uses: actions/cache@v4
+        with: { path: ~/.npm, key: npm-${{ runner.os }}-${{ matrix.node }} }
+      - run: |
+          echo "DATABASE_URL=postgres://postgres:postgres@localhost:5432/postgres" >> "$GITHUB_ENV"
+          echo "## ${{ needs.prepare.outputs.version }}" >> "$GITHUB_STEP_SUMMARY"
+      - run: echo test-${{ matrix.node }} > report.txt
+      - uses: actions/upload-artifact@v4
+        with: { name: report-${{ matrix.os }}-${{ matrix.node }}, path: report.txt }

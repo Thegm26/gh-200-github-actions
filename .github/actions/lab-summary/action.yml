@@ -1,0 +1,17 @@
+name: Lab summary
+description: A local composite action that writes a safe GitHub Actions training summary.
+inputs:
+  title:
+    description: Heading displayed in the job summary.
+    required: true
+runs:
+  using: composite
+  steps:
+    - name: Write learning summary
+      shell: bash
+      run: |
+        {
+          echo "### ${{ inputs.title }}"
+          echo
+          echo "This job exercised a local composite action without external credentials."
+        } >> "$GITHUB_STEP_SUMMARY"

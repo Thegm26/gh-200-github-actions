@@ -1,0 +1,5 @@
+# Northstar enterprise simulation
+
+`finance-prod` needs static outbound IP and production cloud access. `web` needs standard CI only. `shared-release` owns a centrally maintained deploy workflow. Contractors may use approved actions but never production runners.
+
+Values: `REGION=eu-west-1` is safe shared configuration; `NPM_TOKEN` is package-publish credential; `DEPLOY_KEY` is production-only cloud credential. A Windows `*-latest` job changed compiler version last week. Logs/artifacts must be retained 30 days by organization policy.

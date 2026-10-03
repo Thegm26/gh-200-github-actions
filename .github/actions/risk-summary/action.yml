@@ -1,0 +1,14 @@
+name: Risk summary
+description: Calculate a deterministic training risk score and expose it as an action output.
+inputs:
+  sample-size:
+    description: Number of sample failures used by the training formula.
+    required: true
+outputs:
+  score:
+    description: Deterministic risk score.
+  level:
+    description: Deterministic risk level.
+runs:
+  using: node20
+  main: index.cjs
