@@ -1,0 +1,8 @@
+description: incomplete action
+inputs:
+  prefix: {}
+runs:
+  using: composite
+  steps:
+    - run: echo "stamp=${{ inputs.prefix }}-42" >> "$GITHUB_OUTPUT"
+

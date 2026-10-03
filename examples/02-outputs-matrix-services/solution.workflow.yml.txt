@@ -1,0 +1,39 @@
+name: data boundary solution
+on: workflow_dispatch
+jobs:
+  prepare:
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.meta.outputs.version }}
+    steps:
+      - id: meta
+        run: echo "version=2.4.0" >> "$GITHUB_OUTPUT"
+  test:
+    needs: prepare
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      max-parallel: 2
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+        node: [20, 22]
+        exclude:
+          - { os: windows-latest, node: 22 }
+        include:
+          - { os: ubuntu-latest, node: 24, experimental: true }
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_PASSWORD: training
+        ports: [5432:5432]
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    steps:
+      - run: echo "MODE=integration" >> "$GITHUB_ENV"
+      - run: printf '%s %s\n' "${{ needs.prepare.outputs.version }}" "$MODE"
+      - run: echo "## ${{ matrix.os }} / ${{ matrix.node }}" >> "$GITHUB_STEP_SUMMARY"
+

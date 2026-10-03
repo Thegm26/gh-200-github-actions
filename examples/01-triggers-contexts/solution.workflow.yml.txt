@@ -1,0 +1,33 @@
+name: trigger solution
+on:
+  push:
+    branches: [main]
+    paths: ["src/**"]
+  workflow_dispatch:
+    inputs:
+      deploy:
+        description: Continue to the exercise job
+        required: true
+        default: false
+        type: boolean
+      target:
+        description: Training target
+        required: true
+        type: choice
+        options: [dev, staging]
+run-defaults: &run-defaults
+  shell: bash
+  working-directory: .
+jobs:
+  inspect:
+    if: ${{ github.event_name == 'push' || inputs.deploy == true }}
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        <<: *run-defaults
+    steps:
+      - name: Treat event text as data
+        env:
+          EVENT_TEXT: ${{ github.event.pull_request.title || 'manual-or-push' }}
+        run: printf '%s\n' "$EVENT_TEXT"
+

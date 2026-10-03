@@ -1,0 +1,10 @@
+base: &base
+  timeout-minutes: 10
+  shell: bash
+jobs:
+  lint:
+    defaults:
+      run:
+        <<: *base
+        shell: pwsh
+

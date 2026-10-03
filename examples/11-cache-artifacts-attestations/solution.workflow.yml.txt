@@ -1,0 +1,35 @@
+name: inactive supply chain study solution
+on: workflow_dispatch
+permissions:
+  contents: read
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+      attestations: write
+      id-token: write
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803
+      - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm pack --dry-run
+      - name: Study-only placeholder
+        run: echo 'A real authorized workflow would package, attest, and upload here.'
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: package-preview
+          path: package.json
+          retention-days: 7
+  verify-before-trust:
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Verification shape only
+        run: echo 'gh attestation verify artifact.tgz --repo "$GITHUB_REPOSITORY"'
+

@@ -29,11 +29,11 @@ jobs:
       score: ${{ steps.risk.outputs.score }}
       level: ${{ steps.risk.outputs.level }}
     steps:
-      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
       - id: risk
         uses: ./.github/actions/risk-summary
         with:
-          sample-size: ${{ inputs.sample_size }}
+          sample_size: ${{ inputs.sample_size }}
       - name: Show safe secret context pattern
         shell: bash
         run: |

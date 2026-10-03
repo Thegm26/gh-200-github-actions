@@ -1,13 +1,11 @@
-# Lab 05 — secure and optimize (45 min)
+# Lab 05 — secure and optimize
 
-Sources: [security hardening](https://docs.github.com/actions/how-tos/security-for-github-actions/security-guides/security-hardening-for-github-actions) · [OIDC](https://docs.github.com/actions/how-tos/secure-your-work/security-harden-deployments/oidc-in-cloud-providers) · [attestations](https://docs.github.com/actions/security-for-github-actions/using-artifact-attestations).
+Use the time-ordered, non-deploying modules:
 
-Copy and repair `starter/insecure-deploy.workflow.yaml.txt` in a scratch repository, then compare to solution.
+- [10 — permissions, identity, injection, pinning, environments](../../examples/10-security-identity/README.md) (25 minutes)
+- [11 — cache, artifacts, packages, retention, attestations](../../examples/11-cache-artifacts-attestations/README.md) (20 minutes)
+- [12 — final mixed capstone](../../examples/12-final-capstone/README.md) (30 minutes including review/oral close)
 
-1. (10m) Replace broad write permissions with minimum permissions; compare the ephemeral `GITHUB_TOKEN`, a PAT, and an OIDC identity token.
-2. (10m) Eliminate injection from a PR title and pin every third-party action to a full commit SHA. State why a tag is insufficient under immutable-action controls.
-3. (8m) Add protected production environment semantics and separate deployment approval from workflow authoring.
-4. (8m) Choose cache key/restore strategy versus artifact upload/download; set retention through the appropriate REST policy endpoint.
-5. (9m) Generate and verify an artifact attestation, checking repository/identity and digest before deployment.
+The legacy `starter/insecure-deploy.workflow.yaml.txt` is optional extra practice. Keep it inactive; compare with `solution/secure-pattern.yml` only after attempting.
 
-Verification: untrusted text is passed as data, cloud access has `id-token: write` only where needed, third-party actions use full SHAs, and attestation verification is not confused with generation. Hard scenarios: fork PR title contains `$(curl ...)`; an artifact is promoted next week; a cloud trust must not use a stored client secret.
+Primary sources: [security hardening](https://docs.github.com/actions/how-tos/security-for-github-actions/security-guides/security-hardening-for-github-actions) · [OIDC](https://docs.github.com/actions/how-tos/secure-your-work/security-harden-deployments/oidc-in-cloud-providers) · [attestations](https://docs.github.com/actions/security-for-github-actions/using-artifact-attestations).

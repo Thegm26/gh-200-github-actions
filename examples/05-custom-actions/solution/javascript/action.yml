@@ -1,0 +1,15 @@
+name: Risk score
+description: Compute deterministic risk outputs.
+inputs:
+  sample_size:
+    description: Failure sample count from 0 through 20.
+    required: true
+outputs:
+  score:
+    description: Numeric score.
+  level:
+    description: low, medium, or high.
+runs:
+  using: node24
+  main: index.cjs
+

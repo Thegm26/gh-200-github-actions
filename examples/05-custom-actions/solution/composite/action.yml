@@ -1,0 +1,17 @@
+name: Build stamp
+description: Produce a deterministic build stamp.
+inputs:
+  prefix:
+    description: Identifier prefix.
+    required: true
+outputs:
+  stamp:
+    description: Generated identifier.
+    value: ${{ steps.make.outputs.stamp }}
+runs:
+  using: composite
+  steps:
+    - id: make
+      shell: bash
+      run: echo "stamp=${{ inputs.prefix }}-42" >> "$GITHUB_OUTPUT"
+

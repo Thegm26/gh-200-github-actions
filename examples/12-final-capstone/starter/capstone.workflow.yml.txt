@@ -1,0 +1,30 @@
+name: broken final capstone
+on: push
+permissions: write-all
+jobs:
+  prepare:
+    runs-on: ubuntu-latest
+    steps:
+      - id: meta
+        run: echo "version=9.0" >> "$GITHUB_ENV"
+  test:
+    needs: prepare
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+        node: [20, 22]
+    steps:
+      - uses: actions/checkout@v4
+      - run: echo "${{ github.event.pull_request.title }}"
+      - uses: actions/cache@v4
+        with:
+          path: report.txt
+          key: report
+      - run: echo "${{ needs.prepare.outputs.version }}" > report.txt
+  deploy:
+    needs: test
+    runs-on: self-hosted
+    steps:
+      - uses: cloud/deploy@main
+

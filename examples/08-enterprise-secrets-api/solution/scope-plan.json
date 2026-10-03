@@ -1,0 +1,7 @@
+{
+  "REGION": { "kind": "variable", "scope": "organization or repository", "reason": "non-sensitive shared configuration" },
+  "NPM_TOKEN": { "kind": "secret", "scope": "publishing repository or protected publishing environment", "reason": "credential with narrowly limited consumers" },
+  "DEPLOY_KEY": { "kind": "secret", "scope": "production environment", "reason": "production-only credential released after protection rules" },
+  "productionProtection": ["required reviewers", "deployment branch or tag restrictions"]
+}
+

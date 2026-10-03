@@ -1,0 +1,8 @@
+{
+  "financeRunner": "finance-production",
+  "webRunner": "github-hosted",
+  "contractorProductionAccess": "denied",
+  "staticEgressOwner": "self-hosted-network-design",
+  "policy": "allow GitHub-authored actions and explicitly selected Northstar reusable workflows/actions"
+}
+

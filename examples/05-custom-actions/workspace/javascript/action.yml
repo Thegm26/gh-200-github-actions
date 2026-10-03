@@ -1,0 +1,10 @@
+name: Risk score exercise
+description: TODO expose score and level from index.cjs.
+inputs:
+  sample_size:
+    description: Failure sample count from 0 through 20.
+    required: true
+runs:
+  using: node24
+  main: index.cjs
+

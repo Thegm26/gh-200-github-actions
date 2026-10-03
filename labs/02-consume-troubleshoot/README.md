@@ -1,13 +1,7 @@
-# Lab 02 — consume and troubleshoot (35 min)
+# Lab 02 — consume and troubleshoot
 
-Sources: [troubleshoot workflows](https://docs.github.com/actions/how-tos/monitor-workflows/use-workflow-run-logs) · [reusable workflows](https://docs.github.com/actions/sharing-automations/reusing-workflows) · [starter workflows](https://docs.github.com/actions/use-workflows/creating-starter-workflows-for-your-organization).
+Use [04 — consume and troubleshoot run evidence](../../examples/04-consume-troubleshoot/README.md) for the complete 25-minute exercise, then [06 — interleaved debugging](../../examples/06-interleaved-debugging/README.md) for a 10-minute near-transfer check.
 
-Use `starter/run-evidence.md.txt` as a simulated failed run. Diagnose before opening `solution/diagnosis.md`.
+The legacy evidence in `starter/run-evidence.md.txt` is optional extra repetition; diagnose it before `solution/diagnosis.md`.
 
-1. (8m) Map each failed job label to the matrix axes and name the only failed variant; decide whether to rerun one job or all jobs.
-2. (8m) Expand the provided YAML anchor mentally and find which explicit value wins after the merge.
-3. (7m) Choose logs, artifact download, or REST API for each incident in the starter; identify the artifact retention consequence.
-4. (7m) Classify each reuse proposal as starter workflow, reusable workflow, or composite action; choose one for centrally maintained policy logic.
-5. (5m) Explain disabling versus deleting when an audit trail and later re-enable are required.
-
-Verification: a learner can identify trigger, failed matrix coordinate, evidence location, and correct reuse abstraction without opening solution. Hard scenarios: a non-public organization template must seed projects but not remain linked; a shared deployment graph must update centrally; a three-step checkout/setup/test sequence belongs inside a job.
+Primary sources: [workflow run logs](https://docs.github.com/actions/how-tos/monitor-workflows/use-workflow-run-logs) · [reusable workflows](https://docs.github.com/actions/sharing-automations/reusing-workflows) · [starter workflows](https://docs.github.com/actions/use-workflows/creating-starter-workflows-for-your-organization).

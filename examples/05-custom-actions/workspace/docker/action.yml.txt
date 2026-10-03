@@ -1,0 +1,12 @@
+name: Report renderer (inactive study example)
+description: Demonstrates Docker action metadata without building or executing.
+inputs:
+  report_path:
+    description: Relative report path.
+    required: true
+runs:
+  using: docker
+  image: Dockerfile
+  args:
+    - ${{ inputs.report_path }}
+

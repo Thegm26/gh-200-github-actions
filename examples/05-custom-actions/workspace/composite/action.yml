@@ -1,0 +1,8 @@
+name: Build stamp exercise
+description: TODO declare a prefix and expose a stamp output.
+runs:
+  using: composite
+  steps:
+    - shell: bash
+      run: echo "TODO"
+

@@ -1,0 +1,14 @@
+{
+  "organization": "Northstar",
+  "repositories": {
+    "finance-api": { "needsProduction": true, "needsStaticEgress": true },
+    "web": { "needsProduction": false, "needsStaticEgress": false },
+    "contractor-sandbox": { "needsProduction": false, "contractorOwned": true }
+  },
+  "runnerGroups": {
+    "standard-hosted": ["finance-api", "web", "contractor-sandbox"],
+    "finance-production": ["finance-api"]
+  },
+  "approvedReusableWorkflow": "Northstar/shared-release/.github/workflows/deploy.yml@reviewed-ref"
+}
+

@@ -2,6 +2,8 @@
 
 Technical authority: [GH-200 study guide](https://learn.microsoft.com/en-us/credentials/certifications/resources/study-guides/gh-200) and [GitHub Actions docs](https://docs.github.com/actions).
 
+Recall first, then check. For hands-on repair use [01–02](../examples/01-triggers-contexts/README.md); for governance use [07–08](../examples/07-enterprise-policy-runners/README.md); for security/supply chain use [10–11](../examples/10-security-identity/README.md).
+
 ## Workflow grammar and data
 
 ```yaml
@@ -52,6 +54,8 @@ Secrets are encrypted and masked; variables are non-secret configuration. Both m
 Runner groups decide which repositories can use self-hosted runners; enterprise action policies decide which actions/workflows are allowed; IP allow lists/networking constrain traffic. Hosted images expose preinstalled tools/toolcache; use setup actions, package managers, cache, container images or curated self-hosted images for deterministic tools.
 
 Attestations bind artifact digest, build provenance and identity. Generate during build and verify before release/deploy with `gh attestation verify` or supported APIs; verification must check the expected repository/identity and artifact digest. [Artifact attestations](https://docs.github.com/actions/security-for-github-actions/using-artifact-attestations).
+
+Package publication with `GITHUB_TOKEN` normally needs `packages: write`; creating attestations needs `attestations: write` and commonly `id-token: write` for provenance. Those permissions do different jobs. The safe [supply-chain module](../examples/11-cache-artifacts-attestations/README.md) keeps publish/attest syntax inactive and simulates digest verification locally.
 
 ## Fast distinctions
 

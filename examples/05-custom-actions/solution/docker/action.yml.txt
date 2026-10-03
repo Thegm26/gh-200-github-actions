@@ -1,0 +1,11 @@
+name: Report renderer (inactive solution)
+description: A Docker action for a Linux-only hermetic renderer.
+inputs:
+  report_path:
+    description: Relative report path.
+    required: true
+runs:
+  using: docker
+  image: Dockerfile
+  args: ["${{ inputs.report_path }}"]
+

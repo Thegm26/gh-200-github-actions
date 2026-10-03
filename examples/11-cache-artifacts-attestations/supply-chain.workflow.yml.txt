@@ -1,0 +1,14 @@
+name: repair inactive supply chain lesson
+on: workflow_dispatch
+permissions: write-all
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/cache@v4
+        with:
+          path: dist.tgz
+          key: release
+      - run: echo pretend-package > dist.tgz
+      - run: echo publish-and-trust-without-verification
+

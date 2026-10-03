@@ -1,0 +1,13 @@
+{
+  "runId": 481,
+  "event": "push",
+  "ref": "refs/heads/main",
+  "jobs": [
+    { "name": "test (ubuntu-latest, 20)", "conclusion": "success" },
+    { "name": "test (ubuntu-latest, 22)", "conclusion": "failure", "log": "expected 200, got 500" },
+    { "name": "test (windows-latest, 20)", "conclusion": "success" },
+    { "name": "test (windows-latest, 22)", "conclusion": "success" }
+  ],
+  "artifacts": [{ "name": "coverage-node-22", "retentionDays": 14 }]
+}
+

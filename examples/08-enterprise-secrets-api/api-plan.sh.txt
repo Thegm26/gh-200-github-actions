@@ -1,0 +1,5 @@
+# Inert planning file. Replace TODOs, but do not execute during the study session.
+gh api TODO_ORG_VARIABLE_ENDPOINT
+gh api TODO_REPOSITORY_PUBLIC_KEY_ENDPOINT
+gh api --method PUT TODO_ORGANIZATION_RETENTION_ENDPOINT --input retention.json
+

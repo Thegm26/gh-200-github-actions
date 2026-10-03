@@ -1,0 +1,9 @@
+name: repair triggers
+on: push
+jobs:
+  inspect:
+    runs-on: ubuntu-latest
+    steps:
+      - name: unsafe placeholder
+        run: echo "replace me"
+

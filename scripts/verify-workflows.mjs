@@ -5,6 +5,8 @@ import { fileURLToPath } from 'node:url';
 const root = resolve(fileURLToPath(new URL('..', import.meta.url)));
 const workflowsDir = resolve(root, '.github/workflows');
 const requiredFiles = ['ci.yml', 'reusable-risk.yml', 'package-learning.yml'];
+const checkoutV6 = 'actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803';
+const setupNodeV6 = 'actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38';
 const failures = [];
 
 function requireMatch(text, pattern, description) {
@@ -45,6 +47,7 @@ requireMatch(ci, /max-parallel:\s*2/, 'CI must limit matrix parallelism.');
 requireMatch(ci, /\binclude:/, 'CI matrix must include an include example.');
 requireMatch(ci, /\bexclude:/, 'CI matrix must include an exclude example.');
 requireMatch(ci, /cache:\s*npm/, 'CI must use setup-node npm caching.');
+requireMatch(ci, new RegExp(setupNodeV6.replace('/', '\\/'), 'g'), 'CI must use the approved pinned setup-node v6 revision.');
 requireMatch(ci, /services:\s*\n\s+redis:/, 'CI must provide a service container.');
 requireMatch(ci, /--health-cmd/, 'Service container must have a health check.');
 requireMatch(ci, /outputs:\s*\n\s+smoke_result:/, 'CI must map a step output to a job output.');
@@ -56,6 +59,7 @@ requireMatch(reusable, /workflow_call:/, 'Reusable workflow must use workflow_ca
 requireMatch(reusable, /type:\s*number/, 'Reusable workflow input must be typed.');
 requireMatch(reusable, /secrets:\s*\n\s+optional_token:/, 'Reusable workflow must declare its optional secret.');
 requireMatch(reusable, /\.\/\.github\/actions\/risk-summary/, 'Reusable workflow must run the local JavaScript action.');
+requireMatch(reusable, /sample_size:\s*\$\{\{ inputs\.sample_size \}\}/, 'Reusable workflow must pass the underscore-safe JavaScript action input.');
 requireMatch(ci, /\.\/\.github\/actions\/lab-summary/, 'CI must run the local composite action.');
 requireMatch(allText, /concurrency:/, 'At least one active workflow must use concurrency.');
 requireMatch(learning, /environment:\s*\n\s+name:\s*training/, 'Manual learning workflow must demonstrate a non-blocking environment.');
@@ -67,17 +71,33 @@ for (const { name, text } of allWorkflows) {
   if (/permissions:\s*(?:write-all|\{\s*\})/.test(text)) failures.push(`${name} has unsafe permissions.`);
   if (!/\bpermissions:/.test(text)) failures.push(`${name} must declare permissions explicitly.`);
   if (/::set-output|::add-path/.test(text)) failures.push(`${name} uses a deprecated workflow command.`);
+  if (!text.includes(checkoutV6)) failures.push(`${name} must use the approved pinned checkout v6 revision.`);
+  if (/actions\/setup-node@/.test(text) && !text.includes(setupNodeV6)) {
+    failures.push(`${name} must use the approved pinned setup-node v6 revision.`);
+  }
   for (const match of text.matchAll(/^\s*-?\s*uses:\s*([^\s#]+)(?:\s+#.*)?$/gm)) {
     const reference = match[1];
     if (reference.startsWith('./')) continue;
     const revision = reference.slice(reference.lastIndexOf('@') + 1);
     if (!/^[0-9a-f]{40}$/i.test(revision)) failures.push(`${name} has an unpinned action reference: ${reference}`);
+    if (reference.startsWith('actions/checkout@') && reference !== checkoutV6) {
+      failures.push(`${name} has an unapproved checkout revision: ${reference}`);
+    }
+    if (reference.startsWith('actions/setup-node@') && reference !== setupNodeV6) {
+      failures.push(`${name} has an unapproved setup-node revision: ${reference}`);
+    }
   }
 }
 
 for (const actionPath of ['.github/actions/risk-summary/action.yml', '.github/actions/lab-summary/action.yml']) {
   if (!existsSync(resolve(root, actionPath))) failures.push(`Missing local action: ${actionPath}`);
 }
+
+const riskAction = existsSync(resolve(root, '.github/actions/risk-summary/action.yml'))
+  ? readFileSync(resolve(root, '.github/actions/risk-summary/action.yml'), 'utf8')
+  : '';
+requireMatch(riskAction, /inputs:\s*\n\s+sample_size:/, 'Risk action must declare its underscore-safe sample_size input.');
+requireMatch(riskAction, /using:\s*node24/, 'Risk action must use the supported Node 24 runtime.');
 
 if (failures.length) {
   console.error('Workflow validation failed:');

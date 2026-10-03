@@ -1,0 +1,7 @@
+{
+  "REGION": { "kind": "TODO", "scope": "TODO", "reason": "TODO" },
+  "NPM_TOKEN": { "kind": "TODO", "scope": "TODO", "reason": "TODO" },
+  "DEPLOY_KEY": { "kind": "TODO", "scope": "TODO", "reason": "TODO" },
+  "productionProtection": ["TODO"]
+}
+

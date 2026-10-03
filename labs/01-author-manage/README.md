@@ -1,19 +1,11 @@
-# Lab 01 — author and manage workflows (45 min)
+# Lab 01 — author and manage workflows
 
-Source: [GH-200 workflow objectives](https://learn.microsoft.com/en-us/credentials/certifications/resources/study-guides/gh-200) · [workflow syntax](https://docs.github.com/actions/writing-workflows/workflow-syntax-for-github-actions).
+This lab is a domain index. Use the time-ordered modules; they contain the edit files, local checks, expected results, separated solutions, and official links:
 
-**Goal:** copy `starter/broken-release.workflow.yaml.txt` to a scratch workflow in your own test repository, repair it, and compare against `solution/release.yml`. The `.txt` extension and `labs/` location mean it is inactive here.
+- [01 — triggers, contexts, filters, expressions, anchors](../../examples/01-triggers-contexts/README.md) (25 minutes)
+- [02 — outputs, matrices, services, environment files](../../examples/02-outputs-matrix-services/README.md) (20 minutes)
+- [03 — timed retrieval checkpoint](../../examples/03-author-manage-retrieval/README.md) (10 minutes)
 
-1. (8m) Add `workflow_dispatch` boolean `deploy` (required) and string `region` defaulting to `test`; explain why `inputs.deploy` retains Boolean semantics.
-2. (8m) Make `prepare` publish a version through `GITHUB_OUTPUT`, expose it as a job output, and consume it with `needs.prepare.outputs.version`.
-3. (10m) Repair the Node/OS matrix: omit Windows/Node 20, let siblings complete, and cap to two parallel jobs. State each resulting combination.
-4. (9m) Add a PostgreSQL service with health check and a mapped port; use an environment file for later-step configuration and a job summary.
-5. (10m) Anchor common step defaults, add a cache and an artifact. State why a cache is not the release output.
+The older broad challenge remains in `starter/broken-release.workflow.yaml.txt`, with reference `solution/release.yml`. Keep the starter inactive and never copy it into `.github/workflows` in this repository.
 
-Verification: YAML schema accepts the copied workflow; manual-dispatch UI shows correct types/default; matrix job names match expected combinations; service becomes healthy; summary, artifact, and cache behavior are distinguishable. Do not add this deliberate starter under `.github/workflows`.
-
-Hard scenarios:
-
-- A release job needs a build string from a different job. Why is `echo X >> $GITHUB_ENV` insufficient, and which output chain is required?
-- A matrix failure must not cancel a slow diagnostic sibling. Which strategy flag changes that, and what separate cap controls cost?
-- A job running directly on a VM needs a mapped service port. Which host should the step target, and what prerequisite prevents a race?
+Primary sources: [GH-200 study guide](https://learn.microsoft.com/en-us/credentials/certifications/resources/study-guides/gh-200) · [workflow syntax](https://docs.github.com/actions/writing-workflows/workflow-syntax-for-github-actions).
