@@ -9,7 +9,7 @@
   },
   "scripts": {
     "start": "node src/server.js",
-    "test": "node --test test",
+    "test": "node --test test/curriculum/examples.test.mjs test/curriculum/quiz.test.mjs test/runtime/server.test.js test/runtime/workflows.test.js",
     "quiz": "node scripts/quiz.mjs",
     "validate:content": "node scripts/validate-content.mjs",
     "validate:workflows": "node scripts/verify-workflows.mjs",
