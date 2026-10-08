@@ -6,7 +6,7 @@ import path from 'node:path';
 import vm from 'node:vm';
 import test from 'node:test';
 import { lessons } from '../../learning/course-data.mjs';
-import { courseCopy, courseInstructions, courseOutcomes } from '../../learning/course-copy.mjs';
+import { courseCopy, courseInstructions, courseOutcomes, courseTasks } from '../../learning/course-copy.mjs';
 import { cheatSheet, coverage, questions, references } from '../../web/course-resources.mjs';
 import { MAX_YAML_BYTES } from '../../scripts/learning-checks.mjs';
 
@@ -15,11 +15,17 @@ test('course data has all ordered lessons, readable YAML, and Node parity', () =
   assert.equal(Object.keys(courseCopy).length, 17);
   assert.equal(Object.keys(courseInstructions).length, 17);
   assert.equal(Object.keys(courseOutcomes).length, 17);
+  assert.equal(Object.keys(courseTasks).length, 17);
   const manifest = JSON.parse(fs.readFileSync('learning/manifest.json', 'utf8'));
   assert.deepEqual(lessons.map((lesson) => lesson.stage), [...Array(4).fill('Foundations'), ...Array(4).fill('Connect jobs'), ...Array(3).fill('Reuse and debug'), ...Array(6).fill('Secure delivery')]);
   for (const lesson of lessons) {
     assert.equal(lesson.index, Number(lesson.id.slice(0, 2)));
     assert.ok(lesson.explanation.length >= 2 && lesson.task && lesson.source.url.startsWith('https://'));
+    assert.deepEqual(Object.keys(courseTasks[lesson.id]).sort(), ['example', 'goal', 'keep', 'location']);
+    assert.equal(lesson.task, courseTasks[lesson.id].goal);
+    assert.equal(lesson.editLocation, courseTasks[lesson.id].location);
+    assert.equal(lesson.keep, courseTasks[lesson.id].keep);
+    assert.equal(lesson.editExample, courseTasks[lesson.id].example || '');
     assert.ok(lesson.instructions.length >= 2 && lesson.instructions.length <= 4 && lesson.instructions.every((step) => typeof step === 'string' && step.length > 10));
     assert.ok(typeof lesson.doneWhen === 'string' && lesson.doneWhen.length > 10);
     const legacy = manifest.labs.find((lab) => lab.id === lesson.id);
@@ -28,7 +34,7 @@ test('course data has all ordered lessons, readable YAML, and Node parity', () =
     assert.match(lesson.starter, /\n/);
   }
   assert.match(lessons.find((lesson) => lesson.id === '15-sha-pin').starter, /Verified checkout release commit/);
-  assert.match(lessons.find((lesson) => lesson.id === '03-push-filter').task, /src\/\*\*/);
+  assert.match(lessons.find((lesson) => lesson.id === '03-push-filter').task, /src\//);
   assert.match(lessons.find((lesson) => lesson.id === '01-first-workflow').instructions.join(' '), /on: false/);
 });
 

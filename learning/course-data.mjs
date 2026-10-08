@@ -12,18 +12,21 @@ export const lessons = [
       "Keep the existing build job: its runner chooses the computer, and its step is the command that computer will perform."
     ],
     "instructions": [
-      "Find the top-level `on: false` line.",
-      "Replace it with `on:` and add the indented line `workflow_dispatch: {}` beneath it.",
-      "Keep the existing `jobs.build` job and its step unchanged."
+      "Find `on: false` near the top of the file.",
+      "Replace it with `on:`, then put `workflow_dispatch: {}` on the next line with two spaces before it.",
+      "Leave the `build` job and its command as they are."
     ],
-    "doneWhen": "The YAML has a workflow_dispatch mapping and still has a valid build job.",
-    "task": "Imagine you maintain a release smoke test. It must never run by accident; a maintainer should start it from the Actions page. In workflow.yml, replace the disabled on: false with a two-space-indented workflow_dispatch mapping. Keep the existing build job.",
+    "doneWhen": "GitHub shows a Run workflow button, and the build job is still present.",
+    "task": "Make this workflow run only when someone clicks Run workflow on GitHub.",
+    "editLocation": "Near the top of `workflow.yml`, replace the `on: false` line.",
+    "keep": "Keep the whole `build` job and its command unchanged.",
+    "editExample": "on:\n  workflow_dispatch: {}",
     "example": "name: greeting\n\non:\n  workflow_dispatch: {}\n\njobs:\n  build:\n    runs-on: ubuntu-latest\n    steps:\n      - run: echo ready\n",
     "starter": "name: first\non: false\njobs:\n  build:\n    runs-on: ubuntu-latest\n    steps:\n      - run: echo ready\n",
     "solution": "name: first\non:\n  workflow_dispatch:\n    {}\njobs:\n  build:\n    runs-on: ubuntu-latest\n    steps:\n      - run: echo ready\n",
     "file": "workflow.yml",
-    "hint": "Events belong under the top-level trigger key; consult event syntax for the required mapping form.",
-    "success": "Manual trigger is a mapping.",
+    "hint": "Near the top of `workflow.yml`, replace the `on: false` line.",
+    "success": "GitHub shows a Run workflow button, and the build job is still present.",
     "source": {
       "label": "GitHub’s event documentation",
       "url": "https://docs.github.com/actions/writing-workflows/choosing-when-your-workflow-runs/triggering-a-workflow"
@@ -44,18 +47,21 @@ export const lessons = [
       "The runs-on setting belongs inside the job; the steps underneath are the commands that runner will perform."
     ],
     "instructions": [
-      "Find the `jobs.build` mapping.",
-      "Add `runs-on: ubuntu-latest` inside build, aligned with `steps`.",
-      "Keep the existing build step."
+      "Find the `build` job under `jobs:`.",
+      "Inside `build`, add `runs-on: ubuntu-latest` on a new line lined up with `steps:`.",
+      "Leave the existing command in `steps:` unchanged."
     ],
-    "doneWhen": "The build job names ubuntu-latest as its runner.",
-    "task": "Your team needs its small build check to run on GitHub’s Ubuntu image. In workflow.yml, add runs-on: ubuntu-latest to jobs.build, before steps and aligned with it.",
+    "doneWhen": "The build job is set to use an Ubuntu computer.",
+    "task": "Choose the Ubuntu computer that runs the build job.",
+    "editLocation": "Inside the `build` job, on a new line lined up with `steps:`.",
+    "keep": "Keep the existing build step unchanged.",
+    "editExample": "runs-on: ubuntu-latest",
     "example": "",
     "starter": "name: runner\non:\n  workflow_dispatch:\n    {}\njobs:\n  build:\n    steps:\n      - run: echo build\n",
     "solution": "name: runner\non:\n  workflow_dispatch:\n    {}\njobs:\n  build:\n    runs-on: ubuntu-latest\n    steps:\n      - run: echo build\n",
     "file": "workflow.yml",
-    "hint": "A job declares the execution environment before it can run steps.",
-    "success": "build uses ubuntu-latest.",
+    "hint": "Inside the `build` job, on a new line lined up with `steps:`.",
+    "success": "The build job is set to use an Ubuntu computer.",
     "source": {
       "label": "Choose runners",
       "url": "https://docs.github.com/actions/how-tos/write-workflows/choose-where-workflows-run/choose-the-runner-for-a-job"
@@ -76,18 +82,21 @@ export const lessons = [
       "Put both filters below the push event: branch filters choose a branch, while path filters choose files."
     ],
     "instructions": [
-      "Find the top-level `on.push` event.",
-      "Add `branches: [main]` and `paths: [src/**]` inside that push mapping.",
-      "Keep both filters under push, not beside it."
+      "Find `push:` under `on:`.",
+      "Inside `push`, add `paths: [src/**]` on a new line lined up with `branches:`.",
+      "Leave `branches: [main]` and the `build` job unchanged."
     ],
-    "doneWhen": "Push is limited to main and src/** changes.",
-    "task": "The build should run only when src/ changes on main. In workflow.yml, keep the existing main branch filter and add a paths list containing exactly src/**, nested under push.",
+    "doneWhen": "The workflow responds only to changes in `src/` on `main`.",
+    "task": "Run this workflow only when files in `src/` change on `main`.",
+    "editLocation": "Inside `push:`, on a new line lined up with `branches:`.",
+    "keep": "Keep the existing `branches: [main]` filter and the build job.",
+    "editExample": "paths: [src/**]",
     "example": "",
     "starter": "name: filter\non:\n  push:\n    branches:\n      - main\njobs:\n  build:\n    runs-on: ubuntu-latest\n    steps:\n      - run: echo ready\n",
     "solution": "name: filter\non:\n  push:\n    branches:\n      - main\n    paths:\n      - 'src/**'\njobs:\n  build:\n    runs-on: ubuntu-latest\n    steps:\n      - run: echo ready\n",
     "file": "workflow.yml",
-    "hint": "Filters refine a single event and must be nested with that event's configuration.",
-    "success": "push filters main and src/**.",
+    "hint": "Inside `push:`, on a new line lined up with `branches:`.",
+    "success": "The workflow responds only to changes in `src/` on `main`.",
     "source": {
       "label": "Workflow filters",
       "url": "https://docs.github.com/actions/writing-workflows/workflow-syntax-for-github-actions#onpushpull_requestpull_request_targetpathspaths-ignore"
@@ -108,18 +117,21 @@ export const lessons = [
       "Quoting \"$EVENT_TEXT\" keeps the shell from splitting one message into unexpected pieces."
     ],
     "instructions": [
-      "Find the `inspect` step that prints event text directly.",
-      "Add `env.EVENT_TEXT` with the GitHub event expression.",
-      "Change the command to print quoted `$EVENT_TEXT` and remove direct event interpolation from `run`."
+      "Find the command in the `inspect` job that contains `${{ github.event.issue.title }}`.",
+      "In that same step, add `env:` and place `EVENT_TEXT: ${{ github.event.issue.title }}` below it with two more spaces.",
+      "Change the command to `printf \"%s\\n\" \"$EVENT_TEXT\"`; do not leave the GitHub value in the command."
     ],
-    "doneWhen": "Event text crosses an environment-variable boundary and is quoted in the command.",
-    "task": "An issue title is being inspected by a workflow. In workflow.yml, give the inspect step an env mapping with EVENT_TEXT set from github.event, then make its run command echo \"$EVENT_TEXT\". Remove direct github.event interpolation from run.",
+    "doneWhen": "The issue title is saved as `EVENT_TEXT` before the command prints it.",
+    "task": "Put the issue title in a named value before printing it safely.",
+    "editLocation": "Inside the existing step in the `inspect` job, beside its `run:` line.",
+    "keep": "Keep the `inspect` job and its runner.",
+    "editExample": "env:\n  EVENT_TEXT: ${{ github.event.issue.title }}",
     "example": "",
     "starter": "name: context\non:\n  workflow_dispatch:\n    {}\njobs:\n  inspect:\n    runs-on: ubuntu-latest\n    steps:\n      - run: 'echo ${{ github.event.issue.title }}'\n",
     "solution": "name: context\non:\n  workflow_dispatch:\n    {}\njobs:\n  inspect:\n    runs-on: ubuntu-latest\n    steps:\n      - env:\n          EVENT_TEXT: '${{ github.event.issue.title }}'\n        run: 'printf \"%s\\\\n\" \"$EVENT_TEXT\"'\n",
     "file": "workflow.yml",
-    "hint": "Treat context as untrusted data: pass it through an environment boundary and quote shell expansion.",
-    "success": "No direct context interpolation in run.",
+    "hint": "Inside the existing step in the `inspect` job, beside its `run:` line.",
+    "success": "The issue title is saved as `EVENT_TEXT` before the command prints it.",
     "source": {
       "label": "Contexts",
       "url": "https://docs.github.com/actions/learn-github-actions/contexts"
@@ -140,18 +152,21 @@ export const lessons = [
       "Think of it as a two-part label: the step writes version first, then the job exposes that named value."
     ],
     "instructions": [
-      "Find the `prepare` job and its version step.",
-      "Give that step the id `version` and write its value to `$GITHUB_OUTPUT`.",
-      "Add `prepare.outputs.version` that points at `steps.version.outputs.version`."
+      "Find the `prepare` job and the step with `id: version`.",
+      "Inside `prepare`, add `outputs:` with `version: ${{ steps.version.outputs.version }}` below it.",
+      "Leave the step id `version` and its line that writes to `$GITHUB_OUTPUT` unchanged."
     ],
-    "doneWhen": "Prepare exposes version from its named step output.",
-    "task": "prepare calculates version 1; make it available to a future deployment. In workflow.yml, add outputs.version to prepare with the value ${{ steps.version.outputs.version }}. Leave the existing step that writes version=1 to $GITHUB_OUTPUT.",
+    "doneWhen": "The `prepare` job makes its version available under the name `version`.",
+    "task": "Make the version created by `prepare` available to another job.",
+    "editLocation": "Inside the `prepare` job, on a new line lined up with `runs-on:` and `steps:`.",
+    "keep": "Keep the existing `version` step and its `$GITHUB_OUTPUT` line.",
+    "editExample": "outputs:\n  version: ${{ steps.version.outputs.version }}",
     "example": "",
     "starter": "name: output\non:\n  workflow_dispatch:\n    {}\njobs:\n  prepare:\n    runs-on: ubuntu-latest\n    steps:\n      - id: version\n        run: 'echo version=1 >> \"$GITHUB_OUTPUT\"'\n",
     "solution": "name: output\non:\n  workflow_dispatch:\n    {}\njobs:\n  prepare:\n    runs-on: ubuntu-latest\n    outputs:\n      version: '${{ steps.version.outputs.version }}'\n    steps:\n      - id: version\n        run: 'echo version=1 >> \"$GITHUB_OUTPUT\"'\n",
     "file": "workflow.yml",
-    "hint": "A value leaving a job needs an explicit step-to-job output bridge.",
-    "success": "prepare maps version from a step output.",
+    "hint": "Inside the `prepare` job, on a new line lined up with `runs-on:` and `steps:`.",
+    "success": "The `prepare` job makes its version available under the name `version`.",
     "source": {
       "label": "Passing job outputs",
       "url": "https://docs.github.com/actions/writing-workflows/choosing-what-your-workflow-does/passing-information-between-jobs"
@@ -172,18 +187,21 @@ export const lessons = [
       "Write `needs: prepare` to set the order, then use the prepare output where report prints its message."
     ],
     "instructions": [
-      "Find the `prepare` job and give its producing step id `v`.",
-      "Expose `prepare.outputs.version` from `steps.v.outputs.version`.",
-      "In `report`, add `needs: prepare` and print `needs.prepare.outputs.version`."
+      "Find the `report` job.",
+      "Inside `report`, add `needs: prepare` on a new line lined up with `runs-on:`.",
+      "Change its command so it prints `${{ needs.prepare.outputs.version }}`. Leave the `prepare` job unchanged."
     ],
-    "doneWhen": "Report depends on prepare and reads its version output.",
-    "task": "The release report must wait for prepare and print its version. In workflow.yml, set report.needs to prepare, then change its command so it contains needs.prepare.outputs.version. The output bridge in prepare is already correct.",
+    "doneWhen": "The report job waits for prepare and prints the version it made.",
+    "task": "Make `report` wait for `prepare` and print its version.",
+    "editLocation": "Inside the `report` job, on new lines lined up with `runs-on:`.",
+    "keep": "Keep the complete `prepare` job unchanged.",
+    "editExample": "needs: prepare",
     "example": "",
     "starter": "name: needs\non:\n  workflow_dispatch:\n    {}\njobs:\n  prepare:\n    runs-on: ubuntu-latest\n    outputs:\n      version: '${{ steps.v.outputs.version }}'\n    steps:\n      - id: v\n        run: 'echo version=1 >> \"$GITHUB_OUTPUT\"'\n  report:\n    runs-on: ubuntu-latest\n    steps:\n      - run: 'echo missing'\n",
     "solution": "name: needs\non:\n  workflow_dispatch:\n    {}\njobs:\n  prepare:\n    runs-on: ubuntu-latest\n    outputs:\n      version: '${{ steps.v.outputs.version }}'\n    steps:\n      - id: v\n        run: 'echo version=1 >> \"$GITHUB_OUTPUT\"'\n  report:\n    needs: prepare\n    runs-on: ubuntu-latest\n    steps:\n      - run: 'echo ${{ needs.prepare.outputs.version }}'\n",
     "file": "workflow.yml",
-    "hint": "Cross-job data is available only after an explicit dependency and output declaration.",
-    "success": "report depends on prepare and uses its output.",
+    "hint": "Inside the `report` job, on new lines lined up with `runs-on:`.",
+    "success": "The report job waits for prepare and prints the version it made.",
     "source": {
       "label": "Job dependencies and outputs",
       "url": "https://docs.github.com/actions/writing-workflows/choosing-what-your-workflow-does/passing-information-between-jobs"
@@ -204,18 +222,21 @@ export const lessons = [
       "A matrix supplies values; it does not install Node by itself. A later step would use each value to choose an installed version."
     ],
     "instructions": [
-      "Find the `test` job.",
-      "Add `strategy.matrix.node` under that job.",
-      "Put both values, 20 and 22, in the node list."
+      "Find the `node` list inside the `test` job.",
+      "Add `22` after `20`, so the list is `[20, 22]`.",
+      "Leave the runner and test command unchanged."
     ],
-    "doneWhen": "The matrix contains both 20 and 22.",
-    "task": "The project supports Node 20 and 22. In workflow.yml, add 22 to the strategy.matrix.node list; keep 20 too.",
+    "doneWhen": "The test job is set to run with both 20 and 22.",
+    "task": "Create two versions of the test job, one labeled Node 20 and one labeled Node 22.",
+    "editLocation": "Inside the existing `node` list in the `test` job.",
+    "keep": "Keep the runner and the test command unchanged.",
+    "editExample": "node: [20, 22]",
     "example": "",
     "starter": "name: matrix\non:\n  workflow_dispatch:\n    {}\njobs:\n  test:\n    runs-on: ubuntu-latest\n    strategy:\n      matrix:\n        node:\n          - 20\n    steps:\n      - run: echo test\n",
     "solution": "name: matrix\non:\n  workflow_dispatch:\n    {}\njobs:\n  test:\n    runs-on: ubuntu-latest\n    strategy:\n      matrix:\n        node:\n          - 20\n          - 22\n    steps:\n      - run: echo test\n",
     "file": "workflow.yml",
-    "hint": "A matrix creates one job variation for every listed value.",
-    "success": "Matrix contains 20 and 22.",
+    "hint": "Inside the existing `node` list in the `test` job.",
+    "success": "The test job is set to run with both 20 and 22.",
     "source": {
       "label": "Matrix strategy",
       "url": "https://docs.github.com/actions/using-jobs/using-a-matrix-for-your-jobs"
@@ -236,18 +257,21 @@ export const lessons = [
       "The health command answers one important question before tests begin: is the helper ready to accept work?"
     ],
     "instructions": [
-      "Find the `test` job and set `runs-on: ubuntu-latest`.",
-      "Add a `services.redis` mapping with image `redis:7`.",
-      "Add Redis options containing a `health-cmd` readiness check."
+      "Find `services:` inside the `test` job.",
+      "Inside `redis`, add `options: --health-cmd \"redis-cli ping\"` on a new line lined up with `image:`.",
+      "Leave `runs-on: ubuntu-latest`, the Redis image, and the test command unchanged."
     ],
-    "doneWhen": "The Ubuntu test job includes Redis with a health command.",
-    "task": "The test job uses Redis 7. In workflow.yml, keep image: redis:7 and add options under redis containing a Redis health-cmd (for example redis-cli ping).",
+    "doneWhen": "The test job has Redis and checks that Redis is ready.",
+    "task": "Make the test job wait until its Redis helper is ready.",
+    "editLocation": "Inside `redis:` under `services:` in the `test` job, on a new line lined up with `image:`.",
+    "keep": "Keep the Ubuntu runner, Redis image, and test command unchanged.",
+    "editExample": "options: --health-cmd \"redis-cli ping\"",
     "example": "",
     "starter": "name: service\non:\n  workflow_dispatch:\n    {}\njobs:\n  test:\n    runs-on: ubuntu-latest\n    services:\n      redis:\n        image: redis:7\n    steps:\n      - run: echo test\n",
     "solution": "name: service\non:\n  workflow_dispatch:\n    {}\njobs:\n  test:\n    runs-on: ubuntu-latest\n    services:\n      redis:\n        image: redis:7\n        options: '--health-cmd \"redis-cli ping\"'\n    steps:\n      - run: echo test\n",
     "file": "workflow.yml",
-    "hint": "Services share a job's lifecycle, so readiness and runner compatibility matter.",
-    "success": "Ubuntu job has healthy Redis service.",
+    "hint": "Inside `redis:` under `services:` in the `test` job, on a new line lined up with `image:`.",
+    "success": "The test job has Redis and checks that Redis is ready.",
     "source": {
       "label": "Service containers",
       "url": "https://docs.github.com/actions/using-containerized-services/about-service-containers"
@@ -269,17 +293,20 @@ export const lessons = [
     ],
     "instructions": [
       "Find the `risk` job.",
-      "Remove its `runs-on` and `steps` fields.",
-      "Add `uses: ./.github/workflows/reusable-risk.yml` and keep `with.sample_size: 3`."
+      "Replace its `runs-on:` and `steps:` lines with `uses: ./.github/workflows/reusable-risk.yml`.",
+      "Leave `with:` and `sample_size: 3` in the `risk` job."
     ],
-    "doneWhen": "Risk calls the approved reusable workflow with sample size 3.",
-    "task": "Your organization provides a shared risk check. In workflow.yml, make risk use ./.github/workflows/reusable-risk.yml. Keep with.sample_size: 3, and remove its runner and steps.",
+    "doneWhen": "The risk job uses the shared workflow and keeps the sample size of 3.",
+    "task": "Use the shared risk workflow for the `risk` job.",
+    "editLocation": "Inside the `risk` job, where `runs-on:` and `steps:` are now.",
+    "keep": "Keep `with:` and `sample_size: 3` unchanged.",
+    "editExample": "uses: ./.github/workflows/reusable-risk.yml",
     "example": "",
     "starter": "name: reuse\non:\n  workflow_dispatch:\n    {}\njobs:\n  risk:\n    with:\n      sample_size: 3\n    runs-on: ubuntu-latest\n    steps:\n      - run: echo replace\n",
     "solution": "name: reuse\non:\n  workflow_dispatch:\n    {}\njobs:\n  risk:\n    uses: './.github/workflows/reusable-risk.yml'\n    with:\n      sample_size: 3\n",
     "file": "workflow.yml",
-    "hint": "A reusable-workflow call is a job reference, not a runner-backed sequence of steps.",
-    "success": "risk calls the approved reusable path and keeps sample_size 3.",
+    "hint": "Inside the `risk` job, where `runs-on:` and `steps:` are now.",
+    "success": "The risk job uses the shared workflow and keeps the sample size of 3.",
     "source": {
       "label": "Reusing workflows",
       "url": "https://docs.github.com/actions/sharing-automations/reusing-workflows"
@@ -300,18 +327,21 @@ export const lessons = [
       "Naming bash makes the command’s language clear, which helps the action behave consistently for every caller."
     ],
     "instructions": [
-      "Find the top-level `runs` mapping.",
-      "Set `runs.using: composite`.",
-      "Add one item in `runs.steps` with `shell: bash` and a command containing `echo hello`."
+      "Find `runs:` in `action.yml`.",
+      "Change `using: node20` to `using: composite`, then add `steps:` below it.",
+      "Under `steps:`, add one step with `run: echo hello` and `shell: bash`."
     ],
-    "doneWhen": "The action declares composite runs and a bash echo step.",
-    "task": "Turn action.yml into a tiny reusable greeting action: set runs.using to composite, add runs.steps, and include one Bash shell step that runs echo hello.",
+    "doneWhen": "The action is set up as a composite action with a Bash hello command.",
+    "task": "Turn this action into a reusable action that says hello.",
+    "editLocation": "Under the top-level `runs:` section in `action.yml`.",
+    "keep": "Keep the action name `hello` unchanged.",
+    "editExample": "runs:\n  using: composite\n  steps:\n    - run: echo hello\n      shell: bash",
     "example": "",
     "starter": "name: hello\nruns:\n  using: node20\n",
     "solution": "name: hello\nruns:\n  using: composite\n  steps:\n    - run: 'echo hello'\n      shell: bash\n",
     "file": "action.yml",
-    "hint": "Composite actions describe their execution model and explicitly declare shells for run steps.",
-    "success": "Composite action has a safe echo step.",
+    "hint": "Under the top-level `runs:` section in `action.yml`.",
+    "success": "The action is set up as a composite action with a Bash hello command.",
     "source": {
       "label": "Composite actions",
       "url": "https://docs.github.com/actions/sharing-automations/creating-actions/creating-a-composite-action"
@@ -332,18 +362,21 @@ export const lessons = [
       "That note gives the next person a quick place to start instead of making them search every log line."
     ],
     "instructions": [
-      "Find the evidence-writing step in the `test` job.",
-      "Set its `if` value to `always()` so it still runs after failure.",
-      "Write its message to `$GITHUB_STEP_SUMMARY`."
+      "Find the `steps:` list in the `test` job.",
+      "Add a new step after the failing command with `if: ${{ always() }}` and a command that appends `evidence` to `$GITHUB_STEP_SUMMARY`.",
+      "Leave the existing `exit 1` command unchanged."
     ],
-    "doneWhen": "The evidence step uses always() and writes to the job summary.",
-    "task": "The test intentionally fails, but its logs still need a short summary. In workflow.yml, add a later step whose if is exactly ${{ always() }} and whose run appends text to $GITHUB_STEP_SUMMARY.",
+    "doneWhen": "The new note step runs even after a failure and saves a note in the run summary.",
+    "task": "Save a short note even when the earlier test command fails.",
+    "editLocation": "Inside the `steps:` list in the `test` job, after the `exit 1` step.",
+    "keep": "Keep the existing failing command unchanged.",
+    "editExample": "- if: ${{ always() }}\n  run: echo evidence >> \"$GITHUB_STEP_SUMMARY\"",
     "example": "",
     "starter": "name: evidence\non:\n  workflow_dispatch:\n    {}\njobs:\n  test:\n    runs-on: ubuntu-latest\n    steps:\n      - run: 'exit 1'\n",
     "solution": "name: evidence\non:\n  workflow_dispatch:\n    {}\njobs:\n  test:\n    runs-on: ubuntu-latest\n    steps:\n      - run: 'exit 1'\n      - if: '${{ always() }}'\n        name: evidence\n        run: 'echo evidence >> \"$GITHUB_STEP_SUMMARY\"'\n",
     "file": "workflow.yml",
-    "hint": "Diagnostic work must be allowed to run after a failing earlier step and preserve its result.",
-    "success": "Evidence step uses always() and GITHUB_STEP_SUMMARY.",
+    "hint": "Inside the `steps:` list in the `test` job, after the `exit 1` step.",
+    "success": "The new note step runs even after a failure and saves a note in the run summary.",
     "source": {
       "label": "Status check functions",
       "url": "https://docs.github.com/actions/writing-workflows/choosing-what-your-workflow-does/evaluate-expressions-in-workflows-and-actions#status-check-functions"
@@ -364,18 +397,21 @@ export const lessons = [
       "Using both labels narrows the match. Runner groups and repository access decide whether the job is actually permitted to use that computer."
     ],
     "instructions": [
-      "Find the `scan` job runner setting.",
-      "Replace it with the list `[self-hosted, approved]`.",
-      "Do not add other runner labels."
+      "Find `runs-on:` in the `scan` job.",
+      "Replace `unapproved` with `approved`, so the list is `[self-hosted, approved]`.",
+      "Do not add any other labels."
     ],
-    "doneWhen": "Scan has exactly self-hosted and approved runner labels.",
-    "task": "The scanning job must land only on approved self-hosted machines. In workflow.yml, make runs-on exactly the two-item list self-hosted and approved.",
+    "doneWhen": "The scan job asks for exactly `self-hosted` and `approved`.",
+    "task": "Run the scan only on a self-hosted computer marked approved.",
+    "editLocation": "Replace the value of `runs-on:` inside the `scan` job.",
+    "keep": "Keep the scan command and use only the two required labels.",
+    "editExample": "runs-on: [self-hosted, approved]",
     "example": "",
     "starter": "name: runner\non:\n  workflow_dispatch:\n    {}\njobs:\n  scan:\n    runs-on:\n      - self-hosted\n      - unapproved\n    steps:\n      - run: echo scan\n",
     "solution": "name: runner\non:\n  workflow_dispatch:\n    {}\njobs:\n  scan:\n    runs-on:\n      - self-hosted\n      - approved\n    steps:\n      - run: echo scan\n",
     "file": "workflow.yml",
-    "hint": "Runner labels express scheduling requirements; restrict them to the approved policy vocabulary.",
-    "success": "Runner labels are exactly approved/self-hosted.",
+    "hint": "Replace the value of `runs-on:` inside the `scan` job.",
+    "success": "The scan job asks for exactly `self-hosted` and `approved`.",
     "source": {
       "label": "Self-hosted runner labels",
       "url": "https://docs.github.com/actions/how-tos/manage-runners/self-hosted-runners/use-in-a-workflow"
@@ -396,18 +432,21 @@ export const lessons = [
       "If a later job truly needs more access, make that choice visible and limited to that job instead of widening everything."
     ],
     "instructions": [
-      "Find the top-level `permissions` mapping.",
-      "Set it to exactly `contents: read`.",
-      "Remove any broader job-level permissions or make them exactly the same read-only mapping."
+      "Find the top-level `permissions:` line.",
+      "Replace `write-all` with `contents: read` below `permissions:`.",
+      "Leave the `build` job and its command unchanged."
     ],
-    "doneWhen": "All declared permissions are exactly contents: read.",
-    "task": "This build only reads repository content. In workflow.yml, replace the broad permission with a top-level mapping that contains exactly contents: read. Do not add job-level permissions.",
+    "doneWhen": "The workflow can read repository contents but cannot write them.",
+    "task": "Give this workflow permission to read repository files and nothing more.",
+    "editLocation": "Replace the top-level `permissions: write-all` line.",
+    "keep": "Keep the build job and its command unchanged.",
+    "editExample": "permissions:\n  contents: read",
     "example": "",
     "starter": "name: scopes\non:\n  workflow_dispatch:\n    {}\npermissions: write-all\njobs:\n  build:\n    runs-on: ubuntu-latest\n    steps:\n      - run: echo ready\n",
     "solution": "name: scopes\non:\n  workflow_dispatch:\n    {}\npermissions:\n  contents: read\njobs:\n  build:\n    runs-on: ubuntu-latest\n    steps:\n      - run: echo ready\n",
     "file": "workflow.yml",
-    "hint": "Start from the smallest token capability and avoid broadening it in individual jobs.",
-    "success": "Top-level permissions are exactly contents: read.",
+    "hint": "Replace the top-level `permissions: write-all` line.",
+    "success": "The workflow can read repository contents but cannot write them.",
     "source": {
       "label": "Automatic token authentication",
       "url": "https://docs.github.com/actions/security-for-github-actions/security-guides/automatic-token-authentication"
@@ -428,18 +467,21 @@ export const lessons = [
       "Production rules and cloud trust are configured outside this file; this workflow declares the narrow job that may request that identity."
     ],
     "instructions": [
-      "Set top-level permissions to `contents: read`.",
-      "On `deploy`, add `environment: production`.",
-      "Set only deploy job permissions to `id-token: write` and `contents: read`."
+      "At the top level, replace the current permissions with `contents: read`.",
+      "Inside the `deploy` job, add `environment: production` and a `permissions:` section containing `id-token: write` and `contents: read`.",
+      "Leave the deploy runner and command unchanged."
     ],
-    "doneWhen": "Only deploy has OIDC permission and it targets production.",
-    "task": "In workflow.yml, make the top-level permissions exactly contents: read. On deploy, add environment: production and a job-level permissions mapping containing id-token: write and contents: read.",
+    "doneWhen": "Only deploy can request the cloud sign-in permission, and it targets production.",
+    "task": "Give only the deploy job the extra permission it needs to sign in to the cloud.",
+    "editLocation": "Change top-level `permissions:`, then add an environment and permissions inside the `deploy` job.",
+    "keep": "Keep the deploy runner and command unchanged.",
+    "editExample": "environment: production\npermissions:\n  id-token: write\n  contents: read",
     "example": "",
     "starter": "name: deploy\non:\n  workflow_dispatch:\n    {}\npermissions:\n  id-token: write\njobs:\n  deploy:\n    runs-on: ubuntu-latest\n    steps:\n      - run: echo deploy\n",
     "solution": "name: deploy\non:\n  workflow_dispatch:\n    {}\npermissions:\n  contents: read\njobs:\n  deploy:\n    runs-on: ubuntu-latest\n    environment: production\n    permissions:\n      id-token: write\n      contents: read\n    steps:\n      - run: echo deploy\n",
     "file": "workflow.yml",
-    "hint": "Keep cloud identity at the narrowest job boundary and combine it with deployment protection.",
-    "success": "Only deploy has OIDC and it targets production.",
+    "hint": "Change top-level `permissions:`, then add an environment and permissions inside the `deploy` job.",
+    "success": "Only deploy can request the cloud sign-in permission, and it targets production.",
     "source": {
       "label": "OIDC with cloud providers",
       "url": "https://docs.github.com/actions/how-tos/secure-your-work/security-harden-deployments/oidc-in-cloud-providers"
@@ -460,18 +502,21 @@ export const lessons = [
       "You will copy the approved SHA already noted in the starter file, not invent a new one."
     ],
     "instructions": [
-      "Find the checkout step in the `build` job.",
-      "Replace `actions/checkout@v4` with the full approved SHA in the starter comment.",
-      "Keep the action name and do not add text after the 40-character SHA."
+      "Find `actions/checkout@v4` in the `build` job.",
+      "Replace `v4` with the full commit value in the comment above the job.",
+      "Leave `actions/checkout@` before that value, and do not add anything after the 40-character value."
     ],
-    "doneWhen": "Checkout uses the one approved full SHA.",
-    "task": "In workflow.yml, replace actions/checkout@v4 with the verified 40-character checkout SHA in the comment directly above the job. Keep actions/checkout@ before that SHA.",
+    "doneWhen": "Checkout uses the exact approved 40-character commit value.",
+    "task": "Use the exact approved checkout version instead of the moving `v4` label.",
+    "editLocation": "In the `uses:` line of the checkout step in the `build` job.",
+    "keep": "Keep `actions/checkout@` and copy the full value from the comment unchanged.",
+    "editExample": "",
     "example": "",
     "starter": "name: pin\non:\n  workflow_dispatch:\n    {}\n# Verified checkout release commit for this exercise: 11bd71901bbe5b1630ceea73d27597364c9af683\njobs:\n  build:\n    runs-on: ubuntu-latest\n    steps:\n      - uses: actions/checkout@v4\n",
     "solution": "name: pin\non:\n  workflow_dispatch:\n    {}\njobs:\n  build:\n    runs-on: ubuntu-latest\n    steps:\n      - uses: 'actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683'\n",
     "file": "workflow.yml",
-    "hint": "Immutable references make action review reproducible; verify any candidate against its upstream release.",
-    "success": "checkout uses one complete 40-character SHA and no suffix.",
+    "hint": "In the `uses:` line of the checkout step in the `build` job.",
+    "success": "Checkout uses the exact approved 40-character commit value.",
     "source": {
       "label": "Secure use reference",
       "url": "https://docs.github.com/actions/security-for-github-actions/security-guides/security-hardening-for-github-actions#using-third-party-actions"
@@ -492,18 +537,21 @@ export const lessons = [
       "A clear artifact name makes it easier to find the right build result when several jobs or runs exist."
     ],
     "instructions": [
-      "Find the `build` job steps.",
-      "Add an `actions/upload-artifact@v4` step.",
-      "Set its `with.name` to `build-output` and `with.path` to `dist`."
+      "Find the `steps:` list in the `build` job.",
+      "Add a new step after the existing command using `actions/upload-artifact@v4`.",
+      "Inside that new step, set `name: build-output` and `path: dist` under `with:`."
     ],
-    "doneWhen": "Build uploads dist as build-output.",
-    "task": "The build already creates dist/result.txt. In workflow.yml, add a second build step using actions/upload-artifact@v4. Give it name: build-output and path: dist.",
+    "doneWhen": "The build saves `dist` with the name `build-output`.",
+    "task": "Save the `dist` folder from the build with the name `build-output`.",
+    "editLocation": "Inside the `steps:` list in the `build` job, after the existing command.",
+    "keep": "Keep the command that creates `dist` unchanged.",
+    "editExample": "- uses: actions/upload-artifact@v4\n  with:\n    name: build-output\n    path: dist",
     "example": "",
     "starter": "name: artifact\non:\n  workflow_dispatch:\n    {}\njobs:\n  build:\n    runs-on: ubuntu-latest\n    steps:\n      - run: 'mkdir -p dist && echo hi > dist/result.txt'\n",
     "solution": "name: artifact\non:\n  workflow_dispatch:\n    {}\njobs:\n  build:\n    runs-on: ubuntu-latest\n    steps:\n      - run: 'mkdir -p dist && echo hi > dist/result.txt'\n      - uses: actions/upload-artifact@v4\n        with:\n          name: build-output\n          path: dist\n",
     "file": "workflow.yml",
-    "hint": "Artifacts preserve named build outputs for later inspection or jobs, unlike dependency caches.",
-    "success": "Artifact name and path are exact.",
+    "hint": "Inside the `steps:` list in the `build` job, after the existing command.",
+    "success": "The build saves `dist` with the name `build-output`.",
     "source": {
       "label": "Storing workflow data as artifacts",
       "url": "https://docs.github.com/actions/using-workflows/storing-workflow-data-as-artifacts"
@@ -525,17 +573,20 @@ export const lessons = [
     ],
     "instructions": [
       "Find the `deploy` job.",
-      "Add `needs: build` so deployment waits for the build job.",
-      "Keep deploy permissions read-only; do not add any write permission."
+      "Add `needs: build` inside it, on a new line lined up with `runs-on:`.",
+      "Change its `contents` permission from `write` to `read`; leave the build job unchanged."
     ],
-    "doneWhen": "Deploy waits for build and has no write permission.",
-    "task": "In workflow.yml, give deploy needs: build. Change its permissions.contents from write to read, with no other write permission.",
+    "doneWhen": "Deploy waits for build and can read repository contents but cannot write them.",
+    "task": "Make deployment wait for the build and keep deployment read-only.",
+    "editLocation": "Inside the `deploy` job, on new lines lined up with `runs-on:`.",
+    "keep": "Keep the `build` job and the deploy command unchanged.",
+    "editExample": "needs: build\npermissions:\n  contents: read",
     "example": "",
     "starter": "name: gate\non:\n  workflow_dispatch:\n    {}\njobs:\n  build:\n    runs-on: ubuntu-latest\n    steps:\n      - run: echo build\n  deploy:\n    runs-on: ubuntu-latest\n    permissions:\n      contents: write\n    steps:\n      - run: echo deploy\n",
     "solution": "name: gate\non:\n  workflow_dispatch:\n    {}\njobs:\n  build:\n    runs-on: ubuntu-latest\n    steps:\n      - run: echo build\n  deploy:\n    needs: build\n    runs-on: ubuntu-latest\n    permissions:\n      contents: read\n    steps:\n      - run: echo deploy\n",
     "file": "workflow.yml",
-    "hint": "Dependencies model required prior work; retain minimal credentials while the gate is evaluated.",
-    "success": "deploy needs build and has no write permissions.",
+    "hint": "Inside the `deploy` job, on new lines lined up with `runs-on:`.",
+    "success": "Deploy waits for build and can read repository contents but cannot write them.",
     "source": {
       "label": "Defining prerequisite jobs",
       "url": "https://docs.github.com/en/actions/reference/workflows-and-actions/workflow-syntax#jobsjob_idneeds"

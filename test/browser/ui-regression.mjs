@@ -56,6 +56,15 @@ try {
     assert.equal(await test.page.locator('#path .stage-card').count(), 4, 'overview contains four topic bubbles');
     assert.equal(await test.page.locator('#path .map-lesson').count(), 0, 'overview does not expose the lesson list');
     await start(test.page);
+    assert.equal(await test.page.locator('.task-card').count(), 1, 'lesson has one concise task card');
+    assert.equal(await test.page.locator('.learn-card .task').count(), 0, 'learn card has no buried task block');
+    assert.equal(await test.page.locator('.editor-card .instructions').count(), 0, 'editor does not repeat task steps');
+    assert.match(await test.page.locator('.task-card').textContent(), /Your goal[\s\S]*Where to edit[\s\S]*Make these changes[\s\S]*Keep unchanged/, 'task card has the required task hierarchy');
+    const taskSource = test.page.locator('.task-card .source-link a');
+    assert.ok(await taskSource.getAttribute('href'), 'official docs link is inside the task card');
+    assert.equal(await taskSource.getAttribute('target'), '_blank', 'official docs opens in a new tab');
+    assert.equal(await taskSource.getAttribute('rel'), 'noreferrer', 'official docs link keeps noreferrer');
+    assert.equal(await test.page.getByText('Pass the current draft to mark this lesson done.', { exact: true }).count(), 0, 'removed completion prompt is absent on starter');
     const solution = test.page.locator('details').filter({ has: test.page.getByText('View solution', { exact: true }) });
     assert.equal(await solution.count(), 1, 'lesson has the renamed solution disclosure');
     assert.equal(await test.page.getByText('View a separate solution', { exact: true }).count(), 0, 'old solution disclosure is absent');
@@ -101,6 +110,10 @@ try {
   await start(route.page);
   for (let index = 0; index < 17; index += 1) {
     const current = await route.page.evaluate((i) => window.GH200Course.lessons[i], index);
+    assert.ok(current.task && current.file && current.editLocation && current.keep, `lesson ${index + 1} has a clear goal, file, edit location, and keep guidance`);
+    assert.ok(Array.isArray(current.instructions) && current.instructions.length, `lesson ${index + 1} has actionable changes`);
+    if (index === 0) assert.match(current.editExample || '', /^on:\n  /, 'lesson 01 example preserves two-space YAML indentation');
+    if (index === 9) assert.equal(current.file, 'action.yml', 'lesson 10 targets action.yml');
     await route.page.locator('#yaml-editor').fill(current.solution);
     await route.page.getByRole('button', { name: 'Test this YAML' }).click();
     await route.page.getByText('Looks good — this draft meets the exercise checks.').waitFor();
@@ -131,10 +144,11 @@ try {
   assert.equal(await persistence.page.locator('.lesson-map-state.next-state').textContent(), 'Up next', 'completion moves next marker to the following lesson');
   await persistence.page.locator('.lesson-bubble').first().click();
   await persistence.page.reload();
-  assert.match(await persistence.page.locator('.completed-help').textContent(), /Completed\./, 'completed state is unambiguous after reload');
+  assert.equal(await persistence.page.locator('#lesson-status').textContent(), 'Completed', 'completed state is shown once in the lesson header after reload');
+  assert.equal(await persistence.page.locator('.completed-help').count(), 0, 'completed state has no repeated bottom message');
   await persistence.page.locator('#yaml-editor').fill('name: changed after completion');
   assert.equal(await persistence.page.locator('#lesson-continue').count(), 0, 'editing removes stale continuation');
-  assert.equal(await persistence.page.locator('#lesson-status').textContent(), 'Practice now', 'editing removes stale completed status');
+  assert.equal(await persistence.page.locator('#lesson-status').textContent(), '', 'editing removes stale completed status');
   assert.equal(await persistence.page.locator('.completed-help').count(), 0, 'editing removes stale completed message');
   assert.equal(await persistence.page.getByRole('button', { name: 'Mark as done' }).isDisabled(), true, 'edited draft must pass again');
   await persistence.page.getByRole('button', { name: /Back to Foundations/ }).click();
@@ -144,7 +158,8 @@ try {
   await persistence.page.getByRole('button', { name: 'Test this YAML' }).click();
   assert.equal(await persistence.page.getByRole('button', { name: 'Mark as done' }).isDisabled(), false, 'passing the current edit enables completion');
   await persistence.page.getByRole('button', { name: 'Mark as done' }).click();
-  assert.match(await persistence.page.locator('.completed-help').textContent(), /Completed\./, 'completion is restored after the edited draft passes');
+  assert.equal(await persistence.page.locator('#lesson-status').textContent(), 'Completed', 'completion is restored after the edited draft passes');
+  assert.equal(await persistence.page.locator('.completed-help').count(), 0, 'restored completion has no repeated bottom message');
   await persistence.page.locator('#yaml-editor').fill('name: unfinished draft');
   await persistence.page.getByRole('button', { name: /Back to Foundations/ }).click();
   await persistence.page.locator('.lesson-bubble').nth(1).click();
@@ -153,13 +168,14 @@ try {
   assert.equal(await persistence.page.locator('#yaml-editor').inputValue(), 'name: unfinished draft');
   await persistence.page.reload();
   assert.equal(await persistence.page.locator('#yaml-editor').inputValue(), 'name: unfinished draft', 'unfinished draft survives reload');
-  const sourceHref = await persistence.page.locator('.source-link a').getAttribute('href');
+  assert.equal(await persistence.page.getByText('Pass the current draft to mark this lesson done.', { exact: true }).count(), 0, 'removed completion prompt stays absent after editing a completed lesson');
+  const sourceHref = await persistence.page.locator('.task-card .source-link a').getAttribute('href');
   assert.ok(sourceHref && /^https:\/\//.test(sourceHref), 'official source link is available');
   persistence.page.once('dialog', (dialog) => dialog.dismiss());
-  await persistence.page.getByRole('button', { name: 'Reset this exercise' }).click();
+  await persistence.page.getByRole('button', { name: 'Reset', exact: true }).click();
   assert.equal(await persistence.page.locator('#yaml-editor').inputValue(), 'name: unfinished draft', 'cancel keeps draft');
   persistence.page.once('dialog', (dialog) => dialog.accept());
-  await persistence.page.getByRole('button', { name: 'Reset this exercise' }).click();
+  await persistence.page.getByRole('button', { name: 'Reset', exact: true }).click();
   assert.notEqual(await persistence.page.locator('#yaml-editor').inputValue(), 'name: unfinished draft', 'accept restores starter');
   await persistence.context.close();
 
