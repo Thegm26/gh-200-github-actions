@@ -83,20 +83,23 @@ test('custom action examples cover composite, JavaScript, and inactive Docker me
 });
 
 test('custom-action verifier fails while the learner workspace is incomplete', () => {
-  const fixture = fs.mkdtempSync(path.join(root, '.tmp-action-fixture-'));
-  for (const [relative, contents] of Object.entries({
-    'composite/action.yml': 'name: incomplete composite\ndescription: fixture\nruns:\n  using: composite\n  steps: []\n',
-    'javascript/action.yml': 'name: incomplete javascript\ndescription: fixture\nruns:\n  using: node24\n  main: index.cjs\n',
-    'docker/action.yml.txt': 'name: inactive docker\ndescription: fixture\nruns:\n  using: docker\n  image: Dockerfile\n',
-  })) {
-    const target = path.join(fixture, relative);
-    fs.mkdirSync(path.dirname(target), { recursive: true });
-    fs.writeFileSync(target, contents);
+  const fixture = fs.mkdtempSync(path.join(root, '.tmp action #fixture-'));
+  try {
+    for (const [relative, contents] of Object.entries({
+      'composite/action.yml': 'name: incomplete composite\ndescription: fixture\nruns:\n  using: composite\n  steps: []\n',
+      'javascript/action.yml': 'name: incomplete javascript\ndescription: fixture\nruns:\n  using: node24\n  main: index.cjs\n',
+      'docker/action.yml.txt': 'name: inactive docker\ndescription: fixture\nruns:\n  using: docker\n  image: Dockerfile\n',
+    })) {
+      const target = path.join(fixture, relative);
+      fs.mkdirSync(path.dirname(target), { recursive: true });
+      fs.writeFileSync(target, contents);
+    }
+    const result = spawnSync(process.execPath, [path.join(examples, '05-custom-actions/verify.mjs')], { encoding: 'utf8', env: { ...process.env, GH200_ACTION_WORKSPACE: fixture } });
+    assert.equal(result.status, 1);
+    assert.match(result.stderr, /Exercise incomplete/);
+  } finally {
+    fs.rmSync(fixture, { recursive: true, force: true });
   }
-  const result = spawnSync(process.execPath, [path.join(examples, '05-custom-actions/verify.mjs')], { encoding: 'utf8', env: { ...process.env, GH200_ACTION_WORKSPACE: fixture } });
-  fs.rmSync(fixture, { recursive: true, force: true });
-  assert.equal(result.status, 1);
-  assert.match(result.stderr, /Exercise incomplete/);
 });
 
 test('instructional workflow solutions keep services on Linux and model reusable outputs', () => {

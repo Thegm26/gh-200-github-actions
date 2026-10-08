@@ -1,8 +1,9 @@
 # Session Handoff
 
-## Learning-engine refactor completion (current — 2026-10-08 UTC)
+## Windows CI correction (current — 2026-10-08 UTC)
 
-- The integrated tree passes its local functional gate. A final Windows-safe correction changed the timer-archive exclusions in content validation and its regression test to compare absolute paths, so the primary must refresh the full-tree fingerprint before the user-authorized commit/push; no current-tree remote CI result exists yet.
+- Commit `f470813` was pushed, but GitHub Actions run `37832831198` failed only on Windows. The custom-action verifier treated the native `GH200_ACTION_WORKSPACE` path as a file URL, and the workflow validator's LF-only manual-permissions assertion rejected CRLF checkouts. This bounded correction now uses native paths for the workspace and normalizes CRLF while retaining the strict permissions assertion; focused regressions cover a workspace path containing spaces and `#`, plus a CRLF-only workflow mirror.
+- Local verification is required after this correction; the prior independent reviews below remain pre-correction evidence. The primary should run the focused and full gates, obtain any required fresh review, commit, push, and confirm the replacement CI run before calling the refactor remotely validated.
 - Scope delivered: 17 small, independently resettable beginner labs with no timers; 8 supplementary drills; 13 focused direct-study examples; and 60 explained scenario questions. The learner CLI remains `npm run learn -- list|start <id>|check <id>|status|reset <id> --yes`; non-overwrite and explicit-reset guarantees remain enforced.
 - Authorization: the primary alone may verify Git identity, commit, and push this integrated work. No release/deployment, account mutation, GUI, or mouse use is authorized. This handoff updater does not commit or push.
 

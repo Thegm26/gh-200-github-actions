@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import { execFile } from 'node:child_process';
-import { mkdtemp, readFile, rm } from 'node:fs/promises';
+import { cp, mkdtemp, readFile, readdir, rm, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -17,6 +17,42 @@ test('workflow safety and coverage validator passes', async () => {
   });
   assert.match(result.stdout, /Workflow validation passed/);
   assert.equal(result.stderr, '');
+});
+
+test('workflow validator accepts CRLF workflow files without weakening permission checks', async () => {
+  const mirror = await mkdtemp(join(tmpdir(), 'gh200-workflow-crlf-'));
+  try {
+    await cp(join(projectRoot, 'scripts'), join(mirror, 'scripts'), { recursive: true });
+    await cp(join(projectRoot, '.github'), join(mirror, '.github'), { recursive: true });
+    const workflowsDirectory = join(mirror, '.github', 'workflows');
+    for (const name of await readdir(workflowsDirectory)) {
+      const workflow = join(workflowsDirectory, name);
+      await writeFile(workflow, (await readFile(workflow, 'utf8')).replace(/\r?\n/g, '\r\n'));
+    }
+    const result = await new Promise((resolve, reject) => {
+      execFile(process.execPath, ['scripts/verify-workflows.mjs'], { cwd: mirror }, (error, stdout, stderr) => {
+        if (error) reject(Object.assign(error, { stdout, stderr }));
+        else resolve({ stdout, stderr });
+      });
+    });
+    assert.match(result.stdout, /Workflow validation passed/);
+    assert.equal(result.stderr, '');
+    const learningWorkflow = join(workflowsDirectory, 'package-learning.yml');
+    const unsafePermissions = (await readFile(learningWorkflow, 'utf8')).replace(
+      'permissions:\r\n  contents: read',
+      'permissions:\r\n  contents: read\r\n  id-token: write',
+    );
+    await writeFile(learningWorkflow, unsafePermissions);
+    const failure = await new Promise((resolve) => {
+      execFile(process.execPath, ['scripts/verify-workflows.mjs'], { cwd: mirror }, (error, stdout, stderr) => {
+        resolve({ error, stdout, stderr });
+      });
+    });
+    assert.notEqual(failure.error, null);
+    assert.match(failure.stderr, /must not grant unused OIDC/);
+  } finally {
+    await rm(mirror, { recursive: true, force: true });
+  }
 });
 
 test('lab-summary bridges its untrusted title through a quoted environment variable', async () => {

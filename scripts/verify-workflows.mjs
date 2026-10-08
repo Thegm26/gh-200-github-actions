@@ -19,7 +19,7 @@ function file(name) {
     failures.push(`Missing required workflow: ${name}`);
     return '';
   }
-  return readFileSync(path, 'utf8');
+  return readFileSync(path, 'utf8').replace(/\r\n/g, '\n');
 }
 
 if (!existsSync(workflowsDir)) failures.push('Missing .github/workflows directory.');

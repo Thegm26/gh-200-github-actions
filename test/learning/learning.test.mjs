@@ -25,11 +25,11 @@ test('start never overwrites an existing lab', () => {
 });
 test('reset requires confirmation and refuses symbolic-link targets', (t) => {
   const base = tempWorkspace(); const outside = tempWorkspace(); const lab = labById('01-first-workflow');
-  try { assert.throws(() => resetStarter(lab, base, false), /Reset refused/); try { fs.symlinkSync(outside, path.join(base, lab.id)); } catch (error) { if (error.code === 'EPERM') return t.skip('This Windows environment cannot create symbolic links; runtime guard remains covered where supported.'); throw error; } assert.throws(() => resetStarter(lab, base, true), /symbolic-link lab/); assert.ok(fs.existsSync(outside)); } finally { fs.rmSync(base, { recursive: true, force: true }); fs.rmSync(outside, { recursive: true, force: true }); }
+  try { assert.throws(() => resetStarter(lab, base, false), /Reset refused/); try { fs.symlinkSync(outside, path.join(base, lab.id), process.platform === 'win32' ? 'junction' : 'dir'); } catch (error) { if (error.code === 'EPERM') return t.skip('This Windows environment cannot create symbolic links; runtime guard remains covered where supported.'); throw error; } assert.throws(() => resetStarter(lab, base, true), /symbolic-link lab/); assert.ok(fs.existsSync(outside)); } finally { fs.rmSync(base, { recursive: true, force: true }); fs.rmSync(outside, { recursive: true, force: true }); }
 });
 test('workspace root symbolic links are refused before writes', (t) => {
   const parent = tempWorkspace(); const outside = tempWorkspace(); const lab = labById('01-first-workflow');
-  try { const link = path.join(parent, 'workspace'); try { fs.symlinkSync(outside, link); } catch (error) { if (error.code === 'EPERM') return t.skip('This Windows environment cannot create symbolic links; runtime guard remains covered where supported.'); throw error; } assert.throws(() => copyStarter(lab, link), /symbolic-link workspace root/); assert.deepEqual(fs.readdirSync(outside), []); } finally { fs.rmSync(parent, { recursive: true, force: true }); fs.rmSync(outside, { recursive: true, force: true }); }
+  try { const link = path.join(parent, 'workspace'); try { fs.symlinkSync(outside, link, process.platform === 'win32' ? 'junction' : 'dir'); } catch (error) { if (error.code === 'EPERM') return t.skip('This Windows environment cannot create symbolic links; runtime guard remains covered where supported.'); throw error; } assert.throws(() => copyStarter(lab, link), /symbolic-link workspace root/); assert.deepEqual(fs.readdirSync(outside), []); } finally { fs.rmSync(parent, { recursive: true, force: true }); fs.rmSync(outside, { recursive: true, force: true }); }
 });
 test('output, evidence, and OIDC validators reject semantic bypasses', () => {
   const cases = [

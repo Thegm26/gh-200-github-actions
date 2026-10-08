@@ -1,12 +1,14 @@
 import fs from 'node:fs';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 
 const root = process.env.GH200_ACTION_WORKSPACE
-  ? new URL(`${process.env.GH200_ACTION_WORKSPACE.replace(/\/$/, '')}/`, 'file:')
-  : new URL('./workspace/', import.meta.url);
+  ? path.resolve(process.env.GH200_ACTION_WORKSPACE)
+  : fileURLToPath(new URL('./workspace/', import.meta.url));
 const files = {
-  composite: fs.readFileSync(new URL('composite/action.yml', root), 'utf8'),
-  javascript: fs.readFileSync(new URL('javascript/action.yml', root), 'utf8'),
-  docker: fs.readFileSync(new URL('docker/action.yml.txt', root), 'utf8'),
+  composite: fs.readFileSync(path.join(root, 'composite/action.yml'), 'utf8'),
+  javascript: fs.readFileSync(path.join(root, 'javascript/action.yml'), 'utf8'),
+  docker: fs.readFileSync(path.join(root, 'docker/action.yml.txt'), 'utf8'),
 };
 for (const [name, text] of Object.entries(files)) {
   for (const key of ['name:', 'description:', 'runs:']) {
