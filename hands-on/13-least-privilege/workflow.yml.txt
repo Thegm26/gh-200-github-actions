@@ -1,0 +1,15 @@
+name: GH-200 lab 13
+on:
+  workflow_dispatch: {}
+permissions:
+  contents: read
+jobs:
+  policy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803
+      - shell: bash
+        run: |
+          npm ci --ignore-scripts
+          node hands-on/13-least-privilege/check-policy.mjs .github/gh200-policy.yml

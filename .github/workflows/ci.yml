@@ -16,6 +16,7 @@ concurrency:
 
 jobs:
   test:
+    if: ${{ github.repository == 'Thegm26/gh-200-github-actions' || github.event_name == 'workflow_dispatch' }}
     name: Test Node ${{ matrix.node }} on ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
     strategy:
@@ -56,6 +57,7 @@ jobs:
           if-no-files-found: error
 
   risk:
+    if: ${{ github.repository == 'Thegm26/gh-200-github-actions' || github.event_name == 'workflow_dispatch' }}
     uses: ./.github/workflows/reusable-risk.yml
     with:
       sample_size: 3
@@ -63,6 +65,7 @@ jobs:
       optional_token: ${{ secrets.OPTIONAL_LAB_TOKEN }}
 
   integration:
+    if: ${{ github.repository == 'Thegm26/gh-200-github-actions' || github.event_name == 'workflow_dispatch' }}
     needs: [test, risk]
     runs-on: ubuntu-latest
     outputs:

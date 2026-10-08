@@ -1,0 +1,16 @@
+name: GH-200 lab 03-push-filter
+on:
+  workflow_dispatch: {}
+  push:
+    branches: [gh200-path-lab]
+    paths: [lab-inputs/**]
+permissions:
+  contents: read
+jobs:
+  lab:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Hello
+        shell: bash
+        run: echo hello

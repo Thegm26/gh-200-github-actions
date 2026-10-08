@@ -38,11 +38,19 @@ These are optional, one-concept extensions. Create the named files under your ig
 
 **Scenario:** a composite action first serves internal repositories, then may be published for Marketplace discovery. Record its `action.yml` metadata requirement, a `v1.2.0` release tag and movable `v1` major tag for convenience, and the consumer policy to pin the reviewed release commit SHA where required. **Pass:** distinguish GitHub Marketplace publication from private/internal sharing, and distinguish a producer's convenience tag from a consumer's immutable pin. [Primary reference: immutable releases and tags](https://docs.github.com/actions/how-tos/create-and-publish-actions/using-immutable-releases-and-tags-to-manage-your-actions-releases)
 
-## 7. Internal templates and self-hosted runner controls
+## 7. Internal templates, action policy, and self-hosted runner controls
 
 **Write:** `.practice/extra-enterprise/access-plan.md`.
 
-**Scenario:** an internal workflow template must be visible to selected repositories and run a build on an approved self-hosted runner group. State template visibility/repository access, the runner group and labels, the IP/network allow-list owner, and how the image/toolcache/runtime is maintained and versioned. **Pass:** separate template access, allowed-actions policy, runner routing, and network control; name the team responsible for patching the runner image. [Primary reference: enterprise Actions administration](https://docs.github.com/en/enterprise-cloud@latest/admin/managing-github-actions-for-your-enterprise/getting-started-with-github-actions-for-your-enterprise/getting-started-with-github-actions-for-github-enterprise-cloud) and [runner access](https://docs.github.com/actions/how-tos/manage-runners/self-hosted-runners/manage-access)
+**Scenario:** finance repositories may use a `prod-linux` self-hosted runner group; contractor repositories may use approved hosted CI but must never route to that group. The enterprise permits GitHub-owned actions and the organization `octo-platform/*` only. In `access-plan.md`, write four headings: **template access**, **action/reusable-workflow policy**, **runner routing**, and **network/image ownership**. Under runner routing, show the intended job selector:
+
+```yaml
+runs-on: [self-hosted, linux, prod]
+```
+
+Then state that the `prod-linux` runner group is granted only to finance repositories. Under policy, say that the selected-actions policy blocks an unapproved `uses:` reference even if a runner is available; under routing, say that an approved action does not grant a contractor repository access to `prod-linux`. Name the network/IP allow-list owner and the team responsible for patching and versioning the runner image/toolcache.
+
+**Expected result:** a reviewer can point to two independent decisions: (1) whether an action or reusable workflow source is allowed, and (2) whether a repository can receive production compute. The labels only select an eligible runner *inside* the permitted runner group; they do not create access. **Pass:** include all four headings, the selector, the selected-actions rule, and the finance-only group rule. This is a local/manual policy review: do not change enterprise settings or register a runner. [Primary reference: enterprise Actions administration](https://docs.github.com/en/enterprise-cloud@latest/admin/managing-github-actions-for-your-enterprise/getting-started-with-github-actions-for-your-enterprise/getting-started-with-github-actions-for-github-enterprise-cloud) and [runner access](https://docs.github.com/actions/how-tos/manage-runners/self-hosted-runners/manage-access)
 
 ## 8. Digest verification versus attestation
 
@@ -80,14 +88,16 @@ Then replace `run-on` with `runs-on: ubuntu-latest`, use completion to inspect `
 
 **Pass:** show the diagnostic before the correction, then show no schema error for the corrected key; explain that completion and metadata help support authoring but do not prove a hosted workflow will run. The GH-200 study guide names VS Code Actions tooling, schema completion, metadata IntelliSense, and validation as authoring skills. [Primary reference: GH-200 study guide](https://learn.microsoft.com/en-us/credentials/certifications/resources/study-guides/gh-200)
 
-## 10. Matrix coverage and concurrency-cost model
+## 10. Matrix coverage, failure behavior, runner images, and selective rerun
 
 **Write:** `.practice/extra-matrix/optimization.yml.txt` and `.practice/extra-matrix/decision.md`. Keep the workflow sketch inactive.
 
-**Scenario:** begin with `os: [ubuntu-latest, windows-latest]` and `node: [20, 22, 24]`, which creates six jobs. Your coverage policy is Linux on all three Node versions and Windows only on Node 22. Add `exclude` entries for the two unsupported Windows combinations and set `max-parallel: 2`.
+**Scenario:** begin with `os: [ubuntu-latest, windows-latest]` and `node: [20, 22, 24]`, which creates six jobs. Your coverage policy is Linux on all three Node versions and Windows only on Node 22. Add `exclude` entries for the two unsupported Windows combinations, then use `include` to label the Windows/22 job `smoke: true`. Set `fail-fast: false` so the Linux jobs still finish if Windows/22 fails, and set `max-parallel: 2`. Treat each `*-latest` image as a moving label: record the release-notes check you would make before relying on a compiler/tool version.
 
 ```yaml
 strategy:
+  fail-fast: false
+  max-parallel: 2
   matrix:
     os: [ubuntu-latest, windows-latest]
     node: [20, 22, 24]
@@ -96,9 +106,12 @@ strategy:
         node: 20
       - os: windows-latest
         node: 24
-  max-parallel: 2
+    include:
+      - os: windows-latest
+        node: 22
+        smoke: true
 ```
 
-**Expected result:** list the four remaining jobs: Ubuntu/20, Ubuntu/22, Ubuntu/24, and Windows/22. In `decision.md`, model five minutes per job: the six-job matrix is 30 runner-minutes and the four-job matrix is 20 runner-minutes. State separately that `max-parallel: 2` caps peak concurrency but, by itself, does not guarantee less billed work or lower cost; real duration, runner type, platform billing, cache behavior, and failures still matter.
+**Expected result:** list the four remaining jobs: Ubuntu/20, Ubuntu/22, Ubuntu/24, and Windows/22 (`smoke: true`). In `decision.md`, model five minutes per job: the six-job matrix is 30 runner-minutes and the four-job matrix is 20 runner-minutes. State separately that `max-parallel: 2` caps peak concurrency but, by itself, does not guarantee less billed work or lower cost; real duration, runner type, platform billing, cache behavior, and failures still matter. For a supplied run history where only Windows/22 fails because of a transient external outage and there is **no** code or YAML change, state that the smallest hosted follow-up is **rerun the failed Windows/22 matrix job**, not all jobs. If the repair changes code or YAML, commit it and use a new run at the latest SHA instead. These actions are hosted-only; write them as a manual review step and do not create a workflow run.
 
-**Pass:** identify exactly two excluded rows, exactly four remaining jobs, and the 30-to-20 runner-minute model. Mark the model as a planning estimate rather than observed billing. [Primary reference: matrix strategy](https://docs.github.com/actions/using-jobs/using-a-matrix-for-your-jobs)
+**Pass:** identify exactly two excluded rows, exactly four remaining jobs, the Windows/22 include property, `fail-fast: false`, and the 30-to-20 runner-minute model. Mark the model as a planning estimate rather than observed billing and distinguish local YAML review from hosted image availability and rerun behavior. [Primary reference: matrix strategy](https://docs.github.com/actions/using-jobs/using-a-matrix-for-your-jobs) and [runner-image releases](https://github.com/actions/runner-images/releases)

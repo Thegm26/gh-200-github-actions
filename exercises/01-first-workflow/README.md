@@ -38,3 +38,4 @@ Compare your file with the immutable [solution](../../learning/solutions/01-firs
 </details>
 
 Next: [02 — Job and runner](../02-job-and-runner/README.md).
+\nHosted fork-to-fix: [01 lab](../../hands-on/01-first-workflow/README.md).

@@ -1,0 +1,4 @@
+{
+  "action": "actions/checkout",
+  "ref": "v4"
+}

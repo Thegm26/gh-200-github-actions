@@ -40,6 +40,15 @@ const learning = file('package-learning.yml');
 requireMatch(ci, /\bpush:/, 'CI must trigger on push.');
 requireMatch(ci, /\bpull_request:/, 'CI must trigger on pull_request.');
 requireMatch(ci, /\bworkflow_dispatch:/, 'CI must offer workflow_dispatch.');
+const jobsStart = ci.search(/^jobs:\s*$/m);
+const ciJobs = jobsStart === -1
+  ? []
+  : [...ci.slice(jobsStart).matchAll(/^  ([A-Za-z0-9_-]+):\s*$/gm)].map((match) => match[1]);
+if (!ciJobs.length) failures.push('CI must declare at least one job.');
+for (const jobName of ciJobs) {
+  const jobPattern = new RegExp(`^  ${jobName}:\\n    if: \\$\\{\\{ github\\.repository == 'Thegm26/gh-200-github-actions' \\|\\| github\\.event_name == 'workflow_dispatch' \\}\\}`, 'm');
+  requireMatch(ci, jobPattern, `CI job ${jobName} must be upstream-only or manually dispatched.`);
+}
 requireMatch(ci, /permissions:\s*\n\s+contents:\s*read/, 'CI must declare least-privilege contents: read.');
 requireMatch(ci, /fail-fast:\s*false/, 'CI must demonstrate fail-fast.');
 requireMatch(ci, /max-parallel:\s*2/, 'CI must limit matrix parallelism.');

@@ -15,3 +15,4 @@ It fails until both the dependency and reference exist and passes when `report` 
 <details><summary>Solution</summary>Compare with the immutable [solution](../../learning/solutions/06-needs-output/workflow.yml).</details>
 
 Next: [07 — Matrix](../07-matrix/README.md).
+\nHosted fork-to-fix: [06 lab](../../hands-on/06-needs-output/README.md).

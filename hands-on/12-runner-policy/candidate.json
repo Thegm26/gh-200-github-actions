@@ -1,0 +1,8 @@
+{
+  "repository": "octo-org/unapproved-repository",
+  "labels": ["linux", "trusted"],
+  "job": {
+    "requestedRunner": "self-hosted",
+    "name": "documentation-check"
+  }
+}

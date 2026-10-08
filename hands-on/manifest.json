@@ -1,0 +1,23 @@
+{
+  "schemaVersion": 1,
+  "copyTarget": ".github/workflows/gh200-lab.yml",
+  "labs": [
+    {"id":"01-first-workflow","title":"Manual dispatch","mode":"workflow configuration","starter":"hands-on/01-first-workflow/workflow.yml.txt","solution":"hands-on/01-first-workflow/solution.yml.txt"},
+    {"id":"02-job-and-runner","title":"Runner selection","mode":"workflow configuration","starter":"hands-on/02-job-and-runner/workflow.yml.txt","solution":"hands-on/02-job-and-runner/solution.yml.txt"},
+    {"id":"03-push-filter","title":"Push filter","mode":"trigger demonstration","starter":"hands-on/03-push-filter/workflow.yml.txt","solution":"hands-on/03-push-filter/solution.yml.txt"},
+    {"id":"04-context-as-data","title":"Safe context handling","mode":"runtime failure","starter":"hands-on/04-context-as-data/workflow.yml.txt","solution":"hands-on/04-context-as-data/solution.yml.txt"},
+    {"id":"05-job-output","title":"Job output bridge","mode":"runtime failure","starter":"hands-on/05-job-output/workflow.yml.txt","solution":"hands-on/05-job-output/solution.yml.txt"},
+    {"id":"06-needs-output","title":"Consume job output","mode":"runtime failure","starter":"hands-on/06-needs-output/workflow.yml.txt","solution":"hands-on/06-needs-output/solution.yml.txt"},
+    {"id":"07-matrix","title":"Matrix coverage","mode":"runtime failure","starter":"hands-on/07-matrix/workflow.yml.txt","solution":"hands-on/07-matrix/solution.yml.txt"},
+    {"id":"08-service-linux","title":"Service readiness","mode":"runtime failure","starter":"hands-on/08-service-linux/workflow.yml.txt","solution":"hands-on/08-service-linux/solution.yml.txt"},
+    {"id":"09-reusable-call","title":"Reusable workflow caller","mode":"runtime failure","starter":"hands-on/09-reusable-call/workflow.yml.txt","solution":"hands-on/09-reusable-call/solution.yml.txt"},
+    {"id":"10-composite-action","title":"Composite action wrapper","mode":"runtime failure","starter":"hands-on/10-composite-action/workflow.yml.txt","solution":"hands-on/10-composite-action/solution.yml.txt"},
+    {"id":"11-failure-evidence","title":"Failure evidence","mode":"runtime failure","starter":"hands-on/11-failure-evidence/workflow.yml.txt","solution":"hands-on/11-failure-evidence/solution.yml.txt"},
+    {"id":"12-runner-policy","title":"Runner policy","mode":"safe demonstration","starter":"hands-on/12-runner-policy/workflow.yml.txt","solution":"hands-on/12-runner-policy/solution.yml.txt"},
+    {"id":"13-least-privilege","title":"Least privilege","mode":"runtime failure","starter":"hands-on/13-least-privilege/workflow.yml.txt","solution":"hands-on/13-least-privilege/solution.yml.txt"},
+    {"id":"14-oidc-job","title":"Job-scoped OIDC","mode":"safe demonstration","starter":"hands-on/14-oidc-job/workflow.yml.txt","solution":"hands-on/14-oidc-job/solution.yml.txt"},
+    {"id":"15-sha-pin","title":"Immutable action pin","mode":"safe demonstration","starter":"hands-on/15-sha-pin/workflow.yml.txt","solution":"hands-on/15-sha-pin/solution.yml.txt"},
+    {"id":"16-upload-artifact","title":"Artifact upload","mode":"runtime failure","starter":"hands-on/16-upload-artifact/workflow.yml.txt","solution":"hands-on/16-upload-artifact/solution.yml.txt"},
+    {"id":"17-capstone-gate","title":"Deployment gate","mode":"runtime failure","starter":"hands-on/17-capstone-gate/workflow.yml.txt","solution":"hands-on/17-capstone-gate/solution.yml.txt"}
+  ]
+}

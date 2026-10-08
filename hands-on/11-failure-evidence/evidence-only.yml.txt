@@ -1,0 +1,4 @@
+      - name: Evidence
+        if: ${{ always() }}
+        shell: bash
+        run: echo test-finished >> "$GITHUB_STEP_SUMMARY"

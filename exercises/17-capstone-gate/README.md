@@ -15,3 +15,4 @@ It fails while deployment can run independently or has write access, and passes 
 <details><summary>Solution</summary>Compare with the immutable [solution](../../learning/solutions/17-capstone-gate/workflow.yml) after trying it.</details>
 
 You finished the canonical route. Revisit [the course guide](../../docs/COURSE.md) or use the optional GitHub sandbox when authorized.
+\nHosted fork-to-fix: [17 lab](../../hands-on/17-capstone-gate/README.md).

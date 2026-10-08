@@ -15,3 +15,4 @@ It fails until the upload action, artifact name, and path all match; it passes w
 <details><summary>Solution</summary>Compare with the immutable [solution](../../learning/solutions/16-upload-artifact/workflow.yml) after trying it.</details>
 
 Next: [17 — Gate deployment](../17-capstone-gate/README.md).
+\nHosted fork-to-fix: [16 lab](../../hands-on/16-upload-artifact/README.md).

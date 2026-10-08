@@ -1,6 +1,50 @@
 # Session Handoff
 
-## Visual practice-library app (current — 2026-10-08 UTC)
+## Final local delivery record (current — 2026-10-09 UTC)
+
+- Acceptance is locally complete: independent Sol reviewer `/root/delivery_review` passed entry-CI isolated and connected review, curriculum isolated and connected review, hosted isolated and connected review, and final cohesion/polish review. The final release gate is local-only; no GitHub Actions dispatch occurred and no hosted run result is claimed.
+- Primary fresh evidence: `npm run check` passed 28 main plus 16 learning tests (44 total); all 17 starters reject, all 17 solutions pass, and all 17 mutations reject. Reference/catalog validation covers 16 entries, course/content covers 86 questions, workflow validation covers 3 workflows, and hands-on coverage is 4/4 with verifier coverage for all 17 canonical exercises.
+- Evidence logs: `/tmp/gh200-final-delivery-check.log` and `/tmp/gh200-final-delivery-browser.log`. Browser regression passed file/HTTP/mobile/lessons/practice/references/downloads/storage; fresh 360px and 1440px screenshots at `/tmp/gh200-delivery-360.png` and `/tmp/gh200-delivery-1440.png` received primary visual review with no overflow.
+- Current-tree fingerprint: `f752d236d387a3c7d58922f086273b83d74a24423a500f699464f3207b8d8898` across 207 explicitly selected files (web, learning, exercises, hands-on, quiz, scripts, test, references, README, index, GitHub/package files, and current user docs). This handoff and the question ledger are excluded by selection. Protected `.practice/01-first-workflow/workflow.yml` remains `406479bd330fc144bc86081d4d984de87f14696e474ce24906f23522dd718435`.
+
+```sh
+python3 /home/gm26/.codex/skills/review-driven-delivery/scripts/tree_fingerprint.py /home/gm26/gh-200-github-actions --include web --include learning --include exercises --include hands-on --include quiz --include scripts --include test --include references --include README.md --include index.html --include .github --include package.json --include package-lock.json --include docs/START_HERE.md --include docs/BLUEPRINT.md --include docs/EXTRA_EXERCISES.md
+```
+- Ownership: `hosted_finish` owns final hands-on, verifier, and tests; `quiz_finish` owns quiz repair and ledger; `curriculum_depth` owns entry-CI. All learner templates remain inactive. Exercise 03 is opt-in push to a specific branch; Exercise 14 demonstrates job OIDC permission presence only, with no token request or cloud exchange; Exercises 12, 13, and 15 are safe policy models.
+- External question banks remain links only: GHCertified is linked, ExamTopics marketing is unverified, and neither is imported, scraped, or an answer authority. Final evidence monitor `/root/delivery_monitor` independently confirmed the source fingerprint, fresh local gates, unchanged protected practice file, and release constraints. The prior authorization permits the primary alone to commit and push `main` with `[skip ci]`; this avoids Actions execution under the verified official skipping mechanism.
+
+## Archived hosted fork-to-fix entry mode (2026-10-09 UTC)
+
+- Entry mode now exposes two deliberately separate learner routes: the offline `file://` browser course requires no account or install; the optional hosted route asks the learner to fork their own repository, clone it, open it with `code .`, and follow `hands-on/README.md` plus the matching `hands-on/<id>/README.md`.
+- Every browser lesson contains a secondary **Work in VS Code** link to the upstream `main` guide. The link is intentionally external, opens in a new tab with `noreferrer`, and remains inert/offline-safe until the learner chooses it.
+- `ci.yml` guards all three jobs (`test`, `risk`, `integration`) with `github.repository == 'Thegm26/gh-200-github-actions' || github.event_name == 'workflow_dispatch'`. Upstream push/PR automation remains intact. A fork push can show a skipped CI entry but executes no maintainer jobs; learner lab templates are copied into the fork and started manually from its default branch.
+- `scripts/verify-workflows.mjs` and runtime mutation coverage enumerate every CI job and enforce that exact guard; `npm run verify:hands-on` is exposed and `test:learning` includes the hands-on suite. Ownership is bounded: `entry_mode` owns this entry route/guard/browser coverage, `hosted_labs` owns `hands-on/**` and its verifier/tests, and `curriculum_depth` owns quiz/drills/references. No GitHub dispatch, push, commit, cloud configuration, or hosted-run observation was performed by agents. Runtime outcomes are local validation evidence only; expected hosted outcomes in learner material are not observed evidence.
+- Local evidence for this component: `npm run build:course`, `npm run verify:hands-on`, `npm run validate:workflows`, `node --test test/runtime/workflows.test.js`, and browser regression with the supplied Chromium executable passed. Full integration/review/release gates remain pending with the primary.
+
+## Archived hosted fork-to-fix planning record (2026-10-08 UTC)
+
+- User-approved objective: extend the existing offline browser practice library with a complete hands-on learner path: fork the repository, open in VS Code, make a real workflow failure in GitHub Actions, inspect logs, fix it, and confirm a new successful run. This runs alongside—not instead of—the current browser experience. Add deeper objective-aligned drills and plausible quiz distractors.
+- Current baseline: `HEAD` is `11910e9`. Preserve existing user-owned dirty toolbar-cleanup work in `web/app.js`, `web/styles.css`, and `test/browser/ui-regression.mjs`; do not overwrite or claim it. Preserve `.practice/01-first-workflow/workflow.yml` SHA-256 `406479bd330fc144bc86081d4d984de87f14696e474ce24906f23522dd718435`.
+- Historical safety/ownership note: learner workflows remain inactive outside `.github/workflows` until a learner opts in. `hosted_labs` owns hands-on material and its verifier/tests; `curriculum_depth` owns quiz/drills/references; `entry_mode` owns the top-level/browser route, CI guard, and focused tests; the primary owns integration and final verification. This record is not a claim of hosted execution.
+
+| Acceptance surface | Required observable gate |
+|---|---|
+| All 17 canonical exercises | Each maps to a hosted case, or documents an explicit privilege/platform limit plus a working safe alternative. |
+| Hosted failure/fix truth | Broken and fixed paths have runtime-evidence assertions; a static checker alone must not be presented as hosted-runtime proof. |
+| Learner route | Documentation covers fork, VS Code edit, default branch, manual run, logs, fix, new run, and cleanup. |
+| Browser continuity | Every lesson exposes an entry into the hosted learning mode while retaining browser practice. |
+| Fork CI safety | A maintainer guard proves every job is upstream-only or `workflow_dispatch`; fork pushes execute no jobs (skipped run entries are acceptable and documented), while upstream automatic CI is unchanged. |
+| Curriculum depth | Drills match their learning objectives; quiz distractors represent plausible misconceptions. |
+| Delivery gate | Full local tests, browser regression, independent isolated/connected reviews, and final cohesion review pass. Live hosted validation remains intentionally not performed. |
+
+### Resume order
+
+1. Preserve the stated dirty toolbar files and protected practice hash; inspect bounded changes only.
+2. Complete the three owned components, keeping all learner workflows inactive outside `.github/workflows` until opt-in.
+3. Run focused checks, then full local and browser suites; primary integrates without push/remote execution.
+4. Obtain the required independent Sol monitor and isolated/connected/final cohesion reviews before any later commit decision.
+
+## Archived visual practice-library app record (2026-10-08 UTC)
 
 - Objective: add a clickable, offline `file://` practice library with all 17 canonical exercises, readable YAML editing, local browser checks, explanations, quiz questions, primary/secondary references, cheat-sheet and coverage views, progress persistence, and an optional localhost server. The primary start path is opening `index.html`; learners must not need `npm install`, a CDN, `fetch`, or browser ESM support.
 - Ownership: `/root/visual_engine` completed the runtime contract, bundle/build verification, and browser-engine tests; `/root/source_curriculum` completed the frozen catalog, local reference content, coverage, and quiz source questions; `/root/practice_library_ui` completed `index.html`, `web/app.js`, and `web/styles.css`. The primary owns final review, commit, and push coordination.

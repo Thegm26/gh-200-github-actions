@@ -28,6 +28,12 @@ The browser has three sections:
 
 The sections below describe the optional direct terminal exercises and maintainer checks.
 
+## Hosted fork-to-fix mode (optional)
+
+To practise real Actions behavior, use GitHub's [Fork button](https://github.com/Thegm26/gh-200-github-actions/fork) to create your own copy, clone that fork, open it in VS Code with `code .`, and follow [hands-on/README.md](hands-on/README.md). Each of the 17 shared templates stays inactive until you copy it into `.github/workflows` on your fork default branch. Follow the case-specific expected result: lab 01 has a missing trigger and lab 02 has invalid configuration, so GitHub can reject them before a job runs; other labs intentionally demonstrate a safe failure or safe hosted behavior. Make the stated repair where applicable, then confirm a **new** run at the new commit SHA. This is separate from the offline browser path and needs a GitHub account; expected hosted outcomes are instructions, not results observed by this repository.
+
+Maintainer CI runs automatically only in `Thegm26/gh-200-github-actions`. Fork pushes can show skipped CI entries but execute no maintainer jobs; use the learner template's default-branch/manual-run route instead.
+
 ## Optional direct terminal exercise
 
 The original adjacent-file route needs Node.js 18+ plus `npm install` once because its checker uses the YAML package. Open [Exercise 01 — Your first workflow](exercises/01-first-workflow/README.md), edit its YAML, and run:

@@ -15,3 +15,4 @@ It fails with the unapproved label and passes with exactly the two approved labe
 <details><summary>Solution</summary>Compare with the immutable [solution](../../learning/solutions/12-runner-policy/workflow.yml).</details>
 
 Next: [13 — Least privilege](../13-least-privilege/README.md).
+\nHosted fork-to-fix: [12 lab](../../hands-on/12-runner-policy/README.md).

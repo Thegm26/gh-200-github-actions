@@ -15,7 +15,7 @@ test('question bank validates and covers all domains', () => {
   assert.ok(questions.length >= 60);
 });
 
-test('correct choices are balanced and every question has plausible distinct options', () => {
+test('correct choices are balanced and every question has distinct options', () => {
   const questions = loadQuestions();
   const positions = [0, 1, 2, 3].map((position) => questions.filter((question) => question.correct === position).length);
   assert.ok(positions.every((count) => count > 0));

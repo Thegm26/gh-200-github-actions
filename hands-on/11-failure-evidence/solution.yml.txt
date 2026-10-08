@@ -1,0 +1,17 @@
+name: GH-200 lab 11-failure-evidence
+on:
+  workflow_dispatch: {}
+permissions:
+  contents: read
+jobs:
+  lab:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Test
+        shell: bash
+        run: echo success
+      - name: Evidence
+        if: ${{ always() }}
+        shell: bash
+        run: echo test-finished >> "$GITHUB_STEP_SUMMARY"

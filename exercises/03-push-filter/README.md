@@ -15,3 +15,4 @@ It fails until both filters are present and passes when `src/**` is nested under
 <details><summary>Solution</summary>Compare with the immutable [solution](../../learning/solutions/03-push-filter/workflow.yml).</details>
 
 Next: [04 — Context as data](../04-context-as-data/README.md).
+\nHosted fork-to-fix: [03 lab](../../hands-on/03-push-filter/README.md).

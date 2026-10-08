@@ -1,0 +1,22 @@
+name: GH-200 lab 04-context-as-data
+on:
+  workflow_dispatch:
+    inputs:
+      message:
+        description: Maintainer-controlled teaching sample
+        required: true
+        default: '$(printf changed)'
+permissions:
+  contents: read
+jobs:
+  lab:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Treat context as data
+        shell: bash
+        env:
+          EVENT_TEXT: ${{ inputs.message }}
+        run: |
+          printf '%s\n' "$EVENT_TEXT"
+          test "$EVENT_TEXT" = '$(printf changed)'

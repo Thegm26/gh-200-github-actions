@@ -15,3 +15,4 @@ It fails while event text is interpolated in shell and passes when the quoted en
 <details><summary>Solution</summary>Compare with the immutable [solution](../../learning/solutions/04-context-as-data/workflow.yml).</details>
 
 Next: [05 — Job output](../05-job-output/README.md).
+\nHosted fork-to-fix: [04 lab](../../hands-on/04-context-as-data/README.md).

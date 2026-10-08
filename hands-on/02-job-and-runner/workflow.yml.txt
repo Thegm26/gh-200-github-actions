@@ -1,0 +1,9 @@
+name: GH-200 lab 02-job-and-runner
+on:
+  workflow_dispatch: {}
+permissions:
+  contents: read
+jobs:
+  build:
+    steps:
+      - run: echo invalid-no-runner

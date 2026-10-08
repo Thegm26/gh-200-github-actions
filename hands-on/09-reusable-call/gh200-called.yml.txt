@@ -1,0 +1,12 @@
+name: GH-200 called lab
+on:
+  workflow_call: {}
+permissions:
+  contents: read
+jobs:
+  proof:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - shell: bash
+        run: echo "called reusable workflow"

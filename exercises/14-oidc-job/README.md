@@ -15,3 +15,4 @@ It fails while OIDC is broad or the deployment lacks the `production` environmen
 <details><summary>Solution</summary>Compare with the immutable [solution](../../learning/solutions/14-oidc-job/workflow.yml) after trying it.</details>
 
 Next: [15 — SHA pin](../15-sha-pin/README.md).
+\nHosted fork-to-fix: [14 lab](../../hands-on/14-oidc-job/README.md).

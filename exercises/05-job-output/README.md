@@ -15,3 +15,4 @@ It fails until the step-to-job bridge exists and passes when `outputs.version` n
 <details><summary>Solution</summary>Compare with the immutable [solution](../../learning/solutions/05-job-output/workflow.yml).</details>
 
 Next: [06 — Consume output](../06-needs-output/README.md).
+\nHosted fork-to-fix: [05 lab](../../hands-on/05-job-output/README.md).

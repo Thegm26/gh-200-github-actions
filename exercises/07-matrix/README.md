@@ -15,3 +15,4 @@ It fails while one supported version is missing and passes when both values are 
 <details><summary>Solution</summary>Compare with the immutable [solution](../../learning/solutions/07-matrix/workflow.yml).</details>
 
 Next: [08 — Service](../08-service-linux/README.md).
+\nHosted fork-to-fix: [07 lab](../../hands-on/07-matrix/README.md).

@@ -15,3 +15,4 @@ It fails while the token is broad and passes when the top-level permission is ex
 <details><summary>Solution</summary>Compare with the immutable [solution](../../learning/solutions/13-least-privilege/workflow.yml) after trying it.</details>
 
 Next: [14 — Job-scoped OIDC](../14-oidc-job/README.md).
+\nHosted fork-to-fix: [13 lab](../../hands-on/13-least-privilege/README.md).

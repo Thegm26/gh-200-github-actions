@@ -1,0 +1,16 @@
+name: GH-200 lab 08
+on:
+  workflow_dispatch: {}
+permissions:
+  contents: read
+jobs:
+  redis:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    services:
+      redis:
+        image: redis:7
+        ports: ["6379:6379"]
+    steps:
+      - shell: bash
+        run: python3 -c 'import socket; s=socket.create_connection(("127.0.0.1",6380),2); s.sendall(b"PING\\r\\n"); assert b"+PONG" in s.recv(64)'

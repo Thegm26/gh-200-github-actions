@@ -15,3 +15,4 @@ It fails for a mutable tag, a shortened hash, or extra text after the SHA; it pa
 <details><summary>Solution</summary>Compare with the immutable [solution](../../learning/solutions/15-sha-pin/workflow.yml) after trying it.</details>
 
 Next: [16 — Upload an artifact](../16-upload-artifact/README.md).
+\nHosted fork-to-fix: [15 lab](../../hands-on/15-sha-pin/README.md).

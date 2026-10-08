@@ -1,0 +1,8 @@
+name: GH-200 lab 09
+on:
+  workflow_dispatch: {}
+permissions:
+  contents: read
+jobs:
+  risk:
+    uses: ./.github/workflows/gh200-called.yml

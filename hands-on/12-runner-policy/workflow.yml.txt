@@ -1,0 +1,14 @@
+name: GH-200 lab 12-runner-policy
+on:
+  workflow_dispatch: {}
+permissions:
+  contents: read
+jobs:
+  policy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803
+      - name: Evaluate candidate job policy
+        shell: bash
+        run: node .github/gh200-runner-policy/check-policy.js .github/gh200-runner-policy/candidate.json

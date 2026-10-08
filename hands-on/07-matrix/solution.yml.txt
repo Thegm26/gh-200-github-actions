@@ -1,0 +1,20 @@
+name: GH-200 lab 07
+on:
+  workflow_dispatch: {}
+permissions:
+  contents: read
+jobs:
+  node:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    strategy:
+      matrix:
+        node: [20, 22]
+    steps:
+      - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38
+        with:
+          node-version: ${{ matrix.node }}
+      - shell: bash
+        env:
+          REQUESTED_NODE: ${{ matrix.node }}
+        run: test "$(node -p "process.versions.node.split('.')[0]")" = "$REQUESTED_NODE"

@@ -7,12 +7,12 @@ export const questions = [
     "question": "A release must be started by an operator who chooses a region and explicitly confirms deployment. Which design preserves a Boolean confirmation in expressions?",
     "options": [
       "workflow_dispatch input type boolean, then inputs.confirm",
-      "A string env variable set to 'true'",
-      "repository_dispatch with a JSON string",
-      "a secret named CONFIRM"
+      "a string workflow_dispatch input read through github.event.inputs.confirm",
+      "a Boolean `publish` value copied into env before the condition",
+      "a required choice input with `true` and `false` labels"
     ],
     "correct": 0,
-    "explanation": "workflow_dispatch supports typed Boolean inputs; the inputs context preserves Boolean values.",
+    "explanation": "workflow_dispatch supports typed Boolean inputs, and the inputs context preserves the Boolean value. The github.event.inputs context represents the same input as a string, and copying it into env also produces a string; a choice with true/false labels is still a choice string rather than a Boolean input.",
     "sources": [
       "https://docs.github.com/actions/writing-workflows/workflow-syntax-for-github-actions#onworkflow_dispatchinputs"
     ]
@@ -29,7 +29,7 @@ export const questions = [
       "repository variables only"
     ],
     "correct": 1,
-    "explanation": "A reusable workflow declares its call contract under workflow_call, including inputs and secrets.",
+    "explanation": "A reusable workflow declares its call contract under workflow_call, including inputs and secrets. workflow_dispatch configures a manually started workflow, action.yml defines an action rather than a workflow, and repository variables do not declare or transfer a caller contract.",
     "sources": [
       "https://docs.github.com/actions/sharing-automations/reusing-workflows"
     ]
@@ -55,15 +55,15 @@ export const questions = [
     "id": "AM04",
     "domain": "author-manage",
     "objective": "services",
-    "question": "A VM-hosted job needs PostgreSQL. What avoids starting tests before the database is usable?",
+    "question": "A VM-hosted job needs PostgreSQL. What configuration avoids starting tests before the database is usable?",
     "options": [
-      "a cache restore",
-      "needs on a step",
-      "a job summary",
+      "a service with a mapped port but no health check",
+      "a service health check but a test command pointed at the unmapped container port",
+      "a service started in a prior job and exposed through that job's output",
       "services with a health check and mapped port"
     ],
     "correct": 3,
-    "explanation": "Service containers support health-check options and port mappings; the VM job reaches a mapped service at localhost.",
+    "explanation": "A service with Docker health-check options lets the runner wait for readiness, and a VM-hosted job reaches the mapped port at localhost. A mapped port alone does not prove PostgreSQL is ready; a health check still needs the test to use the host-mapped port, and a service is scoped to its job rather than handed to another job through outputs.",
     "sources": [
       "https://docs.github.com/actions/using-containerized-services/creating-postgresql-service-containers"
     ]
@@ -80,7 +80,7 @@ export const questions = [
       "include: 2 and timeout-minutes: 2"
     ],
     "correct": 0,
-    "explanation": "fail-fast controls cancellation of in-progress/queued matrix jobs; max-parallel controls simultaneous jobs.",
+    "explanation": "fail-fast: false keeps queued and in-progress matrix siblings running after a failure; max-parallel: 2 caps simultaneous matrix jobs. continue-on-error changes whether a failure fails the workflow, while `concurrency` is a group/cancellation feature rather than this matrix throttle.",
     "sources": [
       "https://docs.github.com/actions/using-jobs/using-a-matrix-for-your-jobs"
     ]
@@ -97,7 +97,7 @@ export const questions = [
       "remove Windows entirely"
     ],
     "correct": 1,
-    "explanation": "exclude removes a specific generated combination while retaining the remaining Cartesian product.",
+    "explanation": "matrix.exclude removes exactly the generated Windows/20 row while preserving Ubuntu/20, Ubuntu/22, and Windows/22. `include` adds or augments combinations, and deleting Windows or filtering after expansion changes more coverage than the stated exception.",
     "sources": [
       "https://docs.github.com/actions/using-jobs/using-a-matrix-for-your-jobs#excluding-matrix-configurations"
     ]
@@ -123,15 +123,15 @@ export const questions = [
     "id": "AM08",
     "domain": "author-manage",
     "objective": "contexts",
-    "question": "Which context is appropriate for a manual-dispatch `region` input that must retain its declared type?",
+    "question": "Which context is appropriate for a Boolean manual-dispatch `publish` input that must retain its declared Boolean type?",
     "options": [
-      "github.event.inputs.region",
-      "env.region",
-      "matrix.region",
-      "inputs.region"
+      "github.event.inputs.publish",
+      "env.publish",
+      "matrix.publish",
+      "inputs.publish"
     ],
     "correct": 3,
-    "explanation": "The inputs context provides typed values for workflow_dispatch and workflow_call inputs.",
+    "explanation": "The inputs context provides typed values for workflow_dispatch and workflow_call inputs. github.event.inputs is useful for event payload access but represents inputs as strings; env and matrix are unrelated scopes unless the workflow explicitly populates them.",
     "sources": [
       "https://docs.github.com/actions/learn-github-actions/contexts#inputs-context"
     ]
@@ -159,13 +159,13 @@ export const questions = [
     "objective": "summaries",
     "question": "A team needs a rich Markdown test report visible in the run summary, not only raw logs. Which file command is correct?",
     "options": [
-      "write a warning annotation",
+      "write a warning annotation, which appears in log annotations rather than the summary",
       "append Markdown to GITHUB_STEP_SUMMARY",
-      "upload a cache",
-      "set a job output"
+      "append Markdown to GITHUB_ENV, which only affects later steps",
+      "set a job output, which is data for dependent jobs rather than rendered Markdown"
     ],
     "correct": 1,
-    "explanation": "GITHUB_STEP_SUMMARY adds Markdown to the job summary.",
+    "explanation": "Appending Markdown to GITHUB_STEP_SUMMARY renders it in the job summary. Annotations are log diagnostics, GITHUB_ENV passes values to later steps, and a job output is machine-readable data for another job rather than a report surface.",
     "sources": [
       "https://docs.github.com/actions/using-workflows/workflow-commands-for-github-actions#adding-a-job-summary"
     ]
@@ -176,13 +176,13 @@ export const questions = [
     "objective": "cache-artifacts",
     "question": "Which statement is correct for a compiled package handed to a release job in the same run?",
     "options": [
-      "Save a cache because artifacts cannot cross jobs",
-      "Use GITHUB_ENV because it crosses jobs",
-      "Upload an artifact; cache is for keyed dependency/data reuse",
-      "Use a starter workflow"
+      "save the package in a cache keyed by its dependency lockfile, then restore it in release",
+      "write the package path to GITHUB_ENV so the release job inherits it",
+      "upload an artifact; cache is for keyed dependency/data reuse",
+      "upload an artifact only after converting the package into a repository variable"
     ],
     "correct": 2,
-    "explanation": "Artifacts persist files for a workflow run/download; caches optimize reuse keyed data.",
+    "explanation": "An artifact is the run output intended for a later job to download. A cache is keyed reusable data rather than a reliable handoff, and GITHUB_ENV and repository variables do not move the package file across jobs.",
     "sources": [
       "https://docs.github.com/actions/using-workflows/storing-workflow-data-as-artifacts"
     ]
@@ -199,7 +199,7 @@ export const questions = [
       "latest labels migrate with hosted runner-image changes"
     ],
     "correct": 3,
-    "explanation": "GitHub-hosted runner images change; release notes document migrations and installed software.",
+    "explanation": "GitHub-hosted `*-latest` labels can migrate as runner images and installed software change. That does not mean Windows lacks compilers or that a matrix cannot use latest; use image release notes and explicit setup/provisioning instead of assuming an image is frozen.",
     "sources": [
       "https://github.com/actions/runner-images"
     ]
@@ -228,12 +228,12 @@ export const questions = [
     "question": "An issue-labeling workflow only needs to modify issues. What is the best permissions posture?",
     "options": [
       "write-all",
-      "set issues: write and other permissions minimally/none",
-      "store a PAT in every repository",
-      "id-token: write"
+      "set issues: write and omit all unneeded scopes",
+      "grant contents: write because the workflow file is stored in the repository",
+      "grant id-token: write so the workflow can authenticate to GitHub"
     ],
     "correct": 1,
-    "explanation": "Grant the minimum GITHUB_TOKEN permissions required by the workflow.",
+    "explanation": "Grant `issues: write` and omit unneeded scopes, giving GITHUB_TOKEN only the permission the labeling work needs. `write-all` and unrelated contents write broaden authority; `id-token: write` is for requesting an OIDC token, not ordinary GitHub API authentication.",
     "sources": [
       "https://docs.github.com/actions/security-for-github-actions/security-guides/automatic-token-authentication"
     ]
@@ -244,13 +244,13 @@ export const questions = [
     "objective": "retention",
     "question": "An organization wants a standard artifact/log retention period across repositories programmatically. Where is the relevant capability?",
     "options": [
-      "a matrix include rule",
-      "GITHUB_RETENTION env variable",
+      "an artifact upload's per-artifact retention-days setting only",
+      "a repository Actions retention setting applied separately to every repository",
       "GitHub Actions REST retention-limit endpoint",
-      "an action.yml output"
+      "a workflow-level default that overrides organization policy without an API/configuration change"
     ],
     "correct": 2,
-    "explanation": "Actions REST APIs provide organization/repository retention-limit management.",
+    "explanation": "The Actions REST retention-limit endpoint manages the configured organization/repository limit for logs and artifacts. Per-artifact retention is narrower, repository-by-repository edits are not the requested standardization, and no workflow YAML default silently overrides policy.",
     "sources": [
       "https://docs.github.com/rest/actions/permissions#set-artifact-and-log-retention-settings-for-an-organization"
     ]
@@ -259,15 +259,15 @@ export const questions = [
     "id": "CT01",
     "domain": "consume-troubleshoot",
     "objective": "matrix-diagnosis",
-    "question": "Only `test (ubuntu-latest, 22)` fails in a four-axis display. What should be rerun first after fixing the cause?",
+    "question": "Only `test (ubuntu-latest, 22)` fails because of a transient package-registry outage; no workflow or source change is needed. What should be rerun first?",
     "options": [
-      "all workflows in the repository",
-      "only the Windows jobs",
-      "the workflow file parser",
+      "the entire workflow, including successful matrix jobs",
+      "only the Windows jobs because they share the same workflow file",
+      "the workflow file parser because it has the same YAML",
       "that individual matrix job"
     ],
     "correct": 3,
-    "explanation": "GitHub supports rerunning failed jobs; target the failing matrix variation to limit noise/cost.",
+    "explanation": "For a transient failure with no code change, rerun the failed matrix job first to retest Ubuntu/22 while limiting noise and runner use. Rerunning the whole workflow also works but repeats successful work; Windows jobs do not test the failing variant, and parsing YAML cannot validate a registry outage. If a fix changes committed code, use a new run at the new commit instead.",
     "sources": [
       "https://docs.github.com/en/actions/how-tos/manage-workflow-runs/re-run-workflows-and-jobs"
     ]
@@ -279,12 +279,12 @@ export const questions = [
     "question": "A run has status failure and no artifact was uploaded. What is the first evidence source for the command exit code?",
     "options": [
       "the failed step's workflow log",
-      "artifact download",
-      "workflow badge",
-      "runner group settings"
+      "the job's annotations, after confirming which step failed",
+      "the workflow YAML diff, if the failure began immediately after that edit",
+      "the run summary, to identify the failed job before opening its step log"
     ],
     "correct": 0,
-    "explanation": "Step logs expose command output and failure details; artifacts are separate uploaded files.",
+    "explanation": "The failed step log exposes command output and exit details. A summary or diff may help orient diagnosis but cannot replace the failing command's evidence, and rerunning first can hide a transient original failure.",
     "sources": [
       "https://docs.github.com/actions/how-tos/monitor-workflows/use-workflow-run-logs"
     ]
@@ -295,13 +295,13 @@ export const questions = [
     "objective": "artifacts-api",
     "question": "A nightly auditor must list and download artifacts without using the UI. Which integration surface fits?",
     "options": [
-      "YAML anchors",
+      "the workflow-run details endpoint alone, then infer artifacts from its conclusion",
       "GitHub Actions REST API",
-      "a runner image release note",
-      "a status badge"
+      "the cache API, because cached files can be restored by a later run",
+      "the Checks API, because it exposes test annotations for a run"
     ],
     "correct": 1,
-    "explanation": "Actions REST endpoints list/download workflow run artifacts for automation.",
+    "explanation": "Actions REST artifact endpoints list and download artifacts for workflow runs. Cache and generic workflow-run endpoints describe different resources, and an artifact request still needs the appropriate authenticated API access.",
     "sources": [
       "https://docs.github.com/rest/actions/artifacts"
     ]
@@ -318,7 +318,7 @@ export const questions = [
       "Docker action"
     ],
     "correct": 2,
-    "explanation": "Starter workflows are templates copied into a repository; later edits are independent.",
+    "explanation": "A starter workflow is copied into the new repository, so that repository can customize its own YAML afterward. A reusable workflow remains centrally invoked, a composite action packages steps, and a Docker action packages an action runtime—not a repository-copy template.",
     "sources": [
       "https://docs.github.com/en/actions/how-tos/reuse-automations/create-workflow-templates"
     ]
@@ -347,12 +347,12 @@ export const questions = [
     "question": "A workflow should stop auto-running temporarily while preserving a simple re-enable path. Which action?",
     "options": [
       "disable the workflow",
-      "delete the workflow file",
-      "delete all run logs",
-      "revoke every repository secret"
+      "disable only its schedule trigger while leaving push and dispatch triggers active",
+      "remove the workflow file and restore it later from version control",
+      "delete old workflow runs while leaving the workflow enabled"
     ],
     "correct": 0,
-    "explanation": "Disabling stops runs without deleting the workflow configuration.",
+    "explanation": "Disabling stops future runs while preserving the workflow for re-enabling. Removing triggers can still leave manual execution, and deleting run history does not retire the version-controlled definition.",
     "sources": [
       "https://docs.github.com/en/actions/managing-workflow-runs-and-deployments/managing-workflow-runs/disabling-and-enabling-a-workflow"
     ]
@@ -380,13 +380,13 @@ export const questions = [
     "objective": "triggers",
     "question": "A workflow did not run after a docs-only commit. Which configuration should be inspected before runner health?",
     "options": [
-      "artifact retention",
-      "action Marketplace listing",
+      "a job-level `if`, which is evaluated only after a workflow run has been created",
+      "a `workflow_call` input default, which does not filter a push event",
       "event branch/path filters",
-      "job summary Markdown"
+      "the runner labels configured for jobs that would run"
     ],
     "correct": 2,
-    "explanation": "Trigger branch/path filters determine whether an event creates a run.",
+    "explanation": "For a push that creates no run, inspect the event branch/path filters under `on`. A job `if` and runner labels apply only after a run exists, while workflow_call inputs do not select push events.",
     "sources": [
       "https://docs.github.com/actions/writing-workflows/choosing-when-your-workflow-runs/triggering-a-workflow"
     ]
@@ -397,9 +397,9 @@ export const questions = [
     "objective": "nonpublic-templates",
     "question": "A private organization template should be available to members but not publicly visible. What capability is relevant?",
     "options": [
-      "a public Marketplace action",
-      "a public fork",
-      "an artifact",
+      "a public starter workflow repository with the templates hidden by README links",
+      "a centrally called reusable workflow that each repository can edit after invocation",
+      "a private template repository that has not enabled its templates for the organization",
       "non-public organization starter workflow templates"
     ],
     "correct": 3,
@@ -414,10 +414,10 @@ export const questions = [
     "objective": "artifacts",
     "question": "A user says an expected artifact is missing. Which statement best guides diagnosis?",
     "options": [
-      "an artifact exists only if its upload step ran and succeeded under its conditions",
-      "all logs automatically become artifacts",
-      "caches appear in the artifact panel",
-      "GITHUB_OUTPUT creates artifacts"
+      "confirm the expected upload step ran, met its `if` condition, and matched files",
+      "assume a successful build automatically publishes its workspace as an artifact",
+      "look only at cache restore output, because artifacts and caches share storage",
+      "rerun the workflow before checking the original upload-step log"
     ],
     "correct": 0,
     "explanation": "Artifacts are produced by explicit upload actions/steps and their conditional execution matters.",
@@ -431,10 +431,10 @@ export const questions = [
     "objective": "workflow-history",
     "question": "A run was started manually with `workflow_dispatch`. Where can a maintainer inspect a non-secret selected input for diagnosis?",
     "options": [
-      "only in a cache key",
-      "the inputs/github event context, and logs only if the workflow safely emits it",
-      "only in the repository README",
-      "the action Marketplace page"
+      "only in github.event.inputs, where a Boolean stays a Boolean",
+      "the inputs context for typed use or github.event.inputs for event payload access; logs only if safely emitted",
+      "only in the run's dispatch form; a completed run retains no input context",
+      "only after mapping it to a job output"
     ],
     "correct": 1,
     "explanation": "Manual inputs are available through the inputs and event contexts. They only appear in logs if a workflow explicitly and safely writes a non-secret value there.",
@@ -483,9 +483,9 @@ export const questions = [
     "question": "What file and minimum metadata are central to a custom action at its action directory root?",
     "options": [
       "action.yml with name, description, and runs",
-      "package-lock.json with triggers",
-      "workflow.yml with jobs",
-      "README only"
+      "action.yml with an input schema but no `runs` implementation",
+      "package.json with name, description, and a `main` entrypoint",
+      "a workflow YAML file with a `uses:` step pointing to the action directory"
     ],
     "correct": 0,
     "explanation": "Action metadata lives in action.yml (or action.yaml) and defines inputs, outputs and runs.",
@@ -516,10 +516,10 @@ export const questions = [
     "objective": "docker-actions",
     "question": "An action requires a native binary and OS libraries in a hermetic environment and will run on a Linux runner. Which action type is appropriate?",
     "options": [
-      "a starter workflow",
-      "a YAML anchor",
+      "a composite action that relies on the host runner's preinstalled libraries",
+      "a JavaScript action that shells out to a binary installed by the caller",
       "Docker container action",
-      "an organization variable"
+      "a Docker action expected to run a Windows container on a hosted Linux runner"
     ],
     "correct": 2,
     "explanation": "Docker container actions package a Linux container environment and entrypoint. They are not a substitute for Windows-only runtime requirements.",
@@ -551,9 +551,9 @@ export const questions = [
     "question": "A company-only action must be usable by internal repositories but not listed publicly. Which distribution is best?",
     "options": [
       "private/internal repository action with permitted access",
-      "public Marketplace listing",
-      "a public gist",
-      "a cache archive"
+      "a public repository action documented only on an internal portal",
+      "an internal action repository without enabling access for consumer repositories",
+      "a Marketplace action restricted by an organization allow policy"
     ],
     "correct": 0,
     "explanation": "Actions can be shared privately/internal to permitted repositories; Marketplace publishing is public distribution.",
@@ -567,13 +567,13 @@ export const questions = [
     "objective": "marketplace",
     "question": "Before publishing an action to Marketplace, what release-oriented choice helps consumers identify a stable version?",
     "options": [
-      "rename action.yml to workflow.yml",
-      "create a tagged release following versioning strategy",
-      "store it in an artifact",
-      "set matrix max-parallel"
+      "publish a moving `main` reference only",
+      "create a tagged release following a versioning strategy",
+      "reuse a previous release tag for new code without moving or creating a versioned release",
+      "publish an unversioned commit reference and ask consumers to track it manually"
     ],
     "correct": 1,
-    "explanation": "Marketplace publication is tied to a release/tag; maintainers should use deliberate versioning.",
+    "explanation": "Marketplace publication is tied to a release/tag, so a deliberate versioning strategy gives consumers a stable release point. A moving branch or unversioned commit is not the same release contract, and reusing a release-specific tag would blur which code the version represents.",
     "sources": [
       "https://docs.github.com/actions/sharing-automations/creating-actions/publishing-actions-in-github-marketplace"
     ]
@@ -582,15 +582,15 @@ export const questions = [
     "id": "AA09",
     "domain": "author-actions",
     "objective": "troubleshooting",
-    "question": "A local action called as `./.github/actions/stamp` fails to load metadata. What should be checked first?",
+    "question": "Checkout has completed, and the run log shows that local `uses: ./.github/actions/stamp` resolves to that directory but cannot load action metadata. What should be checked first?",
     "options": [
-      "whether the caller has workflow_dispatch",
-      "artifact retention",
-      "the checked-out path contains action.yml/action.yaml at that root",
-      "the job's summary"
+      "whether the local action is referenced with a full commit SHA",
+      "whether action.yml/action.yaml is at the repository root instead of the action directory",
+      "whether the resolved action directory contains `action.yml` or `action.yaml`",
+      "whether the caller workflow declares the action output as a job output"
     ],
     "correct": 2,
-    "explanation": "A local action reference resolves to its directory and requires action metadata there; checkout must precede use.",
+    "explanation": "Once checkout and the local path are confirmed, the referenced action directory must contain action.yml or action.yaml. Full-SHA pinning applies to external action references, and caller outputs are unrelated to metadata discovery.",
     "sources": [
       "https://docs.github.com/actions/sharing-automations/creating-actions/about-custom-actions"
     ]
@@ -601,9 +601,9 @@ export const questions = [
     "objective": "workflow-commands",
     "question": "A JavaScript action must safely expose a value to its caller. What mechanism should it use?",
     "options": [
-      "an arbitrary log string",
-      "a mutable tag",
-      "a runner label",
+      "write a log line and have the caller parse stdout",
+      "write GITHUB_ENV and expect the caller job to expose it automatically",
+      "declare an output in action.yml but assign the value only to a shell variable",
       "the supported core output command/API"
     ],
     "correct": 3,
@@ -635,13 +635,13 @@ export const questions = [
     "objective": "runner-groups",
     "question": "Only finance repositories may use production self-hosted runners. What is the primary control?",
     "options": [
-      "an artifact retention setting",
+      "a runner label named `finance` on every production runner",
       "a restricted self-hosted runner group assigned to selected repositories",
-      "a starter workflow",
-      "a cache key"
+      "a selected-actions policy that permits the deployment workflow",
+      "an environment protection rule on the production environment"
     ],
     "correct": 1,
-    "explanation": "Runner groups control which organizations/repositories can access self-hosted runners.",
+    "explanation": "A restricted self-hosted runner group is the access boundary that grants only selected repositories use of production compute. Labels choose compatible runners only after access is allowed; selected-actions policy governs code sources and an environment protection rule gates deployment, neither grants runner access.",
     "sources": [
       "https://docs.github.com/en/actions/how-tos/manage-runners/self-hosted-runners/manage-access"
     ]
@@ -658,7 +658,7 @@ export const questions = [
       "matrix exclusion"
     ],
     "correct": 2,
-    "explanation": "Enterprise/organization Actions policies control which actions and reusable workflows may be used.",
+    "explanation": "An Actions allow policy controls which actions and reusable workflows repositories may use. Runner-group membership controls compute access instead, and an attestation or matrix exclusion neither blocks an unapproved `uses:` reference nor establishes an allow-list.",
     "sources": [
       "https://docs.github.com/en/enterprise-cloud%40latest/admin/enforcing-policies/enforcing-policies-for-your-enterprise/enforcing-policies-for-github-actions-in-your-enterprise"
     ]
@@ -675,7 +675,7 @@ export const questions = [
       "policy governs allowed code; runner groups govern runner access"
     ],
     "correct": 3,
-    "explanation": "These controls solve different governance problems: action provenance versus compute allocation.",
+    "explanation": "An action allow-list governs which code references are permitted; runner groups govern which repositories can route jobs to particular self-hosted compute. They are complementary, not aliases: an allow-list cannot reserve production runners and a runner group cannot approve an action source.",
     "sources": [
       "https://docs.github.com/enterprise-cloud@latest/admin/managing-github-actions-for-your-enterprise"
     ]
@@ -687,12 +687,12 @@ export const questions = [
     "question": "A deployment requires predictable egress IP for a vendor allow-list. Which design needs explicit runner/network planning?",
     "options": [
       "use a supported static-IP/network option or controlled self-hosted runner",
-      "assume every hosted runner is static",
-      "use a YAML anchor",
-      "increase artifact retention"
+      "use standard hosted runner IP ranges as though one address is reserved to this job",
+      "add `concurrency` so the deployment job is the only job running",
+      "set a runner label in YAML without confirming a matching network-capable runner"
     ],
     "correct": 0,
-    "explanation": "Network/IP requirements depend on the runner offering and enterprise configuration; ephemeral hosted runner IPs should not be assumed static.",
+    "explanation": "Predictable egress requires a runner/network offering that explicitly provides it, or controlled self-hosted networking. Standard hosted runner IP ranges are not a per-job static-IP guarantee; concurrency only schedules jobs, and a label routes only when an eligible configured runner exists—it does not create network capability.",
     "sources": [
       "https://docs.github.com/actions/reference/github-hosted-runners-reference#ip-addresses-of-github-hosted-runners"
     ]
@@ -701,15 +701,15 @@ export const questions = [
     "id": "EN05",
     "domain": "enterprise",
     "objective": "runners",
-    "question": "A self-hosted job stays queued while jobs request `self-hosted, linux, gpu`. What is the most relevant first check?",
+    "question": "A self-hosted job stays queued while it requests `self-hosted`, `linux`, and `gpu`. What routing condition must be verified first?",
     "options": [
-      "the README badge",
-      "an online runner accessible to the repo has all requested labels",
-      "workflow artifact name",
-      "the caller's starter template"
+      "an online runner exists, regardless of its labels or runner-group access",
+      "an online runner accessible to the repository has every requested label",
+      "a runner has the `gpu` label, even if it is offline or in an inaccessible runner group",
+      "the organization action allow policy permits all third-party actions used by the job"
     ],
     "correct": 1,
-    "explanation": "Self-hosted routing requires matching labels and access to an online eligible runner.",
+    "explanation": "A self-hosted job needs an online runner that the repository may use through its runner group and that matches every requested label. An online runner alone, a partial/offline match, or an action-source policy does not satisfy runner routing.",
     "sources": [
       "https://docs.github.com/en/actions/how-tos/manage-runners/self-hosted-runners/use-in-a-workflow"
     ]
@@ -720,13 +720,13 @@ export const questions = [
     "objective": "runner-images",
     "question": "A hosted image update removed a tool. What is the durable response?",
     "options": [
-      "keep retrying the same image",
-      "put the tool in a secret",
+      "keep retrying the same image without a provisioning change",
+      "pin the image label but do not install or select the missing tool version",
       "consult runner-image release notes and install/pin via setup, package manager, container, or curated image",
-      "change artifact retention"
+      "move the tool into a cache and assume it is available before cache restoration"
     ],
     "correct": 2,
-    "explanation": "Hosted images evolve; use documented image/toolcache information and provision required versions deliberately.",
+    "explanation": "Hosted images evolve; use image/toolcache information and deliberately install, setup, containerize, or curate the required version. Retrying, pinning a moving image label without provisioning, or relying on a cache does not restore a removed preinstalled tool.",
     "sources": [
       "https://github.com/actions/runner-images"
     ]
@@ -737,13 +737,13 @@ export const questions = [
     "objective": "secret-scopes",
     "question": "A cloud key is valid only for production deployment and requires human approval. Where should it live?",
     "options": [
-      "an organization variable",
-      "a public repository secret",
-      "a cache",
+      "an organization secret available to every repository",
+      "a repository secret with no environment gate",
+      "an environment variable written by an earlier workflow step",
       "a protected production environment secret"
     ],
     "correct": 3,
-    "explanation": "Environment secrets can be protected by required reviewers and are appropriate for environment-specific credentials.",
+    "explanation": "An environment secret can be protected by required reviewers and is appropriate for an environment-specific credential. Organization and repository secrets are broader, and a value written during a run is not securely stored configuration.",
     "sources": [
       "https://docs.github.com/actions/security-for-github-actions/security-guides/using-secrets-in-github-actions#using-secrets-in-a-workflow"
     ]
@@ -755,9 +755,9 @@ export const questions = [
     "question": "REGION is non-sensitive shared configuration for many repositories. What is usually suitable?",
     "options": [
       "organization configuration variable with selected repository access",
-      "a hard-coded secret",
-      "a job summary",
-      "an attestation"
+      "a repository variable duplicated manually in every repository",
+      "an environment variable scoped only to production jobs",
+      "an organization secret, which is unsuitable for non-sensitive configuration"
     ],
     "correct": 0,
     "explanation": "Configuration variables store non-secret configuration and can be scoped at organization/repository/environment levels.",
@@ -788,10 +788,10 @@ export const questions = [
     "objective": "rest-management",
     "question": "An internal portal must enumerate and update organization Actions variables. Which API family should it use with proper authorization?",
     "options": [
-      "workflow command files",
-      "matrix strategy API",
+      "repository variables endpoints when the target is organization scope",
+      "environment variables endpoints when the target is organization scope",
       "GitHub REST Actions variables endpoints",
-      "artifact upload endpoint only"
+      "organization secrets endpoints, which manage encrypted secrets rather than variables"
     ],
     "correct": 2,
     "explanation": "GitHub REST provides endpoints for organization, repository, and environment Actions variables.",
@@ -805,9 +805,9 @@ export const questions = [
     "objective": "rest-management",
     "question": "A script must set an organization Actions retention cap. Which concept is being managed?",
     "options": [
-      "the cache key prefix",
-      "the runner label",
-      "a composite action output",
+      "an individual artifact upload retention override",
+      "a repository-level retention limit when organization scope is requested",
+      "a cache eviction policy rather than artifact/log retention",
       "the Actions retention limit for logs/artifacts"
     ],
     "correct": 3,
@@ -823,9 +823,9 @@ export const questions = [
     "question": "A platform team wants a central deployment workflow with inputs and secrets mapped by callers. What should it publish?",
     "options": [
       "reusable workflow using workflow_call",
-      "starter workflow only",
-      "a cache action",
-      "a runner group"
+      "a starter workflow copied independently into each consumer repository",
+      "a composite action, which cannot contain a multi-job workflow graph",
+      "a reusable workflow without declared inputs/secrets for caller mapping"
     ],
     "correct": 0,
     "explanation": "workflow_call makes a workflow reusable and lets callers pass declared inputs/secrets.",
@@ -839,10 +839,10 @@ export const questions = [
     "objective": "secrets-api",
     "question": "Why does programmatic secret creation require more than sending plaintext to a REST endpoint?",
     "options": [
-      "secrets are stored in artifacts",
+      "send plaintext to the secret endpoint without retrieving the scope public key",
       "the secret value must be encrypted using the scope's public key",
-      "GITHUB_ENV encrypts secrets",
-      "a matrix generates the encryption key"
+      "reuse a public key from a different repository or environment scope",
+      "base64-encode the value instead of encrypting it with the supplied public key"
     ],
     "correct": 1,
     "explanation": "GitHub requires encrypting secret values with the public key for the relevant secret scope.",
@@ -862,7 +862,7 @@ export const questions = [
       "write-all token plus environment variable"
     ],
     "correct": 2,
-    "explanation": "An action policy governs which actions/workflows may run. Runner-group repository access keeps those repositories from selecting production runners; runner groups do not authenticate or classify individual people.",
+    "explanation": "An action policy limits approved code sources, while production runner-group repository access prevents contractor repositories from selecting that compute. A Marketplace listing, cache, deployment artifact, token permission, or env variable cannot provide both independent controls; runner groups also do not authenticate individual people.",
     "sources": [
       "https://docs.github.com/enterprise-cloud@latest/admin/managing-github-actions-for-your-enterprise"
     ]
@@ -871,15 +871,15 @@ export const questions = [
     "id": "EN15",
     "domain": "enterprise",
     "objective": "hosted-runners",
-    "question": "A company needs an additional tool on a GitHub-hosted runner. Which is a valid approach?",
+    "question": "A company needs an additional tool on a GitHub-hosted runner. Which approach is most maintainable and reproducible?",
     "options": [
-      "modify the immutable hosted image permanently",
-      "put the binary in a workflow trigger",
-      "use a status badge",
-      "setup action, package manager, container image, or install step"
+      "restore a dependency cache and assume it contains the required toolchain",
+      "pin `ubuntu-latest` and depend on its current preinstalled tool inventory",
+      "download the latest binary at runtime without selecting or verifying a version",
+      "use a setup action, package manager, container image, or install step that selects a compatible tool version"
     ],
     "correct": 3,
-    "explanation": "Hosted runner software is provisioned at runtime through setup/install/container approaches; its base image is managed by GitHub.",
+    "explanation": "For reproducible provisioning, explicitly select and install or set up a compatible tool version. Hosted images and caches can change, and downloading an unspecified latest binary makes the workflow less repeatable.",
     "sources": [
       "https://docs.github.com/actions/reference/github-hosted-runners-reference"
     ]
@@ -907,13 +907,13 @@ export const questions = [
     "objective": "oidc",
     "question": "A deployment must obtain cloud credentials without storing a long-lived cloud secret. What is required?",
     "options": [
-      "store cloud key in GITHUB_ENV",
+      "store a long-lived cloud key as an environment secret",
       "configure cloud OIDC trust and grant id-token: write",
-      "use a cache restore",
-      "grant write-all"
+      "request an OIDC token without configuring the cloud-side trust relationship",
+      "grant `contents: write` and exchange GITHUB_TOKEN for cloud credentials"
     ],
     "correct": 1,
-    "explanation": "OIDC federation exchanges an Actions identity token for cloud credentials; id-token: write permits token request.",
+    "explanation": "OIDC federation exchanges an Actions identity token for cloud credentials; `id-token: write` permits the token request and the cloud trust policy must accept the expected issuer, audience, and claims. An environment secret reintroduces a long-lived key, while GITHUB_TOKEN/contents permission is not a cloud identity token.",
     "sources": [
       "https://docs.github.com/actions/how-tos/secure-your-work/security-harden-deployments/oidc-in-cloud-providers"
     ]
@@ -959,12 +959,12 @@ export const questions = [
     "question": "A deployment job must wait for designated reviewers before reading production credentials. What should the job reference?",
     "options": [
       "a protected environment",
-      "a repository label",
-      "a cache namespace",
-      "a runner image"
+      "an environment named `production` with no required-reviewer rule",
+      "a job `if` condition that checks a reviewer name",
+      "a deployment concurrency group named `production`"
     ],
     "correct": 0,
-    "explanation": "Environment protection rules and required reviewers gate jobs that reference the environment.",
+    "explanation": "A protected environment with required reviewers gates the job before it receives environment secrets. An environment name alone has no rule, a job `if` is workflow logic rather than an approval control, and concurrency serializes work but does not require a human approval.",
     "sources": [
       "https://docs.github.com/actions/deployment/targeting-different-environments/using-environments-for-deployment"
     ]
@@ -975,13 +975,13 @@ export const questions = [
     "objective": "attestations",
     "question": "Before promoting a downloaded build, which attestation-verification property is essential in addition to the file itself?",
     "options": [
-      "only check the artifact name",
+      "verify the artifact digest but accept provenance from any repository or workflow identity",
       "verify expected repository/identity and artifact digest/provenance",
-      "only check cache hit",
-      "regenerate a summary"
+      "verify that an attestation signature is valid without restricting its subject or signer identity",
+      "verify the action was pinned to a commit SHA but do not verify the downloaded artifact attestation"
     ],
     "correct": 1,
-    "explanation": "Attestation verification establishes provenance/identity for the artifact and must be tied to the expected source.",
+    "explanation": "Verification must bind the downloaded artifact digest and provenance to the expected repository and identity. A digest alone, an unrestricted valid signature, or action pinning alone does not establish that the artifact came from the intended build.",
     "sources": [
       "https://docs.github.com/actions/security-for-github-actions/using-artifact-attestations/using-artifact-attestations-to-establish-provenance-for-builds"
     ]
@@ -990,15 +990,15 @@ export const questions = [
     "id": "SO07",
     "domain": "secure-optimize",
     "objective": "attestations",
-    "question": "Which permission is associated with generating artifact attestations in a workflow?",
+    "question": "A workflow generates an artifact attestation. Which complete permission set does that generation step require?",
     "options": [
-      "issues: write",
-      "statuses: write",
-      "attestations: write",
-      "discussions: write"
+      "`contents: read`, `id-token: write`, and `attestations: write`",
+      "`contents: read` and `attestations: write`, without `id-token: write`",
+      "`contents: read` and `id-token: write`, without `attestations: write`",
+      "`id-token: write` and `attestations: write`, without `contents: read`"
     ],
-    "correct": 2,
-    "explanation": "GitHub's attestation action requires `contents: read`, `id-token: write`, and `attestations: write`; the permissions have distinct roles.",
+    "correct": 0,
+    "explanation": "Generating an artifact attestation needs `contents: read`, `id-token: write`, and `attestations: write`. Each alternative omits one distinct required permission.",
     "sources": [
       "https://docs.github.com/actions/security-for-github-actions/using-artifact-attestations/using-artifact-attestations-to-establish-provenance-for-builds"
     ]
@@ -1009,13 +1009,13 @@ export const questions = [
     "objective": "cost-retention",
     "question": "Large dependency downloads recur every run, while a release binary must remain downloadable for 30 days. What pairing is best?",
     "options": [
-      "artifact dependencies; put binary in GITHUB_ENV",
-      "cache both with no retention",
-      "use a starter workflow",
+      "upload dependencies as artifacts for every run and export the release binary path through GITHUB_ENV",
+      "cache both dependencies and the release binary under one restore key",
+      "upload both dependencies and the release binary as retained artifacts",
       "cache dependencies; upload binary as artifact with retention policy"
     ],
     "correct": 3,
-    "explanation": "Caches optimize dependency reuse; artifacts preserve run output and are governed by retention.",
+    "explanation": "A dependency cache avoids repeated downloads across runs, while an artifact preserves the release binary for retrieval during its configured retention. Treating the binary as cache data, artifacting recurring dependencies, or using GITHUB_ENV across jobs does not meet both goals.",
     "sources": [
       "https://docs.github.com/actions/using-workflows/caching-dependencies-to-speed-up-workflows",
       "https://docs.github.com/actions/using-workflows/storing-workflow-data-as-artifacts"
@@ -1045,12 +1045,12 @@ export const questions = [
     "question": "An operator should normally see `publish` unchecked but must select one of approved deployment regions before a manual workflow can start. Which input definition matches that policy?",
     "options": [
       "a Boolean `publish` with `default: false`, plus a required `choice` `region` with explicit options",
-      "a secret called `publish`",
-      "an optional untyped `region`",
-      "a matrix value with no dispatch input"
+      "a Boolean `publish` with no default and a free-form required string `region`",
+      "a string `publish` defaulting to `false`, plus an optional choice `region`",
+      "a required choice `publish` with `true`/`false`, plus an untyped `region` input"
     ],
     "correct": 0,
-    "explanation": "workflow_dispatch supports typed inputs, defaults, required values, and choice options. Boolean inputs retain their Boolean type through the inputs context.",
+    "explanation": "The Boolean default makes `publish` unchecked, while required choice options constrain the region before dispatch. A free-form region does not restrict approved choices; string/choice substitutes lose the declared Boolean confirmation or make the region optional/untyped.",
     "sources": [
       "https://docs.github.com/actions/writing-workflows/workflow-syntax-for-github-actions#onworkflow_dispatchinputs"
     ]
@@ -1061,13 +1061,13 @@ export const questions = [
     "objective": "conditions-evaluation",
     "question": "A job condition needs a value produced by an earlier job. Which design evaluates it at the appropriate workflow runtime boundary?",
     "options": [
-      "put the value in a YAML comment",
+      "set `env.value` in a step of the earlier job and read it in the later job",
       "read `steps.previous.outputs.value` from another job",
       "declare a job output and read it through `needs.previous.outputs.value` in a job `if`",
-      "read an artifact filename as an expression"
+      "upload a value as an artifact and expect `if` to read its filename"
     ],
     "correct": 2,
-    "explanation": "Step outputs are scoped to their job. A declared job output is exposed through needs after the prerequisite job completes, which is the correct boundary for a downstream job condition.",
+    "explanation": "Step outputs and GITHUB_ENV values are scoped to their job. A declared job output is exposed through `needs` after the prerequisite job completes; artifacts move files but do not become expression values for a job `if`.",
     "sources": [
       "https://docs.github.com/actions/using-jobs/defining-outputs-for-jobs",
       "https://docs.github.com/actions/learn-github-actions/contexts#needs-context"
@@ -1098,12 +1098,12 @@ export const questions = [
     "question": "A maintainer wants earlier feedback on workflow keys, action metadata, and YAML shape while authoring in VS Code. What is the most suitable aid?",
     "options": [
       "the GitHub Actions VS Code extension and YAML schema completion/validation",
-      "a production PAT in the editor",
-      "a workflow badge",
-      "a runner group"
+      "a generic YAML extension with no workflow schema association",
+      "a local linter result treated as proof that GitHub will accept the hosted run",
+      "editing only through the Actions web UI to obtain schema completion"
     ],
     "correct": 0,
-    "explanation": "The GitHub Actions extension and YAML schema support can provide completion, metadata IntelliSense, and validation while authoring; they do not replace a real workflow run.",
+    "explanation": "The GitHub Actions extension plus workflow schema support provides completion, metadata IntelliSense, and authoring validation. A generic unassociated YAML mode may lack workflow knowledge, and neither local validation nor web editing proves a hosted run will execute.",
     "sources": [
       "https://learn.microsoft.com/en-us/credentials/certifications/resources/study-guides/gh-200"
     ]
@@ -1150,13 +1150,13 @@ export const questions = [
     "objective": "reusable-outputs",
     "question": "A reusable workflow calculates a risk score that a caller must use in its next job. What must the reusable workflow expose?",
     "options": [
-      "only a step id",
-      "a cache key",
+      "only a step id inside the called workflow",
+      "a job output in the called workflow but no declared workflow output",
       "a workflow output mapped from a job output, then the caller reads the reusable job output",
-      "a hidden environment variable"
+      "a GITHUB_ENV value set by a step in the called workflow"
     ],
     "correct": 2,
-    "explanation": "Data crosses the reusable-workflow boundary through declared workflow outputs, typically mapped from job outputs. Step outputs alone are not visible to a caller.",
+    "explanation": "Data crosses the reusable-workflow boundary through declared workflow outputs, typically mapped from job outputs. A step id and GITHUB_ENV value remain internal, while a job output alone still needs the reusable workflow's declared output contract for the caller.",
     "sources": [
       "https://docs.github.com/actions/sharing-automations/reusing-workflows#using-outputs-from-a-reusable-workflow"
     ]
@@ -1168,12 +1168,12 @@ export const questions = [
     "question": "A README should show CI status while deployments need a human approval gate. Which pairing is correct?",
     "options": [
       "a workflow status badge for visibility and a protected environment for deployment rules",
-      "a cache badge and a runner label",
-      "an artifact name and a YAML anchor",
-      "a repository variable and a cron"
+      "a deployment status API entry for visibility and branch protection for runtime approval",
+      "a workflow status badge plus an environment name that has no protection rules",
+      "a required status check plus a manually dispatched workflow with no environment"
     ],
     "correct": 0,
-    "explanation": "A status badge is a display link to workflow status. Environment protection rules, including required reviewers where available, gate jobs that reference the environment.",
+    "explanation": "A status badge is the README display mechanism, while environment protection rules and required reviewers gate a job that references that environment. Deployment status or required-check settings can be useful elsewhere, but do not substitute for the stated badge-and-runtime-approval pairing; merely naming an environment adds no protection.",
     "sources": [
       "https://docs.github.com/en/actions/how-tos/monitor-workflows/add-a-status-badge",
       "https://docs.github.com/actions/deployment/targeting-different-environments/using-environments-for-deployment"
@@ -1186,12 +1186,12 @@ export const questions = [
     "question": "A workflow failed after a recent edit. Before changing YAML, where should an operator compare the event, failed job, and step output?",
     "options": [
       "the Actions run history and that run's job logs",
-      "the Marketplace listing",
-      "the repository topics page",
-      "the cache restore key only"
+      "the workflow file diff only, without opening the failed run",
+      "the run summary only, without expanding the failed step log",
+      "a rerun of the workflow before recording the original failure evidence"
     ],
     "correct": 0,
-    "explanation": "Run history identifies the triggering event and job state; the job log is the direct evidence for a failed command or expression.",
+    "explanation": "Run history identifies the triggering event and job state; the failed step log is the direct evidence for a command or expression failure. A diff can suggest a cause but cannot show runtime output, a summary can omit detail, and rerunning first can obscure a transient failure's original evidence.",
     "sources": [
       "https://docs.github.com/en/actions/how-tos/monitor-workflows/view-workflow-run-history",
       "https://docs.github.com/actions/monitoring-and-troubleshooting-workflows/using-workflow-run-logs"
@@ -1274,12 +1274,12 @@ export const questions = [
     "question": "A JavaScript action works locally but fails on a hosted runner because its declared runtime and entrypoint do not match its packaged files. What should be checked first?",
     "options": [
       "the action.yml `runs.using` and `runs.main`, plus the committed entrypoint/dependencies",
-      "only the workflow badge",
-      "the organization retention setting",
-      "a reusable workflow caller"
+      "only `runs.using`, assuming any JavaScript file in the repository will be discovered",
+      "the `runs.main` path but not whether its bundled dependencies were committed",
+      "the workflow's `uses:` version while leaving action metadata/package contents unchecked"
     ],
     "correct": 0,
-    "explanation": "Action metadata selects the runtime and entrypoint. The referenced JavaScript bundle and any required dependencies must be present in the action package.",
+    "explanation": "Action metadata selects the runtime and entrypoint, and the referenced JavaScript bundle and required dependencies must be present in the action package. Checking only one metadata field or only the caller reference can leave the packaging mismatch unresolved.",
     "sources": [
       "https://docs.github.com/actions/sharing-automations/creating-actions/creating-a-javascript-action"
     ]
@@ -1291,12 +1291,12 @@ export const questions = [
     "question": "A Docker action declares `runs.image: Dockerfile`. What distribution concern remains for a consumer to run it reliably?",
     "options": [
       "the runner builds the action context and must be able to obtain needed base images; registry-image metadata instead needs registry access",
-      "a job summary automatically ships the image",
-      "a YAML anchor publishes it",
-      "a cache key grants registry permission"
+      "the Dockerfile is built by the publisher once, so consumers never need access to its base image",
+      "replace `Dockerfile` with a registry image name but assume private registry access is automatic",
+      "commit only a prebuilt local image tag and omit the Dockerfile or registry reference"
     ],
     "correct": 0,
-    "explanation": "With `runs.image: Dockerfile`, the runner builds the checked-out action context and may need to pull base images. A Docker action that names a registry image has the separate registry-access concern.",
+    "explanation": "With `runs.image: Dockerfile`, the runner builds the checked-out action context and may need to pull base images. A Docker action that instead names a registry image has the separate registry-access concern; neither local image tags nor publisher-side builds automatically make an image available to consumers.",
     "sources": [
       "https://docs.github.com/actions/sharing-automations/creating-actions/creating-a-docker-container-action"
     ]
@@ -1361,12 +1361,12 @@ export const questions = [
     "question": "A vendor must allow-list stable outbound addresses for a GitHub-hosted deployment job. What should the platform team evaluate?",
     "options": [
       "larger runners or an approved self-hosted/network design that provides the needed static IP behavior",
-      "a YAML anchor",
-      "a workflow badge",
-      "a repository topic"
+      "standard hosted-runner IP ranges as a per-job fixed-address guarantee",
+      "a self-hosted runner label without verifying its egress/network ownership",
+      "a `concurrency` group that permits only one deployment at a time"
     ],
     "correct": 0,
-    "explanation": "Standard hosted runner IP ranges are not a per-job static-IP promise. Networking requirements may call for larger runners with static IP capabilities where available or a controlled self-hosted design.",
+    "explanation": "Standard hosted runner IP ranges are not a per-job static-IP promise. Evaluate a supported static-IP-capable runner offering where available or a controlled self-hosted network design; labels and concurrency influence selection/scheduling, not egress identity.",
     "sources": [
       "https://docs.github.com/en/actions/reference/runners/github-hosted-runners#larger-runners"
     ]
@@ -1377,13 +1377,13 @@ export const questions = [
     "objective": "secret-api-encryption",
     "question": "An internal tool creates an organization Actions secret through REST. Why must it first obtain a public key and encrypt the value?",
     "options": [
-      "the API accepts only encrypted secret material and never returns the stored plaintext",
-      "it makes the secret a configuration variable",
-      "it lets logs reveal the secret",
-      "it removes authorization requirements"
+      "the API accepts encrypted secret material for that scope and never returns stored plaintext",
+      "base64-encode the value, because encoding replaces encryption for the secret endpoint",
+      "encrypt with a public key fetched for a different repository or environment scope",
+      "send the public-key-encrypted value without an authorized token because encryption replaces API authorization"
     ],
     "correct": 0,
-    "explanation": "Actions secrets are encrypted using the scope public key before upload. Secret values cannot be read back through the API; a rotation caller supplies a new value rather than retrieving the existing plaintext.",
+    "explanation": "The secret value must be encrypted with the public key for its exact target scope before the authorized API request. Base64 is not encryption, keys are scope-specific, and encryption does not remove authorization requirements; stored secret plaintext is not returned.",
     "sources": [
       "https://docs.github.com/rest/actions/secrets#create-or-update-an-organization-secret"
     ]
@@ -1447,12 +1447,12 @@ export const questions = [
     "question": "A build will generate an artifact attestation using GitHub's attestation action. Which permission set is complete for that generation step?",
     "options": [
       "`contents: read`, `id-token: write`, and `attestations: write`",
-      "`issues: write` only",
-      "`packages: write` only",
-      "`actions: write` only"
+      "`contents: read` and `attestations: write` only",
+      "`contents: read` and `id-token: write` only",
+      "`contents: write`, `id-token: write`, and `attestations: write`"
     ],
     "correct": 0,
-    "explanation": "The documented attestation generation permissions are contents read, id-token write, and attestations write. Package publishing can need packages write, but that is a different capability.",
+    "explanation": "Generation needs `contents: read`, `id-token: write`, and `attestations: write`. The first two near misses each omit one documented permission; broad `contents: write` is unnecessary and does not improve attestation generation.",
     "sources": [
       "https://docs.github.com/actions/security-for-github-actions/using-artifact-attestations/using-artifact-attestations-to-establish-provenance-for-builds"
     ]
@@ -1464,12 +1464,12 @@ export const questions = [
     "question": "An organization wants to limit which marketplace actions may run and ensure workflow changes receive human review before merge. Which pairing fits?",
     "options": [
       "a selected-actions allow policy plus repository pull-request review rules such as CODEOWNERS",
-      "matrix include/exclude",
-      "workflow status badges",
-      "artifact retention"
+      "an action allow policy plus a runner group restricted to the repositories that may deploy",
+      "a full-SHA action policy plus a protected environment with required reviewers",
+      "a selected-actions allow policy plus an environment named production without review rules"
     ],
     "correct": 0,
-    "explanation": "A selected-actions policy governs allowed action sources. Repository review rules can require review of workflow-file changes before merge. Neither replaces runner-group routing or environment approval gates.",
+    "explanation": "A selected-actions policy governs allowed action sources, while repository pull-request rules such as CODEOWNERS can require review of workflow-file changes before merge. Runner groups govern compute access, full-SHA policy controls reference form, and an unprotected environment does not impose review.",
     "sources": [
       "https://docs.github.com/actions/security-for-github-actions/security-guides/security-hardening-for-github-actions#using-third-party-actions",
       "https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/about-code-owners"
@@ -1693,5 +1693,5 @@ export const cheatSheet = {
 };
 export const coverage = {
   "title": "GH-200 blueprint coverage",
-  "content": "# GH-200 blueprint → practice evidence\n\nAuthority: [Microsoft GH-200 study guide, skills measured January 2026](https://learn.microsoft.com/en-us/credentials/certifications/resources/study-guides/gh-200). GitHub Docs, linked from each lab, are the authority for product behavior. “Automatic” means a local checker can inspect the learner workspace; “manual” requires explanation/review; “hosted-only” requires an authorized GitHub account or enterprise configuration.\n\n| Official objective cluster | Concrete practice | Evidence and check | Limit |\n| --- | --- | --- | --- |\n| Events: schedule, webhook/repository dispatch, manual dispatch | 01 manual trigger and [supplementary drill 1](EXTRA_EXERCISES.md#1-events-weekday-schedule-dispatch-webhook-boolean-input) | Typed `workflow_dispatch`; a concrete weekday cron and dispatch type | automatic/manual; cron/webhook delivery hosted-only |\n| `workflow_call` inputs, secrets and reuse | 09 reusable call and [supplementary drill 2](EXTRA_EXERCISES.md#2-reusable-workflow-input-and-secret-mapping) | caller/callee declaration and explicit secret mapping | hosted-only call; structure automatic |\n| Jobs, dependencies, conditions, commands and environment files | 02 job/runner; 04 context data; 05–06 outputs; 17 gate | `needs`, outputs, quoted environment bridge | automatic + manual |\n| Contexts, expressions, editor support | 04 context as data and [supplementary drill 9](EXTRA_EXERCISES.md#9-editor-validation-schema-completion-and-metadata-help) | no direct untrusted shell interpolation; explain context scope; use editor diagnostics, schema completion, and metadata help | automatic + manual/editor hosted-only |\n| YAML anchors and aliases | Example 01 and 04 troubleshooting fragment | expand an anchor manually | manual; GitHub supports anchors/aliases—parsed YAML merge keys are not a claim of hosted workflow support |\n| Matrix include/exclude, max parallel, fail-fast, images | 07 matrix and Example 02 | matrix shape and failure/concurrency explanation | automatic + manual; hosted image availability hosted-only |\n| Service containers | 08 Linux service | Linux runner/service/health invariant | automatic; live networking hosted-only |\n| Outputs, summaries, badges, protection | 05–06 outputs and [supplementary drill 3](EXTRA_EXERCISES.md#3-environment-file-later-step-summary-badge-and-required-check-plan) | step/job output chain; later-step environment use, summary, and hosted protection plan | automatic/manual; badge/protection hosted-only |\n| Cache, artifact, retention, REST | 16 artifact and [supplementary drill 4](EXTRA_EXERCISES.md#4-cacheartifact-choice-retention-and-rest-endpoint-plan) | choose artifact versus cache; retention/API plan | automatic/manual; REST mutation hosted-only |\n| Logs, artifacts, UI/API, selective matrix rerun | 11 failure evidence; Example 04 | identify log/artifact/API and smallest rerun | automatic/manual; UI/rerun hosted-only |\n| Templates, private access, starter/reusable/composite, disable/delete | 09 and Examples 04/06 | classify each reuse mechanism and lifecycle action | manual/hosted-only |\n| Composite, JavaScript, Docker action types and metadata | 10 composite; Example 05 | metadata fields, outputs, runtime choices | automatic/manual; Docker distribution hosted-only |\n| Action commands, distribution, Marketplace, release/version/immutable refs | 10 and 15 SHA pin; [supplementary drill 6](EXTRA_EXERCISES.md#6-action-distribution-and-versioning) | environment-file output and immutable reference decision | automatic/manual; Marketplace/release hosted-only |\n| Enterprise policy, runner groups, IP/networking, toolcache, scopes, REST | 12 runner policy; 13 permissions; [supplementary drills 5 and 7](EXTRA_EXERCISES.md#5-variables-and-secrets-by-scope) | separate runner routing from action policy; scope decision | manual/hosted-only |\n| Approvals, trust, injection, token/PAT/OIDC, pinning | 04, 13–15; Example 10 | quoted untrusted data, least privilege, OIDC job, full SHA | automatic/manual; approval/OIDC federation hosted-only |\n| Attestations, cost and scaling | Example 11, [supplementary drill 8](EXTRA_EXERCISES.md#8-digest-verification-versus-attestation), and [supplementary drill 10](EXTRA_EXERCISES.md#10-matrix-coverage-and-concurrency-cost-model) | generation versus verification; prune a matrix from six to four jobs, model 30 to 20 runner-minutes, and distinguish that from `max-parallel` concurrency (not a billing guarantee) | manual; attestation/cost data hosted-only |\n\nEvery canonical lab has a small starter, solution, task-specific checker, and a manual rubric. Supplementary examples cover broader scenarios without pretending a regex or YAML parser can prove a real hosted run. Use [COURSE.md](COURSE.md) for order and [START_HERE.md](START_HERE.md) for the safe sandbox.\n\n## Complete January 2026 objective checklist\n\nThis is the bullet-level audit used by the question bank. `Local` means an original question or local exercise can check understanding; `Manual` means read/plan/review; `Hosted` means the real GitHub, enterprise, cloud, Marketplace, or API permission is required. Question IDs are deliberately original practice, not recalled exam items.\n\n### Author and manage workflows\n\n| Official skill | Practice evidence | Mode |\n| --- | --- | --- |\n| Scheduled, manual, webhook, repository events | AM01, AM16, drill 1 | Local + Hosted |\n| Scope, permissions, events | AM14, exercise 13 | Local + Manual |\n| Dispatch types/defaults/required; `workflow_call` inputs/secrets | AM01, AM02, AM17, drill 2 | Local + Hosted |\n| Jobs, steps, conditions | AM13, AM18, exercises 02, 17 | Local |\n| Job dependencies | AM03, AM18, exercises 05–06 | Local |\n| Commands and environment variables | AM09–10, drill 3 | Local |\n| Service ports, health checks, options | AM04, exercise 08 | Local + Hosted |\n| Matrix, include/exclude, fail-fast, parallelism, cost, image transitions | AM05–06, AM12, AM21, exercise 07 | Local + Manual |\n| YAML anchors, aliases, merge analysis | AM07, CT07, examples 01/04 | Manual |\n| Contexts and immutable/action pinning | AM08, AA06, SO04, exercise 15 | Local + Manual |\n| Expressions, evaluation boundary, secret leakage | AM13, AM18–19, SO03 | Local + Manual |\n| VS Code extension/schema/metadata validation | AM20 | Manual |\n| Cache/artifacts and retention REST scopes | AM11, AM15, AM22, SO08, drill 4 | Local + Hosted |\n| Artifacts, outputs, environment files, reusable outputs | AM03, AM09, AM23, exercises 05–06/09 | Local |\n| Job summaries | AM10, drill 3 | Local |\n| Status badges and environments | AM24, SO05, drill 3 | Manual + Hosted |\n\n### Consume and troubleshoot workflows\n\n| Official skill | Practice evidence | Mode |\n| --- | --- | --- |\n| Interpret triggers/effects from configuration and logs | CT02, CT08, CT11–12 | Local + Hosted |\n| Diagnose failures using logs and run history | CT02, CT12, exercise 11 | Local + Hosted |\n| Expand anchors/aliases/merged mappings | CT07, AM07 | Manual |\n| Matrix expansion, job names, failures, selective rerun | CT01, AM05–06 | Manual + Hosted |\n| Locate workflows, logs, artifacts in UI/API | CT02–03, CT12–13 | Manual + Hosted |\n| Download/manage artifacts | CT03, CT10, CT13 | Local + Hosted |\n| Consume organization/reusable workflows | CT05, EN12, exercise 09 | Local + Hosted |\n| Consume non-public templates | CT09, CT15 | Manual + Hosted |\n| Starter templates and customization | CT04, CT14–15 | Manual + Hosted |\n| Starter vs reusable vs composite | CT04–05, exercise 09, example 06 | Local + Manual |\n| Disable versus delete | CT06, CT16 | Manual + Hosted |\n\n### Author and maintain actions\n\n| Official skill | Practice evidence | Mode |\n| --- | --- | --- |\n| JavaScript, Docker, composite; immutable-action implications | AA01–02, AA05–06, AA15, exercise 10 | Local + Manual |\n| Troubleshoot action execution/errors | AA09, AA12 | Local |\n| Required files, layout, metadata | AA03–04, AA12, exercise 10 | Local |\n| Workflow commands in actions | AA10, exercise 10 | Local |\n| Public/private/Marketplace distribution | AA07, AA13–14, drill 6 | Manual + Hosted |\n| Publish to Marketplace | AA08, AA14, drill 6 | Manual + Hosted |\n| Version and release strategy | AA08, AA11, AA14–15 | Manual |\n\n### Manage GitHub Actions for the enterprise\n\n| Official skill | Practice evidence | Mode |\n| --- | --- | --- |\n| Reusable components/templates | CT04–05, EN12 | Manual + Hosted |\n| Enterprise access to actions/workflows | CT09, CT15, EN14 | Manual + Hosted |\n| Organization usage policies | EN02–03, SO12 | Manual + Hosted |\n| Hosted/self-hosted configuration and monitoring | EN05–06, EN15, drill 7 | Manual + Hosted |\n| IP allow lists/networking | EN04, EN17 | Manual + Hosted |\n| Runner groups/troubleshooting | EN01, EN05, EN14, EN16 | Manual + Hosted |\n| Preinstalled software, toolcache, runtime install/image maintenance | EN06, EN15, drill 7 | Manual + Hosted |\n| Org/repo/environment secret and variable scope | EN07–09, EN19, drill 5 | Local + Hosted |\n| Secrets/variables usage and REST management | EN10–11, EN13, EN18, drill 4–5 | Manual + Hosted |\n\n### Secure and optimize automation\n\n| Official skill | Practice evidence | Mode |\n| --- | --- | --- |\n| Environment protections and approvals | SO05, AM24 | Manual + Hosted |\n| Trustworthy Marketplace actions | AA06, SO04, SO12 | Manual |\n| Script injection protections | SO03, SO10, exercise 04 | Local + Manual |\n| `GITHUB_TOKEN`, granular permissions, PAT | SO01, SO09, AM14 | Local + Manual |\n| OIDC federation | SO02, exercise 14 | Manual + Hosted |\n| Full-SHA pins and immutable policy | AA06, AA11, AA15, SO04 | Local + Manual |\n| Allow/deny usage policy and workflow review | EN02, SO12 | Manual + Hosted |\n| Attestation/provenance generation and verification | SO06–07, SO11, drill 8 | Local + Hosted |\n| Caching and artifact retention efficiency | AM11, AM22, SO08, drill 4 | Local + Manual |\n| Scaling and cost optimization | AM05, AM21, SO08, [supplementary drill 10](EXTRA_EXERCISES.md#10-matrix-coverage-and-concurrency-cost-model) | Local + Manual |\n"
+  "content": "# GH-200 blueprint → practice evidence\n\nAuthority: [Microsoft GH-200 study guide, skills measured January 2026](https://learn.microsoft.com/en-us/credentials/certifications/resources/study-guides/gh-200). GitHub Docs, linked from each lab, are the authority for product behavior. “Automatic” means a local checker can inspect the learner workspace; “manual” requires explanation/review; “hosted-only” requires an authorized GitHub account or enterprise configuration.\n\n| Official objective cluster | Concrete practice | Evidence and check | Limit |\n| --- | --- | --- | --- |\n| Events: schedule, webhook/repository dispatch, manual dispatch | 01 manual trigger and [supplementary drill 1](EXTRA_EXERCISES.md#1-events-weekday-schedule-dispatch-webhook-boolean-input) | Typed `workflow_dispatch`; a concrete weekday cron and dispatch type | automatic/manual; cron/webhook delivery hosted-only |\n| `workflow_call` inputs, secrets and reuse | 09 reusable call and [supplementary drill 2](EXTRA_EXERCISES.md#2-reusable-workflow-input-and-secret-mapping) | caller/callee declaration and explicit secret mapping | hosted-only call; structure automatic |\n| Jobs, dependencies, conditions, commands and environment files | 02 job/runner; 04 context data; 05–06 outputs; 17 gate | `needs`, outputs, quoted environment bridge | automatic + manual |\n| Contexts, expressions, editor support | 04 context as data and [supplementary drill 9](EXTRA_EXERCISES.md#9-editor-validation-schema-completion-and-metadata-help) | no direct untrusted shell interpolation; explain context scope; use editor diagnostics, schema completion, and metadata help | automatic + manual/editor hosted-only |\n| YAML anchors and aliases | Example 01 and 04 troubleshooting fragment | expand an anchor manually | manual; GitHub supports anchors/aliases—parsed YAML merge keys are not a claim of hosted workflow support |\n| Matrix include/exclude, max parallel, fail-fast, images | 07 matrix and [supplementary drill 10](EXTRA_EXERCISES.md#10-matrix-coverage-failure-behavior-runner-images-and-selective-rerun) | four-row matrix, include property, fail-fast/concurrency explanation, image-release review, and smallest rerun decision | local/manual; hosted image availability and rerun hosted-only |\n| Service containers | 08 Linux service | Linux runner/service/health invariant | automatic; live networking hosted-only |\n| Outputs, summaries, badges, protection | 05–06 outputs and [supplementary drill 3](EXTRA_EXERCISES.md#3-environment-file-later-step-summary-badge-and-required-check-plan) | step/job output chain; later-step environment use, summary, and hosted protection plan | automatic/manual; badge/protection hosted-only |\n| Cache, artifact, retention, REST | 16 artifact and [supplementary drill 4](EXTRA_EXERCISES.md#4-cacheartifact-choice-retention-and-rest-endpoint-plan) | choose artifact versus cache; retention/API plan | automatic/manual; REST mutation hosted-only |\n| Logs, artifacts, UI/API, selective matrix rerun | 11 failure evidence; Example 04 | identify log/artifact/API and smallest rerun | automatic/manual; UI/rerun hosted-only |\n| Templates, private access, starter/reusable/composite, disable/delete | 09 and Examples 04/06 | classify each reuse mechanism and lifecycle action | manual/hosted-only |\n| Composite, JavaScript, Docker action types and metadata | 10 composite; Example 05 | metadata fields, outputs, runtime choices | automatic/manual; Docker distribution hosted-only |\n| Action commands, distribution, Marketplace, release/version/immutable refs | 10 and 15 SHA pin; [supplementary drill 6](EXTRA_EXERCISES.md#6-action-distribution-and-versioning) | environment-file output and immutable reference decision | automatic/manual; Marketplace/release hosted-only |\n| Enterprise policy, runner groups, IP/networking, toolcache, scopes, REST | 12 runner policy; 13 permissions; [supplementary drills 5 and 7](EXTRA_EXERCISES.md#7-internal-templates-action-policy-and-self-hosted-runner-controls) | separate action allow policy from runner routing; scope and network/image ownership decision | local/manual; enterprise configuration hosted-only |\n| Approvals, trust, injection, token/PAT/OIDC, pinning | 04, 13–15; Example 10 | quoted untrusted data, least privilege, OIDC job, full SHA | automatic/manual; approval/OIDC federation hosted-only |\n| Attestations, cost and scaling | Example 11, [supplementary drill 8](EXTRA_EXERCISES.md#8-digest-verification-versus-attestation), and [supplementary drill 10](EXTRA_EXERCISES.md#10-matrix-coverage-failure-behavior-runner-images-and-selective-rerun) | generation versus verification; prune a matrix from six to four jobs, model 30 to 20 runner-minutes, and distinguish that from `max-parallel` concurrency (not a billing guarantee) | local/manual; attestation, cost data, and rerun hosted-only |\n\nEvery canonical lab has a small starter, solution, task-specific checker, and a manual rubric. Supplementary examples cover broader scenarios without pretending a regex or YAML parser can prove a real hosted run. Use [COURSE.md](COURSE.md) for order and [START_HERE.md](START_HERE.md) for the safe sandbox.\n\n## Complete January 2026 objective checklist\n\nThis is the bullet-level audit used by the question bank. `Local` means an original question or local exercise can check understanding; `Manual` means read/plan/review; `Hosted` means the real GitHub, enterprise, cloud, Marketplace, or API permission is required. Question IDs are deliberately original practice, not recalled exam items.\n\n### Author and manage workflows\n\n| Official skill | Practice evidence | Mode |\n| --- | --- | --- |\n| Scheduled, manual, webhook, repository events | AM01, AM16, drill 1 | Local + Hosted |\n| Scope, permissions, events | AM14, exercise 13 | Local + Manual |\n| Dispatch types/defaults/required; `workflow_call` inputs/secrets | AM01, AM02, AM17, drill 2 | Local + Hosted |\n| Jobs, steps, conditions | AM13, AM18, exercises 02, 17 | Local |\n| Job dependencies | AM03, AM18, exercises 05–06 | Local |\n| Commands and environment variables | AM09–10, drill 3 | Local |\n| Service ports, health checks, options | AM04, exercise 08 | Local + Hosted |\n| Matrix, include/exclude, fail-fast, parallelism, cost, image transitions | AM05–06, AM12, AM21, exercise 07 | Local + Manual |\n| YAML anchors, aliases, merge analysis | AM07, CT07, examples 01/04 | Manual |\n| Contexts and immutable/action pinning | AM08, AA06, SO04, exercise 15 | Local + Manual |\n| Expressions, evaluation boundary, secret leakage | AM13, AM18–19, SO03 | Local + Manual |\n| VS Code extension/schema/metadata validation | AM20 | Manual |\n| Cache/artifacts and retention REST scopes | AM11, AM15, AM22, SO08, drill 4 | Local + Hosted |\n| Artifacts, outputs, environment files, reusable outputs | AM03, AM09, AM23, exercises 05–06/09 | Local |\n| Job summaries | AM10, drill 3 | Local |\n| Status badges and environments | AM24, SO05, drill 3 | Manual + Hosted |\n\n### Consume and troubleshoot workflows\n\n| Official skill | Practice evidence | Mode |\n| --- | --- | --- |\n| Interpret triggers/effects from configuration and logs | CT02, CT08, CT11–12 | Local + Hosted |\n| Diagnose failures using logs and run history | CT02, CT12, exercise 11 | Local + Hosted |\n| Expand anchors/aliases/merged mappings | CT07, AM07 | Manual |\n| Matrix expansion, job names, failures, selective rerun | CT01, AM05–06 | Manual + Hosted |\n| Locate workflows, logs, artifacts in UI/API | CT02–03, CT12–13 | Manual + Hosted |\n| Download/manage artifacts | CT03, CT10, CT13 | Local + Hosted |\n| Consume organization/reusable workflows | CT05, EN12, exercise 09 | Local + Hosted |\n| Consume non-public templates | CT09, CT15 | Manual + Hosted |\n| Starter templates and customization | CT04, CT14–15 | Manual + Hosted |\n| Starter vs reusable vs composite | CT04–05, exercise 09, example 06 | Local + Manual |\n| Disable versus delete | CT06, CT16 | Manual + Hosted |\n\n### Author and maintain actions\n\n| Official skill | Practice evidence | Mode |\n| --- | --- | --- |\n| JavaScript, Docker, composite; immutable-action implications | AA01–02, AA05–06, AA15, exercise 10 | Local + Manual |\n| Troubleshoot action execution/errors | AA09, AA12 | Local |\n| Required files, layout, metadata | AA03–04, AA12, exercise 10 | Local |\n| Workflow commands in actions | AA10, exercise 10 | Local |\n| Public/private/Marketplace distribution | AA07, AA13–14, drill 6 | Manual + Hosted |\n| Publish to Marketplace | AA08, AA14, drill 6 | Manual + Hosted |\n| Version and release strategy | AA08, AA11, AA14–15 | Manual |\n\n### Manage GitHub Actions for the enterprise\n\n| Official skill | Practice evidence | Mode |\n| --- | --- | --- |\n| Reusable components/templates | CT04–05, EN12 | Manual + Hosted |\n| Enterprise access to actions/workflows | CT09, CT15, EN14 | Manual + Hosted |\n| Organization usage policies | EN02–03, SO12 | Manual + Hosted |\n| Hosted/self-hosted configuration and monitoring | EN05–06, EN15, drill 7 | Manual + Hosted |\n| IP allow lists/networking | EN04, EN17 | Manual + Hosted |\n| Runner groups/troubleshooting | EN01, EN05, EN14, EN16 | Manual + Hosted |\n| Preinstalled software, toolcache, runtime install/image maintenance | EN06, EN15, drill 7 | Manual + Hosted |\n| Org/repo/environment secret and variable scope | EN07–09, EN19, drill 5 | Local + Hosted |\n| Secrets/variables usage and REST management | EN10–11, EN13, EN18, drill 4–5 | Manual + Hosted |\n\n### Secure and optimize automation\n\n| Official skill | Practice evidence | Mode |\n| --- | --- | --- |\n| Environment protections and approvals | SO05, AM24 | Manual + Hosted |\n| Trustworthy Marketplace actions | AA06, SO04, SO12 | Manual |\n| Script injection protections | SO03, SO10, exercise 04 | Local + Manual |\n| `GITHUB_TOKEN`, granular permissions, PAT | SO01, SO09, AM14 | Local + Manual |\n| OIDC federation | SO02, exercise 14 | Manual + Hosted |\n| Full-SHA pins and immutable policy | AA06, AA11, AA15, SO04 | Local + Manual |\n| Allow/deny usage policy and workflow review | EN02, SO12 | Manual + Hosted |\n| Attestation/provenance generation and verification | SO06–07, SO11, drill 8 | Local + Hosted |\n| Caching and artifact retention efficiency | AM11, AM22, SO08, drill 4 | Local + Manual |\n| Scaling and cost optimization | AM05, AM21, SO08, [supplementary drill 10](EXTRA_EXERCISES.md#10-matrix-coverage-failure-behavior-runner-images-and-selective-rerun) | Local + Manual + Hosted |\n"
 };

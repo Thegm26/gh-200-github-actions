@@ -1,0 +1,14 @@
+name: GH-200 lab 15-sha-pin
+on:
+  workflow_dispatch: {}
+permissions:
+  contents: read
+jobs:
+  policy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803
+      - name: Validate action-reference candidate
+        shell: bash
+        run: node .github/gh200-sha-pin/check-pin.js .github/gh200-sha-pin/action-candidate.json

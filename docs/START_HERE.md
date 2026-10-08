@@ -6,6 +6,10 @@ Open `index.html` in a modern browser. The **Learning path** (17 YAML lessons), 
 
 The browser checker gives immediate practice feedback. Exam-practice links are clearly labeled resources, not released past exam papers. The adjacent exercise `check.mjs` commands below remain the optional direct-study reference route.
 
+## Optional hosted fork-to-fix route
+
+For a real Actions run, fork the repository, clone **your fork**, open it with `code .`, and start at [hands-on/README.md](../hands-on/README.md). The shared `hands-on/<id>/README.md` files give real inactive templates, a deliberate first failure, a repair, and the expected new-run outcome. They require your own GitHub account and default branch; they do not change this repository. Maintainer CI is guarded to the upstream repository, so a fork push may show a skipped CI entry with no jobs. Copy the learner template into `.github/workflows` and use its manual run route instead.
+
 ## What this course changes
 
 Every canonical exercise is already visible in `exercises/<id>/`: read `README.md`, edit the adjacent YAML, and run the adjacent `check.mjs`. Nothing in the local exercises changes a GitHub repository, copies files, or resets an attempt.

@@ -55,6 +55,36 @@ test('workflow validator accepts CRLF workflow files without weakening permissio
   }
 });
 
+test('workflow validator enforces every CI job fork guard', async () => {
+  const mirror = await mkdtemp(join(tmpdir(), 'gh200-workflow-fork-guard-'));
+  try {
+    await cp(join(projectRoot, 'scripts'), join(mirror, 'scripts'), { recursive: true });
+    await cp(join(projectRoot, '.github'), join(mirror, '.github'), { recursive: true });
+    const ciPath = join(mirror, '.github', 'workflows', 'ci.yml');
+    const original = await readFile(ciPath, 'utf8');
+    const guard = "    if: ${{ github.repository == 'Thegm26/gh-200-github-actions' || github.event_name == 'workflow_dispatch' }}\n";
+    const run = async () => new Promise((resolve) => execFile(process.execPath, ['scripts/verify-workflows.mjs'], { cwd: mirror }, (error, stdout, stderr) => resolve({ error, stdout, stderr })));
+    for (const name of ['test', 'risk', 'integration']) {
+      await writeFile(ciPath, original.replace(`  ${name}:\n${guard}`, `  ${name}:\n`));
+      const result = await run();
+      assert.notEqual(result.error, null, `${name} missing guard fails`);
+      assert.match(result.stderr, new RegExp(`CI job ${name} must be upstream-only`));
+    }
+    await writeFile(ciPath, original.replace("github.event_name == 'workflow_dispatch'", "github.event_name == 'push'"));
+    let result = await run();
+    assert.notEqual(result.error, null, 'weakened guard fails');
+    await writeFile(ciPath, `${original}\n  extra:\n    runs-on: ubuntu-latest\n    steps:\n      - run: true\n`);
+    result = await run();
+    assert.notEqual(result.error, null, 'unguarded injected job fails');
+    assert.match(result.stderr, /CI job extra must be upstream-only/);
+    await writeFile(ciPath, `${original}\n  extra:\n${guard}    runs-on: ubuntu-latest\n    steps:\n      - run: true\n`);
+    result = await run();
+    assert.equal(result.error, null, 'guarded injected job remains valid');
+  } finally {
+    await rm(mirror, { recursive: true, force: true });
+  }
+});
+
 test('lab-summary bridges its untrusted title through a quoted environment variable', async () => {
   const action = await readFile(join(projectRoot, '.github/actions/lab-summary/action.yml'), 'utf8');
   const runScript = action.slice(action.indexOf('      run: |'));

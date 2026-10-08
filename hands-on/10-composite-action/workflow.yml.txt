@@ -1,0 +1,15 @@
+name: GH-200 lab 10
+on:
+  workflow_dispatch: {}
+permissions:
+  contents: read
+jobs:
+  greeting:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803
+      - id: greeting
+        uses: ./.github/actions/gh200-greeting
+      - shell: bash
+        run: test "${{ steps.greeting.outputs.message }}" = hello

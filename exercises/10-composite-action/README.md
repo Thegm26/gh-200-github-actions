@@ -15,3 +15,4 @@ It fails until the action has that explicit composite step and passes when the r
 <details><summary>Solution</summary>Compare with the immutable [solution](../../learning/solutions/10-composite-action/action.yml).</details>
 
 Next: [11 — Failure evidence](../11-failure-evidence/README.md).
+\nHosted fork-to-fix: [10 lab](../../hands-on/10-composite-action/README.md).

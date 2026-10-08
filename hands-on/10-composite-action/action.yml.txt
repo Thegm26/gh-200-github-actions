@@ -1,0 +1,11 @@
+name: gh200 greeting
+description: Emits a fixed greeting output for the hosted lab.
+outputs:
+  message:
+    value: ${{ steps.greeting.outputs.message }}
+runs:
+  using: composite
+  steps:
+    - id: greeting
+      shell: bash
+      run: echo "message=hello" >> "$GITHUB_OUTPUT"

@@ -1,0 +1,21 @@
+name: GH-200 lab 06
+on:
+  workflow_dispatch: {}
+permissions:
+  contents: read
+jobs:
+  prepare:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    outputs:
+      version: ${{ steps.version.outputs.version }}
+    steps:
+      - id: version
+        shell: bash
+        run: echo "version=1" >> "$GITHUB_OUTPUT"
+  report:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - shell: bash
+        run: test "${{ needs.prepare.outputs.version }}" = "1"

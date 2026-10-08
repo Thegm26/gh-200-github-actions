@@ -15,3 +15,4 @@ It fails because `build` has no runner and passes only for `ubuntu-latest`. Hint
 <details><summary>Solution</summary>Compare with the immutable [solution](../../learning/solutions/02-job-and-runner/workflow.yml).</details>
 
 Next: [03 — Push filter](../03-push-filter/README.md).
+\nHosted fork-to-fix: [02 lab](../../hands-on/02-job-and-runner/README.md).

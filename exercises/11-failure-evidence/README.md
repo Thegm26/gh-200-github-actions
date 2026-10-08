@@ -15,3 +15,4 @@ It fails until both the condition and summary write are present and passes when 
 <details><summary>Solution</summary>Compare with the immutable [solution](../../learning/solutions/11-failure-evidence/workflow.yml).</details>
 
 Next: [12 — Runner policy](../12-runner-policy/README.md).
+\nHosted fork-to-fix: [11 lab](../../hands-on/11-failure-evidence/README.md).

@@ -15,3 +15,4 @@ It fails if this is still a runner-backed job and passes when `risk` has only th
 <details><summary>Solution</summary>Compare with the immutable [solution](../../learning/solutions/09-reusable-call/workflow.yml).</details>
 
 Next: [10 — Composite action](../10-composite-action/README.md).
+\nHosted fork-to-fix: [09 lab](../../hands-on/09-reusable-call/README.md).

@@ -15,3 +15,4 @@ It fails until the Redis service has a health command and passes when `options` 
 <details><summary>Solution</summary>Compare with the immutable [solution](../../learning/solutions/08-service-linux/workflow.yml).</details>
 
 Next: [09 — Reusable workflow](../09-reusable-call/README.md).
+\nHosted fork-to-fix: [08 lab](../../hands-on/08-service-linux/README.md).

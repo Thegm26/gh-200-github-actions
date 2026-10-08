@@ -1,0 +1,12 @@
+name: GH-200 lab 14
+on:
+  workflow_dispatch: {}
+permissions:
+  contents: read
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - shell: bash
+        run: test -n "$ACTIONS_ID_TOKEN_REQUEST_URL"

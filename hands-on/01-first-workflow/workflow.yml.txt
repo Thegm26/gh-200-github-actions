@@ -1,0 +1,10 @@
+name: GH-200 lab 01-first-workflow
+permissions:
+  contents: read
+jobs:
+  lab:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - shell: bash
+        run: echo manual trigger missing
