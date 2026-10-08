@@ -1,0 +1,10 @@
+name: artifact
+
+on:
+  workflow_dispatch: {}
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - run: mkdir -p dist && echo hi > dist/result.txt

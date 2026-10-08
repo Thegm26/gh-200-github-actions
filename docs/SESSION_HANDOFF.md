@@ -1,34 +1,15 @@
 # Session Handoff
 
-## Windows CI correction (current — 2026-10-08 UTC)
+## Direct-exercise correction (current — 2026-10-08 UTC)
 
-- Commit `f470813` was pushed, but GitHub Actions run `37832831198` failed only on Windows. The custom-action verifier treated the native `GH200_ACTION_WORKSPACE` path as a file URL, and the workflow validator's LF-only manual-permissions assertion rejected CRLF checkouts. This bounded correction now uses native paths for the workspace and normalizes CRLF while retaining the strict permissions assertion; focused regressions cover a workspace path containing spaces and `#`, plus a CRLF-only workflow mirror.
-- Local verification is required after this correction; the prior independent reviews below remain pre-correction evidence. The primary should run the focused and full gates, obtain any required fresh review, commit, push, and confirm the replacement CI run before calling the refactor remotely validated.
-- Scope delivered: 17 small, independently resettable beginner labs with no timers; 8 supplementary drills; 13 focused direct-study examples; and 60 explained scenario questions. The learner CLI remains `npm run learn -- list|start <id>|check <id>|status|reset <id> --yes`; non-overwrite and explicit-reset guarantees remain enforced.
-- Authorization: the primary alone may verify Git identity, commit, and push this integrated work. No release/deployment, account mutation, GUI, or mouse use is authorized. This handoff updater does not commit or push.
-
-| Acceptance area | Fresh evidence | Status |
-|---|---|---|
-| Learner engine, manifest, fixtures, CLI, and regression safety | `npm run verify:learning`: 17/17 starters reject, 17/17 solutions pass, 17/17 semantic mutations reject; learning suite: 7/7 | PASS |
-| Curriculum, examples, question bank, and link policy | Content validation: 60 questions, 5 domain indexes, 13 focused examples; `--links`: 89 primary links reachable | PASS |
-| Repository integration | `npm run check`: 23 main tests and 7 learning tests passed; workflow validation: 3 active workflows; `git diff --check` clean | PASS |
-| Current-tree provenance | Full-tree fingerprint `96ca3b94e982fb6e0685ed379fbeecfce237a8f843dd593f8e173c1cdfa0e7eb` (165 files; excludes `node_modules`, `.practice`, `docs/SESSION_HANDOFF.md`, and helper defaults) | Recorded after the final cross-platform path correction |
-| Git release precondition | Author and committer identities both verified as `Thegm26 <georgios.michalakis26@gmail.com>`; `origin/main` remains `06edcf0` | PASS; push pending |
-
-### Current independent reviews
-
-| Scope | Reviewer | Isolated | Connected | Final cohesion/polish | Result |
-|---|---|---|---|---|---|
-| Learner engine | Independent Sol | PASS (7-learning-test/current-source review; scope `54766383809fac98b8c7052b0953c106956f1cb112ac178e4d992fec9714e815`) | PASS | Covered by final review | No findings |
-| Runtime/workflows | Independent Sol | PASS (8-focused-test/current-source review; scope `41c0d1b8498cbb41807bc35f88c36a778e22148b2d1c545b07262b11e222f457`) | PASS | Covered by final review | No findings |
-| Curriculum/examples/questions | `/root/close_review` (independent Sol) | PASS | PASS | PASS | Fresh re-review after the Windows path correction: 15 curriculum tests, content validation, and `git diff --check`; no findings |
-| Full integrated tree | `/root/close_review` (independent Sol) | — | PASS | PASS | Fresh connected/final-cohesion pass after the Windows path correction; no findings. Full evidence: 23+7 tests, 17/17/17 learning verification, and 89-link validation |
-
-### Release boundary and recovery
-
-1. Primary: stage the intended integrated files, recheck status/diff and effective Git identity, then perform the authorized commit and push to `origin/main`.
-2. Primary: verify the remote SHA and the CI run triggered by that push. Do not describe the refactor as remotely validated or released until that run is green.
-3. If the commit/push or CI fails, preserve the tree/logs, return only the affected bounded component to Terra correction, rerun affected evidence and a fresh independent connected/final review, then update this current section.
+- Current learner path: open an `exercises/<id>/README.md`, edit its adjacent `workflow.yml` or `action.yml`, then run that folder's direct `node exercises/<id>/check.mjs`. No timer, doctor, workspace-manager, start, reset, or learner-CLI step is required or promoted. Existing compatibility commands and their safety coverage remain intact.
+- The 17 check wrappers are formatted and readable. Checkers inspect only the adjacent exercise directory; they do not overwrite a learner file or grade cosmetic YAML formatting. SHA-pin validation accepts only the documented approved checkout SHA and rejects an all-zero 40-character value.
+- Maintainer regression: a temporary mirror copies the immutable starters, writes only inside the mirror, creates `node_modules` as a directory (directory symlink on POSIX; Windows junction with copy fallback), verifies every starter is red and every solved exercise is green, and includes a hand-written valid Exercise 01 solution independent of fixtures.
+- Final local evidence: `npm run check` passed 24 main plus 8 learning tests and `npm run verify:learning` confirmed 17/17 starters reject, 17/17 solutions pass, and 17/17 mutations reject (`/tmp/gh200-direct-final.log`). The full primary-link gate passed with 94 links (`/tmp/gh200-direct-final-links.log`).
+- Baseline: `4e09c21` with green CI run `37833507145`. Preserve `.practice/01-first-workflow/workflow.yml` hash `406479bd330fc144bc86081d4d984de87f14696e474ce24906f23522dd718435`.
+- Stable current-tree fingerprint: `c384a988ec290237dc2c20eac041e60ee9a78353fa967995bd0a1ddd635cf0d2` (216 files; excludes `node_modules`, `.practice`, this handoff, and helper defaults).
+- Owner: `/root/finish_direct` (Terra) completed the bounded correction. Reviewer: independent Sol `/root/direct_review` passed isolated, connected, and final-cohesion review after the corrected tree and full check, including solved Exercise 01 in a safe mirror. Monitor: independent Sol `/root/direct_monitor` passed acceptance, scope, and evidence review. Source was unchanged after those gates.
+- The primary is authorized to commit, push, and confirm the newly triggered CI run. New CI is pending; do not call this dirty tree remotely validated until that run is green.
 
 ### Archived historical record
 

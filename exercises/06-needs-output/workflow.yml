@@ -1,0 +1,15 @@
+name: needs
+on:
+  workflow_dispatch: {}
+jobs:
+  prepare:
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.v.outputs.version }}
+    steps:
+      - id: v
+        run: echo version=1 >> "$GITHUB_OUTPUT"
+  report:
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo missing

@@ -3,7 +3,7 @@ import { spawnSync } from 'node:child_process';
 import fs from 'node:fs';
 import path from 'node:path';
 import test from 'node:test';
-import { copyStarter, labById, learningRoot, resetStarter, tempWorkspace, validateLab } from '../../scripts/learn-lib.mjs';
+import { copyStarter, labById, learningRoot, manifest, resetStarter, tempWorkspace, validateLab } from '../../scripts/learn-lib.mjs';
 
 test('list includes each lab goal as a catalog column', () => {
   const result = spawnSync(process.execPath, ['scripts/learn.mjs', 'list'], { cwd: process.cwd(), encoding: 'utf8' });
@@ -31,6 +31,7 @@ test('workspace root symbolic links are refused before writes', (t) => {
   const parent = tempWorkspace(); const outside = tempWorkspace(); const lab = labById('01-first-workflow');
   try { const link = path.join(parent, 'workspace'); try { fs.symlinkSync(outside, link, process.platform === 'win32' ? 'junction' : 'dir'); } catch (error) { if (error.code === 'EPERM') return t.skip('This Windows environment cannot create symbolic links; runtime guard remains covered where supported.'); throw error; } assert.throws(() => copyStarter(lab, link), /symbolic-link workspace root/); assert.deepEqual(fs.readdirSync(outside), []); } finally { fs.rmSync(parent, { recursive: true, force: true }); fs.rmSync(outside, { recursive: true, force: true }); }
 });
+
 test('output, evidence, and OIDC validators reject semantic bypasses', () => {
   const cases = [
     ['05-job-output', '$GITHUB_OUTPUT', '$NOT_OUTPUT'],
@@ -39,6 +40,7 @@ test('output, evidence, and OIDC validators reject semantic bypasses', () => {
     ['11-failure-evidence', 'always()', 'always() && false'],
     ['14-oidc-job', 'contents: read}', 'contents: read, packages: write}'],
     ['13-least-privilege', 'steps: [{run: echo ready}]', 'permissions: {contents: write}, steps: [{run: echo ready}]'],
+    ['15-sha-pin', '11bd71901bbe5b1630ceea73d27597364c9af683', '0000000000000000000000000000000000000000'],
   ];
   for (const [id, from, to] of cases) { const item = alteredSolution(id, from, to); try { assert.notEqual(validateLab(item.lab, item.directory).length, 0, `${id} accepted ${to}`); } finally { fs.rmSync(item.directory, { recursive: true, force: true }); } }
 });
@@ -63,4 +65,42 @@ test('workflow baseline accepts event shorthand but rejects malformed triggers a
     assert.doesNotThrow(() => validateLab(nullStep.lab, nullStep.directory));
     assert.ok(validateLab(nullStep.lab, nullStep.directory).length);
   } finally { for (const item of [shorthand, trigger, step, both, malformed, nullStep]) fs.rmSync(item.directory, { recursive: true, force: true }); }
+});
+
+test('every readable exercise checker rejects its starter and accepts its immutable solution in a safe mirror', () => {
+  const mirror = tempWorkspace();
+  try {
+    for (const directory of ['exercises', 'scripts', 'learning']) fs.cpSync(directory, path.join(mirror, directory), { recursive: true });
+    const dependencyTarget = path.join(mirror, 'node_modules');
+    try {
+      fs.symlinkSync(path.resolve('node_modules'), dependencyTarget, process.platform === 'win32' ? 'junction' : 'dir');
+    } catch (error) {
+      if (process.platform !== 'win32') throw error;
+      fs.cpSync(path.resolve('node_modules'), dependencyTarget, { recursive: true });
+    }
+    assert.ok(fs.statSync(dependencyTarget).isDirectory(), 'mirror node_modules must be a directory');
+    for (const lab of manifest.labs) {
+      const exercise = path.join(mirror, 'exercises', lab.id);
+      const check = path.join(exercise, 'check.mjs');
+      const readme = fs.readFileSync(path.join(exercise, 'README.md'), 'utf8');
+      assert.match(readme, /## Do/);
+      assert.match(readme, /node exercises\//);
+      assert.match(readme, /Hint:/);
+      assert.match(readme, /Solution/);
+      assert.match(readme, /https:\/\/(docs\.github\.com|learn\.microsoft\.com)/);
+      fs.copyFileSync(path.join(mirror, 'learning', 'starters', lab.id, lab.file), path.join(exercise, lab.file));
+      const red = spawnSync(process.execPath, [check], { cwd: mirror, encoding: 'utf8' });
+      assert.equal(red.status, 1, `${lab.id} starter should fail: ${red.stderr}`);
+      if (lab.id === '01-first-workflow') assert.match(red.stderr, /Manual trigger is a mapping/);
+      if (lab.id === '01-first-workflow') {
+        fs.writeFileSync(path.join(exercise, lab.file), 'name: First workflow\non:\n  workflow_dispatch: {}\njobs:\n  hello:\n    runs-on: ubuntu-latest\n    steps:\n      - run: echo hello\n');
+      } else {
+        fs.copyFileSync(path.join(mirror, 'learning', 'solutions', lab.id, lab.file), path.join(exercise, lab.file));
+      }
+      const green = spawnSync(process.execPath, [check], { cwd: mirror, encoding: 'utf8' });
+      assert.equal(green.status, 0, `${lab.id} solved exercise should pass: ${green.stderr}`);
+    }
+  } finally {
+    fs.rmSync(mirror, { recursive: true, force: true });
+  }
 });

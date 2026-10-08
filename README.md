@@ -10,39 +10,21 @@ Prerequisites: Git, Node.js 18+ and npm (Node 22+ is recommended). A GitHub acco
 git clone https://github.com/Thegm26/gh-200-github-actions.git
 cd gh-200-github-actions
 npm install
-npm run doctor
-npm run learn -- list
 ```
 
-`doctor` checks local prerequisites. `learn list` shows the available small labs and their GH-200 objective/domain. Start with the first lab:
+Install once, then open [Exercise 01 — Your first workflow](exercises/01-first-workflow/README.md).
 
-```bash
-npm run learn -- start 01-first-workflow
-# edit .practice/01-first-workflow/workflow.yml
-npm run learn -- check 01-first-workflow
-```
-
-Expected pattern: `start` reports the new `.practice/<id>` folder; `check` reports either specific fixes or a passing result. A failed check is the intended red step—read its message, edit the starter again, and rerun the same command. `start` never overwrites an existing workspace. To intentionally restart one lab:
-
-```bash
-npm run learn -- reset <id> --yes
-npm run learn -- status
-```
-
-Use `npm run verify:learning` to verify the course engine. `npm run check` is repository-maintainer integrity validation (tests, content, and workflow contracts); it does **not** measure learner correctness or certify exam readiness.
+Each numbered folder is a small, safe local exercise: read its explanation, edit the named YAML file, run its `node exercises/.../check.mjs` command, then move to the linked next exercise. The check fails first on purpose and tells you what to change. It only reads that exercise folder; nothing is copied, reset, or sent to GitHub.
 
 ## Your first red → green exercise
 
-The start command above already created the workspace; do not run it again. First run `npm run learn -- check 01-first-workflow` to see the red result, then edit `.practice/01-first-workflow/workflow.yml`. Its `on: false` starter is deliberately red. Replace it with:
+Open [01 — Your first workflow](exercises/01-first-workflow/README.md). It explains manual triggers, names [workflow.yml](exercises/01-first-workflow/workflow.yml) as the only file to edit, and gives this check:
 
-```yaml
-on:
-  workflow_dispatch: {}
+```bash
+node exercises/01-first-workflow/check.mjs
 ```
 
-Then run `npm run learn -- check 01-first-workflow`. This file is outside `.github/workflows`, so it cannot run by accident. Make one change at a time and recheck.
-
-Only after a pass, compare your work with `learning/solutions/01-first-workflow/workflow.yml`. Do not copy a solution to make a checker pass: the checks inspect workflow structure and decisions, not an answer hash. If stuck, use the task-specific GitHub Docs link in the lab, then retry before viewing the solution.
+After you have tried, compare with the separate immutable solution linked from that exercise. `npm run check` is for repository maintainers; your exercise check is the learning feedback.
 
 ## Course map
 
@@ -52,11 +34,11 @@ The older [`examples/`](examples) remain useful focused reference exercises and 
 
 ## Readiness loop
 
-1. Complete each learning lab green at least once.
+1. Complete each exercise green at least once.
 2. Run the seeded quizzes: `npm run quiz -- --domain <tag> --count 8 --seed practice`.
 3. Record each missed objective, redo its linked lab without the solution, then answer the explanation in your own words.
 4. Use [CHEAT_SHEET.md](docs/CHEAT_SHEET.md) for distinctions, not as a substitute for the exercise.
-5. Re-run `npm run learn -- status` and repeat only unfinished or missed-topic labs.
+5. Reopen the relevant exercise README and redo its YAML without the solution.
 
 This is an evidence-based study loop, not a guarantee of readiness or certification.
 

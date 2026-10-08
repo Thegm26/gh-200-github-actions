@@ -2,7 +2,7 @@
 
 ## Prerequisites and focused goal
 
-Run `npm run doctor`. Build a map of the course before choosing a workflow feature.
+Install dependencies with `npm install`. Build a map of the course before choosing a workflow feature.
 
 ## Objective and domain
 

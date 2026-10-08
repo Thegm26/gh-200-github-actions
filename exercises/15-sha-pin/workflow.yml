@@ -1,0 +1,11 @@
+name: pin
+
+on:
+  workflow_dispatch: {}
+
+# Verified checkout release commit for this exercise: 11bd71901bbe5b1630ceea73d27597364c9af683
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4

@@ -2,7 +2,7 @@
 
 ## What this course changes
 
-Every canonical exercise lives in a disposable `.practice/<id>` folder. `npm run learn -- start <id>` copies a starter; `npm run learn -- check <id>` gives concrete structural feedback. Nothing in the local labs changes a GitHub repository.
+Every canonical exercise is already visible in `exercises/<id>/`: read `README.md`, edit the adjacent YAML, and run the adjacent `check.mjs`. Nothing in the local exercises changes a GitHub repository, copies files, or resets an attempt.
 
 ## Small glossary
 
@@ -20,11 +20,11 @@ Use a POSIX terminal (macOS/Linux, Git Bash, or WSL) for the copy-paste commands
 
 ## If something fails
 
-1. Run `npm run doctor` and fix the reported prerequisite.
-2. Run `npm run learn -- status` to see started labs and their current outcome.
-3. Read the failed invariant, make the smallest edit, and rerun `check`.
-4. If the workspace is confused, use `npm run learn -- reset <id> --yes`; this replaces only that lab's `.practice/<id>` folder.
-5. Compare with `learning/solutions/<id>/` only after a genuine attempt. If the local check passes but your explanation is weak, use the manual rubric in [COURSE.md](COURSE.md).
+1. Re-read that exercise's `README.md` and the exact task.
+2. Run its displayed `node exercises/<id>/check.mjs` command.
+3. Read the failed invariant, make the smallest edit to the adjacent YAML, and rerun the same command.
+4. Compare with the separately linked `learning/solutions/<id>/` file only after a genuine attempt.
+5. If the check passes but your explanation is weak, use the plain-language guide in [COURSE.md](COURSE.md).
 
 ## Optional GitHub sandbox runbook
 

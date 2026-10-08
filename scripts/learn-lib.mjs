@@ -42,7 +42,7 @@ export function validateLab(lab, directory = safeDirectory(workspaceRoot, lab)) 
     'runner-policy': () => Array.isArray(j('scan')['runs-on']) && j('scan')['runs-on'].length === 2 && j('scan')['runs-on'].includes('self-hosted') && j('scan')['runs-on'].includes('approved'),
     'least-privilege': () => permissionsMatch(data.permissions, { contents: 'read' }) && Object.values(allJobs).every((job) => !job.permissions || permissionsMatch(job.permissions, { contents: 'read' })),
     'oidc-deploy': () => permissionsMatch(data.permissions, { contents: 'read' }) && j('deploy').environment === 'production' && permissionsMatch(j('deploy').permissions, { 'id-token': 'write', contents: 'read' }) && Object.entries(allJobs).every(([name, job]) => name === 'deploy' || !job.permissions || permissionsMatch(job.permissions, { contents: 'read' })),
-    'checkout-sha': () => steps('build').some((s) => /^actions\/checkout@[a-f0-9]{40}$/i.test(text(s.uses))),
+    'checkout-sha': () => steps('build').some((s) => text(s.uses) === 'actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683'),
     artifact: () => steps('build').some((s) => s.uses === 'actions/upload-artifact@v4' && s.with?.name === 'build-output' && s.with?.path === 'dist'),
     'deploy-gate': () => j('deploy').needs === 'build' && j('deploy').permissions?.contents === 'read' && !Object.values(j('deploy').permissions || {}).includes('write'),
   };
@@ -62,5 +62,11 @@ export function validateLab(lab, directory = safeDirectory(workspaceRoot, lab)) 
   const errors = [];
   errors.push(...lab.rules.filter((rule) => !checks[rule]?.()).map(() => `Not yet: ${lab.success} (${lab.hint})`));
   return errors;
+}
+/** Validate a checked-in exercise without creating or touching a learner workspace. */
+export function validateExercise(id, directory) {
+  const lab = safeLab(id);
+  const errors = validateLab(lab, directory);
+  return errors.map((error) => error.startsWith('Workflow baseline needs') ? `${lab.success} (${lab.hint})` : error);
 }
 export function tempWorkspace() { return fs.mkdtempSync(path.join(os.tmpdir(), 'gh200-learning-')); }

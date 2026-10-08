@@ -1,14 +1,14 @@
 #!/usr/bin/env node
 import fs from 'node:fs';
 import path from 'node:path';
-import { copyStarter, labById, learningRoot, manifest, tempWorkspace, validateLab } from './learn-lib.mjs';
+import { labById, learningRoot, manifest, tempWorkspace, validateLab } from './learn-lib.mjs';
 let failures = [];
 let mutationsChecked = 0;
 for (const lab of manifest.labs) {
   const temp = tempWorkspace();
   try {
-    const starter = copyStarter(lab, temp);
-    if (!validateLab(lab, starter).length) failures.push(`${lab.id}: untouched starter unexpectedly passes`);
+    const starter = path.join(learningRoot, 'starters', lab.id);
+    if (!validateLab(lab, starter).length) failures.push(`${lab.id}: immutable starter unexpectedly passes`);
     const solution = path.join(learningRoot, 'solutions', lab.id);
     if (validateLab(lab, solution).length) failures.push(`${lab.id}: solution does not pass`);
     const copiedSolution = path.join(temp, 'mutated');

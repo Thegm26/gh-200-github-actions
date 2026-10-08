@@ -95,9 +95,23 @@ for (const module of expectedModules) {
   const readme = fs.readFileSync(path.join(examplesRoot, module, 'README.md'), 'utf8');
   if (/## Exact target time|\bafter minute\b|\btimed\s+(?:study|retrieval|enterprise)|\buse a timer\b/i.test(readme)) errors.push(`${module}/README.md retains timed-study instructions`);
 }
-for (const required of ['docs/START_HERE.md', 'docs/COURSE.md', 'docs/BLUEPRINT.md', 'npm run learn -- start 01-first-workflow', 'npm run doctor']) {
+for (const required of ['docs/START_HERE.md', 'docs/COURSE.md', 'docs/BLUEPRINT.md', 'exercises/01-first-workflow/README.md', 'node exercises/01-first-workflow/check.mjs']) {
   const target = required.startsWith('docs/') ? path.join(root, required) : null;
   if (target ? !fs.existsSync(target) : !routeReadme.includes(required)) errors.push(`missing beginner navigation: ${required}`);
+}
+const exerciseRoot = path.join(root, 'exercises');
+const exerciseReadmeRequirements = [/^# \d\d — /m, /## Do/, /node exercises\//, /It fails[\s\S]*passes|It fails[\s\S]*Passes/i, /Hint:/, /Solution/, /Next:|You finished the canonical route/, /https:\/\/(docs\.github\.com|learn\.microsoft\.com)/];
+for (const index of Array.from({ length: 17 }, (_, value) => value + 1)) {
+  const id = String(index).padStart(2, '0');
+  const directory = fs.readdirSync(exerciseRoot, { withFileTypes: true }).find((entry) => entry.isDirectory() && entry.name.startsWith(`${id}-`))?.name;
+  if (!directory) { errors.push(`missing readable exercise ${id}`); continue; }
+  const exercise = path.join(exerciseRoot, directory);
+  const readme = path.join(exercise, 'README.md');
+  const check = path.join(exercise, 'check.mjs');
+  const yaml = fs.readdirSync(exercise).find((file) => file === 'workflow.yml' || file === 'action.yml');
+  if (!fs.existsSync(readme) || !fs.existsSync(check) || !yaml) { errors.push(`${directory} needs README.md, check.mjs, and editable YAML`); continue; }
+  const content = fs.readFileSync(readme, 'utf8');
+  for (const requirement of exerciseReadmeRequirements) if (!requirement.test(content)) errors.push(`${directory}/README.md missing readable-exercise requirement: ${requirement}`);
 }
 
 const topicCoverage = {
@@ -176,7 +190,7 @@ if (mergeDocument.errors.length) {
 
 function primaryUrls() {
   const allowed = new Set(['docs.github.com', 'learn.microsoft.com', 'cli.github.com', 'github.com']);
-  const files = [path.join(root, 'README.md'), ...walk(path.join(root, 'docs')), ...walk(path.join(root, 'labs')), ...walk(path.join(root, 'examples')), path.join(root, 'quiz', 'questions.json')];
+  const files = [path.join(root, 'README.md'), ...walk(path.join(root, 'docs')), ...walk(path.join(root, 'labs')), ...walk(path.join(root, 'examples')), ...walk(path.join(root, 'exercises')), path.join(root, 'quiz', 'questions.json')];
   const urls = new Set();
   for (const file of files) {
     const text = fs.readFileSync(file, 'utf8');

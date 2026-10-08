@@ -16,10 +16,11 @@ function walk(directory) {
   });
 }
 
-test('the beginner route is untimed and links to the canonical learning flow', () => {
+test('the beginner route is untimed and links to the first readable exercise', () => {
   const readme = fs.readFileSync(path.join(root, 'README.md'), 'utf8');
   assert.doesNotMatch(readme, /4h45|285 minutes|Use a timer|Emergency 3-hour/i);
-  assert.match(readme, /npm run learn -- start 01-first-workflow/);
+  assert.match(readme, /exercises\/01-first-workflow\/README\.md/);
+  assert.match(readme, /node exercises\/01-first-workflow\/check\.mjs/);
   assert.match(readme, /docs\/START_HERE\.md/);
 });
 
