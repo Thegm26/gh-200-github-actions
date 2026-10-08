@@ -1,5 +1,13 @@
 # Session Handoff
 
+## Practice and References refinement — current authoritative release record (2026-10-09 UTC)
+
+- Scope/owner: `/root/reference_ui_redesign` owns the frozen Practice and References presentation refinement in `visual/web/app.js`, `visual/web/styles.css`, and browser coverage. The previously released roadmap baseline is `dcae1de` on `main`; Pages commit `4440f27` deployed successfully in job `37861054062`.
+- Product contract: Practice has a spaced filter and review control, with muted score on its own row; question metadata has real flex spacing; feedback renders inline code safely; source links read exactly **Source**. Filtering, review queues, keyboard selection, persistence, answer states, and paging are unchanged. References renders 16 catalog destinations as title links only—no badges, details, offline readers, download controls, cheat-sheet, or coverage blocks. Underlying catalog and offline data remain intact; external banks remain links only.
+- Frozen canonical selected-tree fingerprint (handoff excluded): `0b5a3b509cbf73beea981db8cd8082257974e8f7959a5c69b27d5999f2358723` across 317 files. Protected `.practice/01-first-workflow/workflow.yml` remains SHA-256 `406479bd330fc144bc86081d4d984de87f14696e474ce24906f23522dd718435`.
+- Fresh primary evidence: `/tmp/gh200-practice-fixed-primary-check.log`, `/tmp/gh200-practice-fixed-primary-browser.log`, and `/tmp/gh200-practice-fixed-primary-hands-on.log` all exited 0 (47 tests plus validators, browser regression, and hands-on 17/17). The exact-source Check handler and final responsive `@media` syntax were rechecked after their interim regressions. Screenshots: `/tmp/gh200-practice-final-{correct,refs}-{360,1440}.png`.
+- Review status: A and B both passed exact-hash isolated, connected, and final-cohesion review. A inspected initial, wrong, correct, review-empty, and References states at 360/768/1440 and ran a fresh 12.827s zero-failure suite; B passed with fresh 13.3s browser evidence. Monitor freshness/scope passed and the final ledger is resolved. Release is **READY** for the primary only. No commit, push, deployment, CI dispatch, learner job, or configuration change has occurred for this refinement.
+
 ## Reference-roadmap redesign — current authoritative release record (2026-10-09 UTC)
 
 - The published circles, lavender/cream palette, and stacked-card interpretation were explicitly rejected. `/root/reference_ui_redesign` owns a reference-led local visual replacement across `visual/` and the browser regression only; curriculum, runtime data, hands-on, workflows, package dependencies, commits, publication, CI, and learner jobs remain out of scope.

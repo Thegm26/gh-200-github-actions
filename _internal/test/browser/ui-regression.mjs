@@ -307,24 +307,20 @@ try {
     assert.ok(await library.page.locator('.question-sources a').count() > 0, 'checked answer exposes source links');
     await library.page.reload();
     assert.equal(await library.page.locator(`input[name="practice-answer"][value="${firstQuestion.correct}"]`).isChecked(), true, 'practice answer survives reload');
-    await library.page.getByRole('button', { name: 'Open exam practice resources' }).click();
+    assert.equal(await library.page.locator('.question-sources a').first().textContent(), 'Source', 'answer links use the concise Source label');
+    await library.page.getByRole('button', { name: 'Exam practice resources' }).click();
     await library.page.getByRole('heading', { name: 'References' }).waitFor();
-    await library.page.getByRole('heading', { name: 'Exam practice resources' }).waitFor();
-    assert.match(await library.page.locator('#exam-practice').textContent(), /not released past exam papers/i, 'exam area rejects past-paper claim');
-    assert.ok(await library.page.locator('.compact-reference .reference-open').count() >= 2, 'exam resources expose their external links');
-    assert.equal(await library.page.locator('#exam-practice .reference-details').count(), 0, 'links-only exam resources have no fake offline content or downloads');
-    const snapshot = library.page.locator('[data-reference-id="github-docs-workflow-syntax-snapshot"]');
-    await assert.equal(await snapshot.locator('details.reference-details').getAttribute('open'), null, 'content-backed reference details start closed');
-    await assert.match(await snapshot.locator('.reference-badge').textContent(), /Official/, 'primary reference has an official badge');
-    const download = library.page.waitForEvent('download');
-    await snapshot.locator('details.reference-details > summary').click();
-    await snapshot.getByRole('button', { name: /Download source snapshot/ }).click();
-    const artifact = await download;
-    assert.match(artifact.suggestedFilename(), /\.md$/, 'reference download is Markdown');
-    const downloaded = await readFile(await artifact.path(), 'utf8');
-    assert.match(downloaded, /Source: https:/, 'download includes source metadata');
-    assert.match(downloaded, /Content: (source-snapshot|original-summary)/, 'download records content classification');
-    assert.match(await library.page.locator('.reference-card button').first().getAttribute('aria-label'), /Download .+: .+/, 'reference download has a unique title-aware accessible name');
+    await library.page.getByRole('heading', { name: 'Exam practice' }).waitFor();
+    assert.equal(await library.page.locator('.reference-badge, .reference-details, .download-card, .offline-read').count(), 0, 'references omit badges, disclosures, offline readers, and downloads');
+    const catalog = await library.page.evaluate(() => window.GH200Course.references.filter((reference) => /^https:\/\//.test(reference.url)).map((reference) => reference.url));
+    const links = library.page.locator('.reference-title-link');
+    assert.equal(await links.count(), catalog.length, 'every catalog URL is rendered as a title link');
+    const renderedUrls = await links.evaluateAll((nodes) => nodes.map((node) => node.getAttribute('href')));
+    assert.deepEqual([...renderedUrls].sort(), [...catalog].sort(), 'reference title links preserve every catalog URL');
+    for (let index = 0; index < catalog.length; index += 1) {
+      assert.equal(await links.nth(index).getAttribute('target'), '_blank', 'reference opens in a new tab');
+      assert.equal(await links.nth(index).getAttribute('rel'), 'noreferrer', 'reference retains noreferrer');
+    }
     await assertNoOverflow(library.page);
     assert.deepEqual(library.errors, [], 'practice/library has no page errors');
     assert.deepEqual(library.external, [], 'practice/library makes no external requests until learner opens a source');
