@@ -1,6 +1,6 @@
 description: incomplete action
 inputs:
-  prefix: {}
+  prefix:
 runs:
   using: composite
   steps:

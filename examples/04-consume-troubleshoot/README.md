@@ -1,23 +1,23 @@
 # 04 — consume and troubleshoot run evidence
 
-## Exact target time
+## Prerequisites and focused goal
 
-25 minutes (01:15–01:40).
+Complete canonical lab 11 first. Diagnose one run record and select the smallest recovery action.
 
 ## Objective and domain
 
-Consume and troubleshoot workflows: use run evidence, expand anchors, isolate matrix failures, select logs/artifacts/API, and choose the correct reuse abstraction.
+Consume and troubleshoot workflows: use run evidence, expand anchors and merge keys, isolate matrix failures, select logs/artifacts/API, and choose the correct reuse abstraction.
 
 ## Files to inspect or edit
 
 - Inspect `run-evidence.json` and inactive `workflow-fragment.yml.txt`.
 - Record decisions in `attempt.md`.
-- Compare with `solution.md` after minute 20.
+- Compare with `solution.md` only after recording every decision.
 
 ## Tasks
 
 1. Identify the only failed matrix coordinate and the smallest useful rerun.
-2. Expand the anchor and state the effective `shell` and `timeout-minutes`.
+2. Expand the anchor and merge key, then state the effective `shell` and `timeout-minutes`.
 3. Pick run log, artifact, or REST API for: command stderr; compiled binary; automated cross-run inventory.
 4. Classify: copied new-repo scaffold; central deployment graph; reusable three-step sequence within a job.
 5. Explain disable versus delete when history and later re-enable matter.
@@ -37,7 +37,7 @@ Explain why artifact retention can remove the file while run metadata still exis
 
 ## Answer or solution location
 
-Use [`solution.md`](solution.md) only after completing `attempt.md`.
+Use [`solution.md`](solution.md) only after completing `attempt.md`. The local check validates the scenario answer format; manually distinguish GitHub-supported anchors/aliases from this plain-YAML merge-key interpretation exercise.
 
 ## Primary official links
 
@@ -47,4 +47,3 @@ Use [`solution.md`](solution.md) only after completing `attempt.md`.
 - [Reusing workflows](https://docs.github.com/actions/sharing-automations/reusing-workflows)
 - [Creating starter workflows](https://docs.github.com/actions/sharing-automations/creating-workflow-templates-for-your-organization)
 - [Disabling and enabling a workflow](https://docs.github.com/actions/managing-workflow-runs/disabling-and-enabling-a-workflow)
-

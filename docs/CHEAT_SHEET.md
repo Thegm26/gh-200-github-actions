@@ -26,7 +26,7 @@ jobs:
 
 Contexts: `github` (event/ref), `github.event` (payload), `runner` (machine), `env` (workflow/job/step env), `vars` (configuration variables), `secrets` (masked secrets), `inputs` (manual/reusable call), `matrix`/`strategy`, `needs.<job>.outputs`, `job`, `steps.<id>.outputs`. Expressions use `${{ }}`; do not interpolate untrusted context directly into `run:`. `GITHUB_ENV` affects later steps in its job; `GITHUB_OUTPUT` exposes a step output; job outputs bridge jobs; artifacts bridge files.
 
-YAML anchors are file-local reuse: `defaults: &defaults { shell: bash }`, then `<<: *defaults`. In troubleshooting, expand merge keys mentally; an explicit key wins. See [anchors](https://docs.github.com/actions/reference/workflows-and-actions/reusing-workflow-configurations#yaml-anchors-and-aliases).
+GitHub documents YAML anchors and aliases for workflow reuse. Plain YAML parsers may also interpret merge keys such as `<<: *base`; this repository uses that only as a troubleshooting simulation, not as evidence that GitHub Actions supports merge keys. Expand any simulated mapping mentally before judging its effective values. See [anchors](https://docs.github.com/actions/reference/workflows-and-actions/reusing-workflow-configurations#yaml-anchors-and-aliases).
 
 `workflow_dispatch` is manual; `schedule` is cron; `repository_dispatch` is webhook-style; `push`/`pull_request` are repository events. Scope events and permissions narrowly. [Triggers](https://docs.github.com/actions/writing-workflows/choosing-when-your-workflow-runs/triggering-a-workflow).
 

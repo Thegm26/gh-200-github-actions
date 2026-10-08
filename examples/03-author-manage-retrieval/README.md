@@ -1,12 +1,12 @@
 # 03 — author/manage retrieval checkpoint
 
-## Exact target time
+## Prerequisites and focused goal
 
-10 minutes (00:55–01:05).
+Complete examples 01–02. Retrieve workflow boundaries without opening their solutions.
 
 ## Objective and domain
 
-Author and manage workflows: retrieve syntax and boundary rules under exam-style time pressure.
+Author and manage workflows: retrieve syntax and boundary rules, then use misses to select a small lab to repeat.
 
 ## Files to inspect or edit
 
@@ -23,7 +23,7 @@ Author and manage workflows: retrieve syntax and boundary rules under exam-style
 
 ## Expected observable result
 
-At least 6/8 correct and four correct free-recall statements. If below either threshold, repeat Modules 01–02 for 10 minutes before continuing.
+Record every missed objective and repeat its canonical lab before retrying. A score is feedback, not readiness certification.
 
 ## Verification commands or checklist
 
@@ -41,4 +41,3 @@ Open [`solution.md`](solution.md) after the quiz.
 
 - [Microsoft GH-200 author/manage objectives](https://learn.microsoft.com/en-us/credentials/certifications/resources/study-guides/gh-200#skills-measured-as-of-january-2026)
 - [Workflow syntax](https://docs.github.com/actions/writing-workflows/workflow-syntax-for-github-actions)
-

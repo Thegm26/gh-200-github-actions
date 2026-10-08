@@ -1,8 +1,8 @@
 # 05 — custom actions: composite, JavaScript, and Docker
 
-## Exact target time
+## Prerequisites and focused goal
 
-20 minutes (01:40–02:00).
+Complete canonical lab 10 first. Repair one metadata contract for each action type without publishing anything.
 
 ## Objective and domain
 
@@ -37,13 +37,12 @@ Checklist: composite output maps from a step; JS writes through the environment-
 
 ## Answer or solution location
 
-Compare against [`solution/composite/action.yml`](solution/composite/action.yml), [`solution/javascript`](solution/javascript), and [`solution/docker`](solution/docker).
+Compare against [`solution/composite/action.yml`](solution/composite/action.yml), [`solution/javascript`](solution/javascript), and [`solution/docker`](solution/docker). The local verifier is a supplement; manual success requires explaining metadata placement, action runtime, and release/distribution choice.
 
 ## Primary official links
 
-- [Creating actions](https://docs.github.com/actions/sharing-automations/creating-actions)
-- [Metadata syntax](https://docs.github.com/actions/sharing-automations/metadata-syntax-for-github-actions)
-- [Creating a JavaScript action](https://docs.github.com/actions/sharing-automations/creating-actions/creating-a-javascript-action)
-- [Creating a Docker container action](https://docs.github.com/actions/sharing-automations/creating-actions/creating-a-docker-container-action)
-- [Creating a composite action](https://docs.github.com/actions/sharing-automations/creating-actions/creating-a-composite-action)
-
+- [Creating actions](https://docs.github.com/en/actions/tutorials/create-actions)
+- [Metadata syntax](https://docs.github.com/en/actions/reference/workflows-and-actions/metadata-syntax)
+- [Creating a JavaScript action](https://docs.github.com/en/actions/tutorials/create-actions/create-a-javascript-action)
+- [Creating a Docker container action](https://docs.github.com/en/actions/tutorials/use-containerized-services/create-a-docker-container-action)
+- [Creating a composite action](https://docs.github.com/en/actions/tutorials/create-actions/create-a-composite-action)

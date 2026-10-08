@@ -44,14 +44,19 @@ jobs:
           name: report-${{ matrix.os }}-${{ matrix.node }}
           path: report.txt
           retention-days: 7
+  risk:
+    needs: prepare
+    uses: ./.github/workflows/reusable-risk.yml
+    with:
+      version: ${{ needs.prepare.outputs.version }}
   deployment-review-only:
     if: ${{ github.event_name == 'workflow_dispatch' && inputs.run_preview }}
-    needs: test
+    needs: [test, risk]
     runs-on: [self-hosted, linux, finance-production]
     environment: production
     permissions:
       contents: read
       id-token: write
     steps:
-      - run: echo 'No deployment: verify attestation identity and digest before any authorized promotion.'
-
+      - run: >-
+          echo 'No deployment: reusable risk is ${{ needs.risk.outputs.risk }}; verify attestation identity and digest before any authorized promotion.'

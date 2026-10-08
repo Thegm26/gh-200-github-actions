@@ -1,8 +1,8 @@
 # 07 — enterprise policy, runner groups, and networking
 
-## Exact target time
+## Prerequisites and focused goal
 
-25 minutes (02:20–02:45).
+Complete canonical lab 12 first. Separate runner routing, action policy, and network decisions.
 
 ## Objective and domain
 
@@ -36,12 +36,11 @@ Checklist: least repository access; static-egress rationale; explicit self-hoste
 
 ## Answer or solution location
 
-Use [`solution.json`](solution.json) and [`solution.md`](solution.md) after the checker.
+Use [`solution.json`](solution.json) and [`solution.md`](solution.md) after the checker. The check evaluates this scenario only; runner groups, policies, and IP restrictions require authorized enterprise review to prove.
 
 ## Primary official links
 
-- [Enforcing policies for GitHub Actions](https://docs.github.com/enterprise-cloud@latest/admin/enforcing-policies/enforcing-policies-for-your-enterprise/enforcing-policies-for-github-actions-in-your-enterprise)
-- [Managing access to self-hosted runners with groups](https://docs.github.com/actions/how-tos/manage-runners/self-hosted-runners/managing-access-to-self-hosted-runners-using-groups)
-- [Choosing the runner for a job](https://docs.github.com/actions/using-jobs/choosing-the-runner-for-a-job)
+- [Enforcing policies for GitHub Actions](https://docs.github.com/en/enterprise-cloud%40latest/admin/enforcing-policies/enforcing-policies-for-your-enterprise/enforcing-policies-for-github-actions-in-your-enterprise)
+- [Managing access to self-hosted runners with groups](https://docs.github.com/en/actions/how-tos/manage-runners/self-hosted-runners/manage-access)
+- [Choosing the runner for a job](https://docs.github.com/en/actions/how-tos/manage-runners/self-hosted-runners/use-in-a-workflow)
 - [About IP allow lists](https://docs.github.com/enterprise-cloud@latest/admin/configuring-settings/hardening-security-for-your-enterprise/restricting-network-traffic-to-your-enterprise-with-an-ip-allow-list)
-

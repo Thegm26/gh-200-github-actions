@@ -1,0 +1,3 @@
+name: reuse
+on: {workflow_dispatch: {}}
+jobs: {risk: {uses: './.github/workflows/reusable-risk.yml', with: {sample_size: 3}}}

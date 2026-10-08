@@ -1,0 +1,3 @@
+name: runner
+on: {workflow_dispatch: {}}
+jobs: {scan: {runs-on: [self-hosted, approved], steps: [{run: echo scan}]}}

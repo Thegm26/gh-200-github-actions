@@ -6,12 +6,6 @@ on:
   pull_request:
     branches: [main]
   workflow_dispatch:
-    inputs:
-      run_extended:
-        description: Run the optional container smoke test.
-        required: true
-        default: false
-        type: boolean
 
 permissions:
   contents: read
@@ -44,19 +38,21 @@ jobs:
           node-version: ${{ matrix.node }}
           cache: npm
       - run: npm ci
-      - run: npm test
-      - name: Validate workflow safety
+      - run: npm run check
+      - name: Validate workflow safety and study content
         if: ${{ runner.os == 'Linux' && matrix.node == 22 }}
-        run: npm run validate:workflows
+        run: |
+          npm run validate:content
+          npm run validate:workflows
       - name: Save test evidence
         if: ${{ always() && runner.os == 'Linux' }}
         shell: bash
-        run: printf 'node=%s\nos=%s\n' '${{ matrix.node }}' '${{ runner.os }}' > test-evidence.txt
+        run: printf 'node=%s\nos=%s\n' '${{ matrix.node }}' '${{ runner.os }}' > 'test-evidence-node-${{ matrix.node }}.txt'
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         if: ${{ always() && runner.os == 'Linux' }}
         with:
           name: test-evidence-node-${{ matrix.node }}
-          path: test-evidence.txt
+          path: test-evidence-node-${{ matrix.node }}.txt
           if-no-files-found: error
 
   risk:
@@ -93,6 +89,15 @@ jobs:
         with:
           pattern: test-evidence-node-*
           merge-multiple: true
+      - name: Verify all matrix evidence
+        shell: bash
+        run: |
+          for node_version in 20 22; do
+            evidence_file="test-evidence-node-${node_version}.txt"
+            test -f "$evidence_file"
+            grep --fixed-strings --line-regexp "node=${node_version}" "$evidence_file"
+            grep --fixed-strings --line-regexp 'os=Linux' "$evidence_file"
+          done
       - name: Start service and smoke test it
         id: smoke
         shell: bash

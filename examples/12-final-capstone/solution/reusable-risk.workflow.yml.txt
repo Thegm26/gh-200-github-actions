@@ -1,0 +1,25 @@
+name: reusable risk contract (inactive training solution)
+on:
+  workflow_call:
+    inputs:
+      version:
+        required: true
+        type: string
+    outputs:
+      risk:
+        description: Training risk result returned to the caller.
+        value: ${{ jobs.assess.outputs.risk }}
+permissions:
+  contents: read
+jobs:
+  assess:
+    runs-on: ubuntu-latest
+    outputs:
+      risk: ${{ steps.score.outputs.risk }}
+    steps:
+      - id: score
+        env:
+          VERSION: ${{ inputs.version }}
+        run: |
+          printf 'risk=low\n' >> "$GITHUB_OUTPUT"
+          printf 'Assessed version %s as training-only low risk\n' "$VERSION"

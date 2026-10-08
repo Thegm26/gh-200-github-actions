@@ -15,19 +15,17 @@ on:
         required: true
         type: choice
         options: [dev, staging]
-run-defaults: &run-defaults
-  shell: bash
-  working-directory: .
+defaults: &run-defaults
+  run:
+    shell: bash
+    working-directory: .
 jobs:
   inspect:
     if: ${{ github.event_name == 'push' || inputs.deploy == true }}
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        <<: *run-defaults
+    defaults: *run-defaults
     steps:
       - name: Treat event text as data
         env:
           EVENT_TEXT: ${{ github.event.pull_request.title || 'manual-or-push' }}
         run: printf '%s\n' "$EVENT_TEXT"
-

@@ -2,7 +2,9 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { parseDocument } from 'yaml';
 import { loadQuestions, validateQuestions } from './quiz.mjs';
+import { isIllustrativeTemplateUrl } from './link-policy.mjs';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const workflowRoot = path.join(root, '.github', 'workflows');
@@ -24,7 +26,7 @@ const expectedModules = [
   '12-final-capstone',
 ];
 const requiredModuleSections = [
-  '## Exact target time',
+  '## Prerequisites and focused goal',
   '## Objective and domain',
   '## Files to inspect or edit',
   '## Tasks',
@@ -35,6 +37,7 @@ const requiredModuleSections = [
 ];
 const questions = loadQuestions();
 const errors = validateQuestions(questions);
+const checkLinks = process.argv.includes('--links');
 const minimumByDomain = { 'author-manage': 15, 'consume-troubleshoot': 11, 'author-actions': 11, enterprise: 15, 'secure-optimize': 8 };
 for (const [domain, minimum] of Object.entries(minimumByDomain)) {
   const count = questions.filter((question) => question.domain === domain).length;
@@ -76,19 +79,25 @@ for (const module of expectedModules) {
     errors.push(`${module} needs separated answer/solution material`);
   }
 }
+const timedInstruction = /## Exact target time|\bafter minute\b|\btimed\s+(?:study|retrieval|enterprise)|\buse a timer\b|\btime-ordered\b|\b4h45\b|\b285 minutes\b|\bemergency 3-hour\b|\bfinal 60 minutes\b|\b\d+[- ]minutes?\b/i;
+for (const directory of ['docs', 'examples', 'labs']) {
+  for (const file of walk(path.join(root, directory))) {
+    if (file === path.join(root, 'docs', 'SESSION_HANDOFF.md')) continue;
+    if (timedInstruction.test(fs.readFileSync(file, 'utf8'))) errors.push(`${path.relative(root, file)} retains retired timed-course instructions`);
+  }
+}
 
 const routeReadme = fs.readFileSync(path.join(root, 'README.md'), 'utf8');
-const routeRows = [...routeReadme.matchAll(/^\|\s*\d{2}:\d{2}–\d{2}:\d{2}\s*\|\s*(\d+)\s*\|([^\n]+)$/gm)];
-const routeMinutes = routeRows.reduce((sum, match) => sum + Number(match[1]), 0);
-if (routeMinutes !== 285) errors.push(`4h45 route totals ${routeMinutes} minutes; expected 285`);
-if (routeRows.length !== 18) errors.push(`4h45 route has ${routeRows.length} blocks; expected 18`);
-for (const [, minutes, activity] of routeRows) {
-  const isBreak = /\bbreak\b/i.test(activity);
-  const hasExerciseLink = /\]\(examples\/[^)]+\/README\.md(?:#[^)]+)?\)/.test(activity);
-  if (!isBreak && !hasExerciseLink) errors.push(`active ${minutes}-minute route block does not link to an example: ${activity.trim()}`);
+for (const forbidden of ['4h45', '285 minutes', 'Emergency 3-hour', 'Use a timer']) {
+  if (routeReadme.includes(forbidden)) errors.push(`README must not contain retired timed-route text: ${forbidden}`);
 }
 for (const module of expectedModules) {
-  if (!routeReadme.includes(`examples/${module}/README.md`)) errors.push(`route does not link to examples/${module}`);
+  const readme = fs.readFileSync(path.join(examplesRoot, module, 'README.md'), 'utf8');
+  if (/## Exact target time|\bafter minute\b|\btimed\s+(?:study|retrieval|enterprise)|\buse a timer\b/i.test(readme)) errors.push(`${module}/README.md retains timed-study instructions`);
+}
+for (const required of ['docs/START_HERE.md', 'docs/COURSE.md', 'docs/BLUEPRINT.md', 'npm run learn -- start 01-first-workflow', 'npm run doctor']) {
+  const target = required.startsWith('docs/') ? path.join(root, required) : null;
+  if (target ? !fs.existsSync(target) : !routeReadme.includes(required)) errors.push(`missing beginner navigation: ${required}`);
 }
 
 const topicCoverage = {
@@ -118,5 +127,80 @@ const executableStarters = walk(path.join(root, 'labs')).filter((file) => file.i
 if (executableStarters.length) errors.push(`broken starter YAML must be inactive extensions; found ${executableStarters.map((file) => path.relative(root, file)).join(', ')}`);
 const activeLabFiles = fs.existsSync(workflowRoot) ? walk(workflowRoot).filter((file) => file.includes(`${path.sep}labs${path.sep}`)) : [];
 if (activeLabFiles.length) errors.push(`lab content discovered under active workflows: ${activeLabFiles.join(', ')}`);
+
+const triggerSolution = fs.readFileSync(path.join(examplesRoot, '01-triggers-contexts', 'solution.workflow.yml.txt'), 'utf8');
+if (/^run-defaults:/m.test(triggerSolution) || !/^defaults:\s*&/m.test(triggerSolution) || !/^\s+defaults:\s*\*/m.test(triggerSolution)) {
+  errors.push('01 solution must use valid defaults.run anchor/alias syntax, not unsupported run-defaults');
+}
+for (const relative of ['examples/02-outputs-matrix-services/solution.workflow.yml.txt', 'labs/01-author-manage/solution/release.yml']) {
+  const solution = fs.readFileSync(path.join(root, relative), 'utf8');
+  if (/runs-on:\s*\$\{\{\s*matrix\.os\s*\}\}[\s\S]*?services:/m.test(solution)) {
+    errors.push(`${relative} incorrectly combines a Windows-capable OS matrix with service containers`);
+  }
+  if (!/runs-on:\s*windows-latest/.test(solution) || !/runs-on:\s*ubuntu-latest[\s\S]*?services:/.test(solution)) {
+    errors.push(`${relative} must demonstrate separate Linux service and Windows jobs`);
+  }
+}
+const capstone = fs.readFileSync(path.join(examplesRoot, '12-final-capstone', 'solution', 'capstone.workflow.yml.txt'), 'utf8');
+const reusableCapstone = fs.readFileSync(path.join(examplesRoot, '12-final-capstone', 'solution', 'reusable-risk.workflow.yml.txt'), 'utf8');
+if (!/uses:\s*\.\/\.github\/workflows\/reusable-risk\.yml/.test(capstone) || !/needs\.risk\.outputs\.risk/.test(capstone) || !/on:\s*\n\s*workflow_call:/.test(reusableCapstone) || !/steps\.score\.outputs\.risk/.test(reusableCapstone)) {
+  errors.push('final capstone must demonstrate caller and reusable workflow outputs');
+}
+const actionVerifier = fs.readFileSync(path.join(examplesRoot, '05-custom-actions', 'verify.mjs'), 'utf8');
+if (!/process\.exitCode\s*=\s*1/.test(actionVerifier)) errors.push('custom-action verifier must fail incomplete work');
+const securePattern = fs.readFileSync(path.join(root, 'labs/05-secure-optimize/solution/secure-pattern.yml'), 'utf8');
+if (/^permissions:\s*\{[^}]*?(?:id-token|attestations):\s*write/m.test(securePattern)) errors.push('Lab 05 must not grant OIDC or attestation permissions globally');
+
+const instructionalYaml = [
+  'labs/01-author-manage/solution/release.yml',
+  'labs/05-secure-optimize/solution/secure-pattern.yml',
+  'examples/12-final-capstone/solution/capstone.workflow.yml.txt',
+];
+for (const relative of instructionalYaml) {
+  const text = fs.readFileSync(path.join(root, relative), 'utf8');
+  const document = parseDocument(text, { merge: true });
+  if (document.errors.length) {
+    errors.push(`${relative} must parse as YAML: ${document.errors.map((error) => error.message).join('; ')}`);
+  }
+}
+const mergeFragment = fs.readFileSync(path.join(root, 'examples/04-consume-troubleshoot/workflow-fragment.yml.txt'), 'utf8');
+const mergeDocument = parseDocument(mergeFragment, { merge: true });
+if (mergeDocument.errors.length) {
+  errors.push(`04 workflow fragment must parse with anchor/alias/merge-key syntax: ${mergeDocument.errors.map((error) => error.message).join('; ')}`);
+} else {
+  const mergedRun = mergeDocument.toJS({ merge: true })?.jobs?.lint?.defaults?.run;
+  if (mergedRun?.['timeout-minutes'] !== 10 || mergedRun?.shell !== 'pwsh') {
+    errors.push('04 workflow fragment must preserve timeout 10 while an explicit shell overrides the merged anchor value.');
+  }
+}
+
+function primaryUrls() {
+  const allowed = new Set(['docs.github.com', 'learn.microsoft.com', 'cli.github.com', 'github.com']);
+  const files = [path.join(root, 'README.md'), ...walk(path.join(root, 'docs')), ...walk(path.join(root, 'labs')), ...walk(path.join(root, 'examples')), path.join(root, 'quiz', 'questions.json')];
+  const urls = new Set();
+  for (const file of files) {
+    const text = fs.readFileSync(file, 'utf8');
+    for (const match of text.matchAll(/https:\/\/[^\s)"'`>]+/g)) {
+      const url = match[0].replace(/[.,;]+$/, '');
+      try { if (allowed.has(new URL(url).hostname) && !isIllustrativeTemplateUrl(url)) urls.add(url); } catch { errors.push(`invalid URL in ${path.relative(root, file)}: ${url}`); }
+    }
+  }
+  return [...urls].sort();
+}
+
+async function verifyLinks() {
+  const failures = [];
+  for (const url of primaryUrls()) {
+    let response;
+    try {
+      response = await fetch(url, { method: 'HEAD', redirect: 'follow', signal: AbortSignal.timeout(15_000) });
+      if (response.status === 405 || response.status === 501) response = await fetch(url, { method: 'GET', redirect: 'follow', signal: AbortSignal.timeout(15_000) });
+      if (!response.ok) failures.push(`${response.status} ${url}`);
+    } catch (error) { failures.push(`${url}: ${error.message}`); }
+  }
+  if (failures.length) errors.push(`primary-link check failed:\n${failures.join('\n')}`);
+  else console.log(`Primary links reachable: ${primaryUrls().length}.`);
+}
+if (checkLinks) await verifyLinks();
 if (errors.length) { console.error(`Content validation failed:\n- ${errors.join('\n- ')}`); process.exitCode = 1; }
-else console.log(`Content valid: ${questions.length} questions; ${expectedLabs.length} labs; ${expectedModules.length} timed example modules; route=285 minutes; inactive challenge YAML confirmed.`);
+else console.log(`Content valid: ${questions.length} questions; ${expectedLabs.length} domain indexes; ${expectedModules.length} focused examples; inactive challenge YAML confirmed.`);

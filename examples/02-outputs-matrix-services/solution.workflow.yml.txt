@@ -8,19 +8,16 @@ jobs:
     steps:
       - id: meta
         run: echo "version=2.4.0" >> "$GITHUB_OUTPUT"
-  test:
+  test-linux:
     needs: prepare
-    runs-on: ${{ matrix.os }}
+    runs-on: ubuntu-latest
     strategy:
       fail-fast: false
       max-parallel: 2
       matrix:
-        os: [ubuntu-latest, windows-latest]
         node: [20, 22]
-        exclude:
-          - { os: windows-latest, node: 22 }
         include:
-          - { os: ubuntu-latest, node: 24, experimental: true }
+          - { node: 24, experimental: true }
     services:
       postgres:
         image: postgres:16
@@ -35,5 +32,19 @@ jobs:
     steps:
       - run: echo "MODE=integration" >> "$GITHUB_ENV"
       - run: printf '%s %s\n' "${{ needs.prepare.outputs.version }}" "$MODE"
-      - run: echo "## ${{ matrix.os }} / ${{ matrix.node }}" >> "$GITHUB_STEP_SUMMARY"
-
+      - run: echo "## ubuntu-latest / ${{ matrix.node }}" >> "$GITHUB_STEP_SUMMARY"
+  test-windows:
+    needs: prepare
+    runs-on: windows-latest
+    strategy:
+      fail-fast: false
+      max-parallel: 2
+      matrix:
+        node: [20]
+    steps:
+      - shell: pwsh
+        run: '"MODE=integration" | Out-File -FilePath $env:GITHUB_ENV -Append'
+      - shell: pwsh
+        run: '"${{ needs.prepare.outputs.version }} $env:MODE"'
+      - shell: pwsh
+        run: '"## windows-latest / ${{ matrix.node }}" | Out-File -FilePath $env:GITHUB_STEP_SUMMARY -Append'

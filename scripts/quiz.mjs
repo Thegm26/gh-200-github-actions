@@ -24,10 +24,15 @@ export function validateQuestions(questions) {
     if (seen.has(q.id)) errors.push(`${label} duplicate id ${q.id}`); seen.add(q.id);
     if (!domains.includes(q.domain)) errors.push(`${label} invalid domain ${q.domain}`);
     if (!Array.isArray(q.options) || q.options.length !== 4 || q.options.some((v) => typeof v !== 'string' || !v.trim())) errors.push(`${label} needs exactly four nonempty options`);
+    if (Array.isArray(q.options) && q.options.every((option) => typeof option === 'string') && new Set(q.options.map((option) => option.trim().toLowerCase())).size !== q.options.length) errors.push(`${label} options must be distinct`);
     if (!Number.isInteger(q.correct) || q.correct < 0 || q.correct > 3) errors.push(`${label} correct must be 0–3`);
+    if (typeof q.question !== 'string' || q.question.trim().length < 45 || !q.question.includes('?')) errors.push(`${label} needs a substantive scenario question`);
     if (!Array.isArray(q.sources) || !q.sources.length || q.sources.some((url) => !/^https:\/\/(?:docs\.github\.com|learn\.microsoft\.com)\/|^https:\/\/github\.com\/actions\/runner-images(?:\/|$)/.test(url))) errors.push(`${label} needs primary https source URL(s)`);
   }
   for (const domain of domains) if (!questions.some((q) => q.domain === domain)) errors.push(`missing ${domain} coverage`);
+  const correctPositions = [0, 1, 2, 3].map((position) => questions.filter((q) => q.correct === position).length);
+  if (correctPositions.some((count) => count === 0)) errors.push('correct answers must use every displayed position');
+  if (correctPositions.some((count) => count / questions.length > 0.4)) errors.push(`correct-answer positions are unbalanced: ${correctPositions.join('/')}`);
   return errors;
 }
 

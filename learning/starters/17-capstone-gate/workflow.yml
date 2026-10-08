@@ -1,0 +1,3 @@
+name: gate
+on: {workflow_dispatch: {}}
+jobs: {build: {runs-on: ubuntu-latest, steps: [{run: echo build}]}, deploy: {runs-on: ubuntu-latest, permissions: {contents: write}, steps: [{run: echo deploy}]}}

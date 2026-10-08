@@ -1,50 +1,67 @@
-# GH-200 GitHub Actions: 4h45 CLI Bootcamp
+# Learn GitHub Actions for GH-200
 
-An intensive, hands-on review aligned to the **Microsoft GH-200 skills measured as of January 2026**. Technical claims link to [the official study guide](https://learn.microsoft.com/en-us/credentials/certifications/resources/study-guides/gh-200) and GitHub Docs; this repository contains no exam dumps.
+This is a beginner-first, local practice course for the [Microsoft GH-200 study guide (skills measured January 2026)](https://learn.microsoft.com/en-us/credentials/certifications/resources/study-guides/gh-200). It teaches GitHub Actions through one small task at a time. It is not an exam dump and does not promise an exam result.
 
-## Start in exactly three commands
+## Start here
 
-Prerequisites: Git, Node.js 20+, npm, a GitHub account/repository for optional workflow runs, and VS Code with the GitHub Actions extension.
+Prerequisites: Git, Node.js 18+ and npm (Node 22+ is recommended). A GitHub account and `gh` CLI are optional until the GitHub sandbox runbook.
 
 ```bash
+git clone https://github.com/Thegm26/gh-200-github-actions.git
+cd gh-200-github-actions
 npm install
-code .
-npm run check
+npm run doctor
+npm run learn -- list
 ```
 
-Then open [`examples/00-blueprint-recall`](examples/00-blueprint-recall/README.md) and follow the numbered tree in order. Every timed study block has concrete files to edit, expected results, local checks, separated solutions, and primary-source links. Intentionally broken or credential/publishing workflow examples use `.yml.txt` and cannot run as GitHub workflows.
+`doctor` checks local prerequisites. `learn list` shows the available small labs and their GH-200 objective/domain. Start with the first lab:
 
-## The 4h45 route (285 minutes)
+```bash
+npm run learn -- start 01-first-workflow
+# edit .practice/01-first-workflow/workflow.yml
+npm run learn -- check 01-first-workflow
+```
 
-Use a timer. At the end of every block, close the file and answer the prompt from memory before looking at the solution. That retrieval step and the alternating domains are deliberate learning strategy, not a technical source; see [Exam strategy](docs/EXAM_STRATEGY.md).
+Expected pattern: `start` reports the new `.practice/<id>` folder; `check` reports either specific fixes or a passing result. A failed check is the intended red step—read its message, edit the starter again, and rerun the same command. `start` never overwrites an existing workspace. To intentionally restart one lab:
 
-| Clock | Minutes | Do / retrieve |
-| --- | ---: | --- |
-| 00:00–00:10 | 10 | [00 blueprint recall](examples/00-blueprint-recall/README.md): write weights/objectives before checking. |
-| 00:10–00:35 | 25 | [01 triggers and contexts](examples/01-triggers-contexts/README.md): typed dispatch, filters, expressions, safe contexts, anchors. |
-| 00:35–00:55 | 20 | [02 outputs, matrix, services](examples/02-outputs-matrix-services/README.md): edit the inactive workflow and run the matrix check. |
-| 00:55–01:05 | 10 | [03 author/manage retrieval](examples/03-author-manage-retrieval/README.md): seeded quiz plus free recall. |
-| 01:05–01:15 | 10 | Break: stand up, water, no scrolling. |
-| 01:15–01:40 | 25 | [04 consume/troubleshoot](examples/04-consume-troubleshoot/README.md): diagnose simulated run evidence and reuse choices. |
-| 01:40–02:00 | 20 | [05 custom actions](examples/05-custom-actions/README.md): runnable local composite/JS work and safe Docker metadata. |
-| 02:00–02:10 | 10 | [06 interleaved debugging](examples/06-interleaved-debugging/README.md): five cross-domain decisions without notes. |
-| 02:10–02:20 | 10 | Break and write three confusing distinctions on paper. |
-| 02:20–02:45 | 25 | [07 policy and runners](examples/07-enterprise-policy-runners/README.md): runner groups, hosted/self-hosted, allow policy, IP decisions. |
-| 02:45–03:10 | 25 | [08 scopes and APIs](examples/08-enterprise-secrets-api/README.md): secrets/vars, retention endpoints, image migration. |
-| 03:10–03:20 | 10 | [09 enterprise retrieval](examples/09-enterprise-retrieval/README.md): seeded quiz plus governance recall. |
-| 03:20–03:30 | 10 | Break. |
-| 03:30–03:55 | 25 | [10 security and identity](examples/10-security-identity/README.md): permissions, injection, OIDC, SHA pinning, environments. |
-| 03:55–04:15 | 20 | [11 supply chain](examples/11-cache-artifacts-attestations/README.md): cache/artifact/package/retention and safe attestation simulation. |
-| 04:15–04:30 | 15 | [12 final capstone](examples/12-final-capstone/README.md): mixed quiz plus repair the cross-domain workflow. |
-| 04:30–04:40 | 10 | [12 solution review](examples/12-final-capstone/README.md#10-minute-review): inspect only misses, then targeted cheat-sheet recall. |
-| 04:40–04:45 | 5 | [12 oral close](examples/12-final-capstone/README.md#5-minute-oral-close): explain five distinctions without notes. |
+```bash
+npm run learn -- reset <id> --yes
+npm run learn -- status
+```
 
-## Labs and quiz
+Use `npm run verify:learning` to verify the course engine. `npm run check` is repository-maintainer integrity validation (tests, content, and workflow contracts); it does **not** measure learner correctness or certify exam readiness.
 
-The numbered `examples/` tree is the main 4h45 route. Each `labs/0*/README.md` is a domain index into those modules for targeted repetition. Run `npm run validate:content` to check route/module integrity. Quiz flags: `--count N`, `--domain TAG`, `--seed TEXT`, `--review-wrong`, `--list-domains`, `--validate`.
+## Your first red → green exercise
 
-## Emergency 3-hour compression
+The start command above already created the workspace; do not run it again. First run `npm run learn -- check 01-first-workflow` to see the red result, then edit `.practice/01-first-workflow/workflow.yml`. Its `on: false` starter is deliberately red. Replace it with:
 
-Spend 10 minutes on [00](examples/00-blueprint-recall/README.md); 35 minutes each across [01–02](examples/01-triggers-contexts/README.md), [07–08](examples/07-enterprise-policy-runners/README.md), and [10–11](examples/10-security-identity/README.md); 20 minutes each on [04](examples/04-consume-troubleshoot/README.md) and [05](examples/05-custom-actions/README.md); then take a 25-question mixed quiz (15 minutes), review misses (15 minutes), and use [12](examples/12-final-capstone/README.md) for the close. Preserve two five-minute breaks.
+```yaml
+on:
+  workflow_dispatch: {}
+```
 
-Primary sources: [GH-200 study guide](https://learn.microsoft.com/en-us/credentials/certifications/resources/study-guides/gh-200), [GitHub Actions documentation](https://docs.github.com/actions). Source roles and learning-method evidence are separated in [SOURCES.md](docs/SOURCES.md).
+Then run `npm run learn -- check 01-first-workflow`. This file is outside `.github/workflows`, so it cannot run by accident. Make one change at a time and recheck.
+
+Only after a pass, compare your work with `learning/solutions/01-first-workflow/workflow.yml`. Do not copy a solution to make a checker pass: the checks inspect workflow structure and decisions, not an answer hash. If stuck, use the task-specific GitHub Docs link in the lab, then retry before viewing the solution.
+
+## Course map
+
+Open [START_HERE.md](docs/START_HERE.md) for vocabulary, platform notes, troubleshooting, and the safe GitHub sandbox option. [COURSE.md](docs/COURSE.md) is the progressive route with primary references; [BLUEPRINT.md](docs/BLUEPRINT.md) maps objective groups to practice evidence and names automatic, manual, and hosted-only limits. [EXTRA_EXERCISES.md](docs/EXTRA_EXERCISES.md) supplies small supplementary drills for advanced objectives outside the canonical 17 labs.
+
+The older [`examples/`](examples) remain useful focused reference exercises and the [`labs/`](labs) indexes group them by domain. They are untimed. Each gives prerequisites, one scope, a success/failure expectation, a check, a retry path, a separated solution, and a next link.
+
+## Readiness loop
+
+1. Complete each learning lab green at least once.
+2. Run the seeded quizzes: `npm run quiz -- --domain <tag> --count 8 --seed practice`.
+3. Record each missed objective, redo its linked lab without the solution, then answer the explanation in your own words.
+4. Use [CHEAT_SHEET.md](docs/CHEAT_SHEET.md) for distinctions, not as a substitute for the exercise.
+5. Re-run `npm run learn -- status` and repeat only unfinished or missed-topic labs.
+
+This is an evidence-based study loop, not a guarantee of readiness or certification.
+
+## Optional GitHub sandbox
+
+The local course makes no GitHub changes. When you are ready to see a real run, follow the exact, non-production instructions in [the sandbox runbook](docs/START_HERE.md#optional-github-sandbox-runbook). Use a disposable repository, no secrets, and delete it when finished.
+
+Technical sources: [GH-200 guide](https://learn.microsoft.com/en-us/credentials/certifications/resources/study-guides/gh-200) and [GitHub Actions documentation](https://docs.github.com/actions). [SOURCES.md](docs/SOURCES.md) explains source roles.

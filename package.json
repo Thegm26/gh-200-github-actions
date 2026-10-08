@@ -7,12 +7,19 @@
   "engines": {
     "node": ">=18"
   },
+  "devDependencies": {
+    "yaml": "2.6.0"
+  },
   "scripts": {
     "start": "node src/server.js",
     "test": "node --test test/curriculum/examples.test.mjs test/curriculum/quiz.test.mjs test/runtime/server.test.js test/runtime/workflows.test.js",
     "quiz": "node scripts/quiz.mjs",
     "validate:content": "node scripts/validate-content.mjs",
     "validate:workflows": "node scripts/verify-workflows.mjs",
-    "check": "npm test && npm run validate:content && npm run validate:workflows"
+    "learn": "node scripts/learn.mjs",
+    "doctor": "node scripts/doctor.mjs",
+    "verify:learning": "node scripts/verify-learning.mjs",
+    "test:learning": "node --test test/learning/learning.test.mjs",
+    "check": "npm test && npm run test:learning && npm run verify:learning && npm run validate:content && npm run validate:workflows"
   }
 }

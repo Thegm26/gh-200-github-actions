@@ -1,0 +1,3 @@
+name: filter
+on: {push: {branches: [main]}}
+jobs: {build: {runs-on: ubuntu-latest, steps: [{run: echo ready}]}}

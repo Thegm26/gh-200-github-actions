@@ -3,16 +3,54 @@ on: workflow_dispatch
 jobs:
   prepare:
     runs-on: ubuntu-latest
+    outputs:
+      version: ${{steps.meta.outputs.version}}
     steps:
       - id: meta
-        run: echo "version=2.4.0" >> "$GITHUB_ENV"
+        run: echo "version=2.4.0" >> "$GITHUB_OUTPUT"
+  windows-test:
+    needs: prepare
+    runs-on: windows-latest
+    strategy:
+      matrix:
+        node: [20]
+    steps:
+      - name: prints-stuff
+        run: |
+          echo "Windows"
+          echo ${{matrix.node}}
   test:
     needs: prepare
     runs-on: ${{ matrix.os }}
+    continue-on-error: ${{matrix.experimental}}
     strategy:
+      fail-fast: false
+      max-parallel: 2
       matrix:
-        os: [ubuntu-latest, windows-latest]
+        include:
+          - os: ubuntu-latest
+            node: 24
+            experimental: true
+        os: [ubuntu-latest]
         node: [20, 22]
+    services:
+      postgres:
+        image: postgres:16
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        env:
+          POSTGRES_USER: lab
+          POSTGRES_PASSWORD: lab
+        ports:
+          - 5432:5432
     steps:
+      - id: writing-mode
+        run: |
+          echo "MODE=integration" >> "$GITHUB_ENV"
+          echo "## Heading2" >> "$GITHUB_STEP_SUMMARY"
+      - name: show mode
+        run: printf '%s\n' "$MODE"
       - run: echo "${{ needs.prepare.outputs.version }}"
-

@@ -9,20 +9,19 @@ defaults: &bash-defaults
 jobs:
   prepare:
     runs-on: ubuntu-latest
-    outputs: { version: ${{ steps.version.outputs.version }} }
+    outputs:
+      version: ${{ steps.version.outputs.version }}
     steps:
       - id: version
         run: echo "version=1.4.0" >> "$GITHUB_OUTPUT"
-  test:
+  test-linux:
     needs: prepare
-    runs-on: ${{ matrix.os }}
+    runs-on: ubuntu-latest
     strategy:
       fail-fast: false
       max-parallel: 2
       matrix:
-        os: [ubuntu-latest, windows-latest]
         node: [20, 22]
-        exclude: [{ os: windows-latest, node: 20 }]
     services:
       postgres:
         image: postgres:16
@@ -32,12 +31,30 @@ jobs:
           --health-cmd "pg_isready -U postgres" --health-interval 10s --health-timeout 5s --health-retries 5
     defaults: *bash-defaults
     steps:
-      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
-      - uses: actions/cache@v4
-        with: { path: ~/.npm, key: npm-${{ runner.os }}-${{ matrix.node }} }
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803
+      - uses: actions/cache@5a3ec84eff668545956fd18022155c47e93e2684
+        with:
+          path: ~/.npm
+          key: "npm-${{ runner.os }}-${{ matrix.node }}"
       - run: |
           echo "DATABASE_URL=postgres://postgres:postgres@localhost:5432/postgres" >> "$GITHUB_ENV"
           echo "## ${{ needs.prepare.outputs.version }}" >> "$GITHUB_STEP_SUMMARY"
       - run: echo test-${{ matrix.node }} > report.txt
-      - uses: actions/upload-artifact@v4
-        with: { name: report-${{ matrix.os }}-${{ matrix.node }}, path: report.txt }
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: "report-ubuntu-${{ matrix.node }}"
+          path: report.txt
+  test-windows:
+    needs: prepare
+    runs-on: windows-latest
+    strategy:
+      fail-fast: false
+      max-parallel: 2
+      matrix: { node: [20] }
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803
+      - run: echo test-${{ matrix.node }} > report.txt
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: "report-windows-${{ matrix.node }}"
+          path: report.txt

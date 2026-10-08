@@ -1,8 +1,8 @@
 # 09 — enterprise retrieval checkpoint
 
-## Exact target time
+## Prerequisites and focused goal
 
-10 minutes (03:10–03:20).
+Complete examples 07–08. Retrieve governance boundaries and use misses to choose a repeat lab.
 
 ## Objective and domain
 
@@ -24,7 +24,7 @@ Manage Actions for the enterprise: retrieve governance distinctions and apply th
 
 ## Expected observable result
 
-At least 8/10 quiz answers and four free-recall prompts correct. If below threshold, repeat Modules 07–08 for 10 minutes.
+Record every missed objective and repeat its canonical lab before retrying. A quiz result is feedback, not an approval or readiness signal.
 
 ## Verification commands or checklist
 
@@ -42,4 +42,3 @@ Use [`solution.md`](solution.md) only after your attempt.
 
 - [Microsoft GH-200 enterprise objectives](https://learn.microsoft.com/en-us/credentials/certifications/resources/study-guides/gh-200#skills-measured-as-of-january-2026)
 - [GitHub Actions enterprise administration](https://docs.github.com/enterprise-cloud@latest/admin/managing-github-actions-for-your-enterprise)
-

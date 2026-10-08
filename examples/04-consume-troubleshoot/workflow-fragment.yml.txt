@@ -7,4 +7,3 @@ jobs:
       run:
         <<: *base
         shell: pwsh
-

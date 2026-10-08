@@ -1,8 +1,8 @@
 # 12 — final mixed capstone and oral close
 
-## Exact target time
+## Prerequisites and focused goal
 
-30 minutes total: 15 minutes capstone (04:15–04:30), 10 minutes review (04:30–04:40), and 5 minutes oral close (04:40–04:45).
+Complete the relevant canonical labs first. Integrate two small repairs and identify remaining hosted-only decisions.
 
 ## Objective and domain
 
@@ -11,44 +11,31 @@ Integrate all five GH-200 domains in one constrained workflow review, then finis
 ## Files to inspect or edit
 
 - Repair `starter/capstone.workflow.yml.txt` and complete `starter/decisions.md`.
-- Run the mixed quiz during the first 15 minutes.
-- Compare with `solution/` only in the 10-minute review window.
+- Inspect the separate inactive reusable-workflow contract in `solution/reusable-risk.workflow.yml.txt` only during review.
+- Compare with `solution/` only after recording the repair plan.
 
 ## Tasks
 
-### 15-minute capstone
-
-1. Run `npm run quiz -- --count 15 --seed route3 --review-wrong`.
-2. Fix trigger filters and typed manual input; retain a safe manual path.
-3. Repair step → job → reusable-workflow output flow.
-4. Correct matrix cancellation/concurrency and choose artifact rather than cache for the report.
-5. Apply minimum permissions, full-SHA pins, safe PR-title handling, and environment gating.
-6. Classify the shared logic as starter/reusable/composite, choose runner governance, and specify attestation verification before trust.
-
-### 10-minute review
-
-Read only missed sections in `solution/`, then use `../../docs/CHEAT_SHEET.md` and `../../docs/LAST_HOUR.md` to close gaps.
-
-### 5-minute oral close
-
-Explain aloud: starter/reusable/composite; artifact/cache; secret/variable; `GITHUB_TOKEN`/PAT/OIDC; full SHA/tag. Add runner group/action policy and generate/verify attestation if time remains.
+1. Run `npm run quiz -- --count 5 --seed capstone`; record misses without opening explanations.
+2. Repair the output path through the reusable-workflow caller to a consuming job.
+3. Replace the report cache with an artifact and write why `write-all`, an unreviewed mutable ref, and direct PR-title interpolation are unsafe.
+4. Explain starter/reusable/composite; artifact/cache; secret/variable; `GITHUB_TOKEN`/PAT/OIDC; and SHA policy versus immutable release tag.
 
 ## Expected observable result
 
-The repaired inactive workflow passes `check.mjs`, the mixed quiz reaches at least 12/15, and you can explain all five distinctions without notes.
+You have a completed repair, a short list of remaining matrix/security defects, and a missed-topic loop. Compare the complete inactive solution only after the attempt.
 
 ## Verification commands or checklist
 
 ```bash
-npm run quiz -- --count 15 --seed route3 --review-wrong
-node examples/12-final-capstone/check.mjs examples/12-final-capstone/starter/capstone.workflow.yml.txt
+npm run quiz -- --count 5 --seed route3
 ```
 
-Checklist: no active workflow copied; no credentials/deployments; write down every miss by objective; stop after the oral close.
+Then run the checker against your starter and compare manually with the solution. Checklist: no active workflow copied; no credentials/deployments; write down every miss by objective. The legacy checker is structural, so manual explanation remains required.
 
 ## Answer or solution location
 
-Use [`solution/capstone.workflow.yml.txt`](solution/capstone.workflow.yml.txt) and [`solution/decisions.md`](solution/decisions.md) only in the review window.
+Use [`solution/capstone.workflow.yml.txt`](solution/capstone.workflow.yml.txt), [`solution/reusable-risk.workflow.yml.txt`](solution/reusable-risk.workflow.yml.txt), and [`solution/decisions.md`](solution/decisions.md) only after the attempt.
 
 ## Primary official links
 
@@ -56,4 +43,3 @@ Use [`solution/capstone.workflow.yml.txt`](solution/capstone.workflow.yml.txt) a
 - [GitHub Actions documentation](https://docs.github.com/actions)
 - [Security hardening](https://docs.github.com/actions/security-for-github-actions/security-guides/security-hardening-for-github-actions)
 - [Artifact attestations](https://docs.github.com/actions/security-for-github-actions/using-artifact-attestations)
-

@@ -1,8 +1,8 @@
 # 01 — triggers, inputs, filters, contexts, expressions, and anchors
 
-## Exact target time
+## Prerequisites and focused goal
 
-25 minutes (00:10–00:35).
+Complete canonical labs 01–04 first. Make one inactive workflow choose events and handle context data safely.
 
 ## Objective and domain
 
@@ -36,7 +36,7 @@ Then confirm: matching push = run; `main` docs-only push = skip; feature `src` p
 
 ## Answer or solution location
 
-Use [`solution.workflow.yml.txt`](solution.workflow.yml.txt) and [`solution.md`](solution.md) only after the checker reports what is missing.
+Use [`solution.workflow.yml.txt`](solution.workflow.yml.txt) and [`solution.md`](solution.md) only after the checker reports what is missing. The legacy checker is structural; also explain filters, typed inputs, and why its YAML anchor example does not establish GitHub support for YAML merge keys.
 
 ## Primary official links
 
@@ -45,4 +45,3 @@ Use [`solution.workflow.yml.txt`](solution.workflow.yml.txt) and [`solution.md`]
 - [Contexts](https://docs.github.com/actions/learn-github-actions/contexts)
 - [Expressions](https://docs.github.com/actions/learn-github-actions/expressions)
 - [YAML anchors and aliases](https://docs.github.com/actions/reference/workflows-and-actions/reusing-workflow-configurations#yaml-anchors-and-aliases)
-

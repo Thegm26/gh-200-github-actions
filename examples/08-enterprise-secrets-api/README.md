@@ -1,8 +1,8 @@
 # 08 — scopes, APIs, runner images, and retention
 
-## Exact target time
+## Prerequisites and focused goal
 
-25 minutes (02:45–03:10).
+Complete canonical labs 12–13 first. Make one scope and API decision without exposing a secret or running a command.
 
 ## Objective and domain
 
@@ -12,7 +12,7 @@ Manage Actions for the enterprise: scope secrets/variables, plan protected envir
 
 - Edit `scope-plan.json` and `api-plan.sh.txt`.
 - Inspect `runner-migration.md`.
-- Compare with `solution/` files after minute 20.
+- Compare with `solution/` files only after completing each decision.
 
 ## Tasks
 
@@ -36,7 +36,7 @@ Checklist: no literal secret values; no API command executes; retention is not c
 
 ## Answer or solution location
 
-Use [`solution/scope-plan.json`](solution/scope-plan.json), [`solution/api-plan.sh.txt`](solution/api-plan.sh.txt), and [`solution/runner-migration.md`](solution/runner-migration.md).
+Use [`solution/scope-plan.json`](solution/scope-plan.json), [`solution/api-plan.sh.txt`](solution/api-plan.sh.txt), and [`solution/runner-migration.md`](solution/runner-migration.md). Its checker catches incomplete placeholders, not semantic policy quality; manually justify scope, review gates, and each inert REST request.
 
 ## Primary official links
 
@@ -46,4 +46,3 @@ Use [`solution/scope-plan.json`](solution/scope-plan.json), [`solution/api-plan.
 - [REST: Actions secrets](https://docs.github.com/rest/actions/secrets)
 - [REST: Actions permissions and retention](https://docs.github.com/rest/actions/permissions)
 - [Runner images](https://github.com/actions/runner-images)
-

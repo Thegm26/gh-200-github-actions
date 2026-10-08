@@ -1,62 +1,1023 @@
 [
-  {"id":"AM01","domain":"author-manage","objective":"triggers-inputs","question":"A release must be started by an operator who chooses a region and explicitly confirms deployment. Which design preserves a Boolean confirmation in expressions?","options":["workflow_dispatch input type boolean, then inputs.confirm","A string env variable set to 'true'","repository_dispatch with a JSON string","a secret named CONFIRM"],"correct":0,"explanation":"workflow_dispatch supports typed Boolean inputs; the inputs context preserves Boolean values.","sources":["https://docs.github.com/actions/writing-workflows/workflow-syntax-for-github-actions#onworkflow_dispatchinputs"]},
-  {"id":"AM02","domain":"author-manage","objective":"reusable-inputs","question":"A caller must pass a deploy target and a cloud secret to a centrally maintained workflow. What is required in the called workflow?","options":["on.workflow_call declarations for inputs and secrets","workflow_dispatch declarations only","a composite action metadata file","repository variables only"],"correct":0,"explanation":"A reusable workflow declares its call contract under workflow_call, including inputs and secrets.","sources":["https://docs.github.com/actions/sharing-automations/reusing-workflows"]},
-  {"id":"AM03","domain":"author-manage","objective":"job-outputs","question":"Job build computes a digest that deploy must consume. Which path crosses the job boundary?","options":["step writes GITHUB_OUTPUT → job outputs maps it → needs.build.outputs.digest","step writes GITHUB_ENV → deploy reads env","step prints the digest → deploy reads logs","step sets a repository variable"],"correct":0,"explanation":"GITHUB_ENV is limited to later steps in the same job; map a step output to a job output and read it through needs.","sources":["https://docs.github.com/actions/writing-workflows/choosing-what-your-workflow-does/passing-information-between-jobs"]},
-  {"id":"AM04","domain":"author-manage","objective":"services","question":"A VM-hosted job needs PostgreSQL. What avoids starting tests before the database is usable?","options":["services with a health check and mapped port","a cache restore","needs on a step","a job summary"],"correct":0,"explanation":"Service containers support health-check options and port mappings; the VM job reaches a mapped service at localhost.","sources":["https://docs.github.com/actions/using-containerized-services/creating-postgresql-service-containers"]},
-  {"id":"AM05","domain":"author-manage","objective":"matrix","question":"A four-variant matrix should keep running siblings after one failure while limiting concurrency to two. Which settings?","options":["fail-fast: false and max-parallel: 2","continue-on-error: true and max-parallel: 4","fail-fast: true and concurrency: 2","include: 2 and timeout-minutes: 2"],"correct":0,"explanation":"fail-fast controls cancellation of in-progress/queued matrix jobs; max-parallel controls simultaneous jobs.","sources":["https://docs.github.com/actions/using-jobs/using-a-matrix-for-your-jobs"]},
-  {"id":"AM06","domain":"author-manage","objective":"matrix","question":"A test matrix has os=[ubuntu,windows] and node=[20,22], but Windows/20 is unsupported. Which is the clearest removal?","options":["matrix.exclude with os windows and node 20","matrix.include with only Ubuntu","job.if comparing matrix before expansion","remove Windows entirely"],"correct":0,"explanation":"exclude removes a specific generated combination while retaining the remaining Cartesian product.","sources":["https://docs.github.com/actions/using-jobs/using-a-matrix-for-your-jobs#excluding-matrix-configurations"]},
-  {"id":"AM07","domain":"author-manage","objective":"anchors","question":"A workflow defines `base: &base { timeout-minutes: 10, shell: bash }` and merges it with `shell: pwsh`. What applies?","options":["timeout 10 and pwsh","timeout 10 and bash","only pwsh, no timeout","YAML anchors cannot merge mappings"],"correct":0,"explanation":"An explicit mapping key overrides the merged anchor value while the other merged key remains.","sources":["https://docs.github.com/actions/reference/workflows-and-actions/reusing-workflow-configurations#yaml-anchors-and-aliases"]},
-  {"id":"AM08","domain":"author-manage","objective":"contexts","question":"Which context is appropriate for a manual-dispatch `region` input that must retain its declared type?","options":["inputs.region","github.event.inputs.region","env.region","matrix.region"],"correct":0,"explanation":"The inputs context provides typed values for workflow_dispatch and workflow_call inputs.","sources":["https://docs.github.com/actions/learn-github-actions/contexts#inputs-context"]},
-  {"id":"AM09","domain":"author-manage","objective":"environment-files","question":"A shell step sets COLOR for subsequent steps in the same job. Where should it write?","options":["$GITHUB_ENV","$GITHUB_OUTPUT","$GITHUB_STEP_SUMMARY","the workflow YAML"],"correct":0,"explanation":"GITHUB_ENV exports environment variables to later steps in the current job.","sources":["https://docs.github.com/actions/using-workflows/workflow-commands-for-github-actions#setting-an-environment-variable"]},
-  {"id":"AM10","domain":"author-manage","objective":"summaries","question":"A team needs a rich Markdown test report visible in the run summary, not only raw logs. Which file command is correct?","options":["append Markdown to GITHUB_STEP_SUMMARY","write a warning annotation","upload a cache","set a job output"],"correct":0,"explanation":"GITHUB_STEP_SUMMARY adds Markdown to the job summary.","sources":["https://docs.github.com/actions/using-workflows/workflow-commands-for-github-actions#adding-a-job-summary"]},
-  {"id":"AM11","domain":"author-manage","objective":"cache-artifacts","question":"Which statement is correct for a compiled package handed to a release job in the same run?","options":["Upload an artifact; cache is for keyed dependency/data reuse","Save a cache because artifacts cannot cross jobs","Use GITHUB_ENV because it crosses jobs","Use a starter workflow"],"correct":0,"explanation":"Artifacts persist files for a workflow run/download; caches optimize reuse keyed data.","sources":["https://docs.github.com/actions/using-workflows/storing-workflow-data-as-artifacts"]},
-  {"id":"AM12","domain":"author-manage","objective":"runner-images","question":"Why should a workflow avoid assuming `windows-latest` always has the same compiler?","options":["latest labels migrate with hosted runner-image changes","Windows runners never contain compilers","matrix values cannot contain latest","only self-hosted runners have images"],"correct":0,"explanation":"GitHub-hosted runner images change; release notes document migrations and installed software.","sources":["https://github.com/actions/runner-images"]},
-  {"id":"AM13","domain":"author-manage","objective":"expressions","question":"A job must run only after build succeeds and only on main. Which context reads build's declared output?","options":["needs.build.outputs.approved","steps.build.outputs.approved","runner.outputs.approved","github.outputs.approved"],"correct":0,"explanation":"The needs context exposes outputs of prerequisite jobs.","sources":["https://docs.github.com/actions/learn-github-actions/contexts#needs-context"]},
-  {"id":"AM14","domain":"author-manage","objective":"permissions-events","question":"An issue-labeling workflow only needs to modify issues. What is the best permissions posture?","options":["set issues: write and other permissions minimally/none","write-all","store a PAT in every repository","id-token: write"],"correct":0,"explanation":"Grant the minimum GITHUB_TOKEN permissions required by the workflow.","sources":["https://docs.github.com/actions/security-for-github-actions/security-guides/automatic-token-authentication"]},
-  {"id":"AM15","domain":"author-manage","objective":"retention","question":"An organization wants a standard artifact/log retention period across repositories programmatically. Where is the relevant capability?","options":["GitHub Actions REST retention-limit endpoint","a matrix include rule","GITHUB_RETENTION env variable","an action.yml output"],"correct":0,"explanation":"Actions REST APIs provide organization/repository retention-limit management.","sources":["https://docs.github.com/rest/actions/permissions#set-github-actions-retention-limit-for-an-organization"]},
-  {"id":"CT01","domain":"consume-troubleshoot","objective":"matrix-diagnosis","question":"Only `test (ubuntu-latest, 22)` fails in a four-axis display. What should be rerun first after fixing the cause?","options":["that individual matrix job","all workflows in the repository","only the Windows jobs","the workflow file parser"],"correct":0,"explanation":"GitHub supports rerunning failed jobs; target the failing matrix variation to limit noise/cost.","sources":["https://docs.github.com/actions/how-tos/monitor-workflows/re-run-workflows-and-jobs"]},
-  {"id":"CT02","domain":"consume-troubleshoot","objective":"logs","question":"A run has status failure and no artifact was uploaded. What is the first evidence source for the command exit code?","options":["the failed step's workflow log","artifact download","workflow badge","runner group settings"],"correct":0,"explanation":"Step logs expose command output and failure details; artifacts are separate uploaded files.","sources":["https://docs.github.com/actions/how-tos/monitor-workflows/use-workflow-run-logs"]},
-  {"id":"CT03","domain":"consume-troubleshoot","objective":"artifacts-api","question":"A nightly auditor must list and download artifacts without using the UI. Which integration surface fits?","options":["GitHub Actions REST API","YAML anchors","a runner image release note","a status badge"],"correct":0,"explanation":"Actions REST endpoints list/download workflow run artifacts for automation.","sources":["https://docs.github.com/rest/actions/artifacts"]},
-  {"id":"CT04","domain":"consume-troubleshoot","objective":"templates","question":"An organization wants a workflow offered to new repositories, after which each repository may modify its own copy. What is it?","options":["starter workflow","reusable workflow","composite action","Docker action"],"correct":0,"explanation":"Starter workflows are templates copied into a repository; later edits are independent.","sources":["https://docs.github.com/actions/use-workflows/creating-starter-workflows-for-your-organization"]},
-  {"id":"CT05","domain":"consume-troubleshoot","objective":"reusable-vs-composite","question":"A central platform team must update a multi-job deployment graph once for all consumers. What should callers use?","options":["a reusable workflow invoked with workflow_call","a starter workflow","a composite action","a cache key"],"correct":0,"explanation":"Reusable workflows are centrally maintained workflows called as jobs; composite actions encapsulate steps.","sources":["https://docs.github.com/actions/sharing-automations/reusing-workflows"]},
-  {"id":"CT06","domain":"consume-troubleshoot","objective":"disable-delete","question":"A workflow should stop auto-running temporarily while preserving a simple re-enable path. Which action?","options":["disable the workflow","delete the workflow file","delete all run logs","revoke every repository secret"],"correct":0,"explanation":"Disabling stops runs without deleting the workflow configuration.","sources":["https://docs.github.com/actions/how-tos/manage-workflow-runs/disable-and-enable-a-workflow"]},
-  {"id":"CT07","domain":"consume-troubleshoot","objective":"anchors","question":"A reviewer sees aliases in a failed workflow. What is the correct diagnostic approach?","options":["expand anchors/merge keys and then apply explicit-key precedence","assume aliases execute shell commands","ignore merged mappings because Actions rejects them","replace every anchor with a reusable workflow"],"correct":0,"explanation":"Anchors/aliases are YAML reuse; understanding the expanded mapping is necessary for behavior analysis.","sources":["https://docs.github.com/actions/reference/workflows-and-actions/reusing-workflow-configurations#yaml-anchors-and-aliases"]},
-  {"id":"CT08","domain":"consume-troubleshoot","objective":"triggers","question":"A workflow did not run after a docs-only commit. Which configuration should be inspected before runner health?","options":["event branch/path filters","artifact retention","action Marketplace listing","job summary Markdown"],"correct":0,"explanation":"Trigger branch/path filters determine whether an event creates a run.","sources":["https://docs.github.com/actions/writing-workflows/choosing-when-your-workflow-runs/triggering-a-workflow"]},
-  {"id":"CT09","domain":"consume-troubleshoot","objective":"nonpublic-templates","question":"A private organization template should be available to members but not publicly visible. What capability is relevant?","options":["non-public organization starter workflow templates","a public Marketplace action","a public fork","an artifact"],"correct":0,"explanation":"Organizations can create and manage private/internal starter workflow templates.","sources":["https://docs.github.com/actions/use-workflows/creating-starter-workflows-for-your-organization"]},
-  {"id":"CT10","domain":"consume-troubleshoot","objective":"artifacts","question":"A user says an expected artifact is missing. Which statement best guides diagnosis?","options":["an artifact exists only if its upload step ran and succeeded under its conditions","all logs automatically become artifacts","caches appear in the artifact panel","GITHUB_OUTPUT creates artifacts"],"correct":0,"explanation":"Artifacts are produced by explicit upload actions/steps and their conditional execution matters.","sources":["https://docs.github.com/actions/using-workflows/storing-workflow-data-as-artifacts"]},
-  {"id":"CT11","domain":"consume-troubleshoot","objective":"workflow-history","question":"A run was started manually with `workflow_dispatch`. Where does the selected input normally appear for diagnosis?","options":["run event/context and workflow logs","only in a cache key","only in the repository README","the action Marketplace page"],"correct":0,"explanation":"Manual event data is available through workflow contexts and can be logged safely when non-sensitive.","sources":["https://docs.github.com/actions/learn-github-actions/contexts#github-context"]},
-  {"id":"AA01","domain":"author-actions","objective":"action-types","question":"An action needs to call Node APIs and return structured outputs without a container. Which action type fits best?","options":["JavaScript action","Docker action only","starter workflow","reusable workflow"],"correct":0,"explanation":"JavaScript actions run Node-based code; composite actions combine workflow steps and Docker actions package containers.","sources":["https://docs.github.com/actions/sharing-automations/creating-actions/about-custom-actions"]},
-  {"id":"AA02","domain":"author-actions","objective":"action-types","question":"A reusable action is only checkout, setup, and three portable shell commands. What is usually the simplest packaging?","options":["composite action","Docker action","a runner group","a starter workflow"],"correct":0,"explanation":"Composite actions group multiple workflow steps without requiring a Docker image or JavaScript program.","sources":["https://docs.github.com/actions/sharing-automations/creating-actions/creating-a-composite-action"]},
-  {"id":"AA03","domain":"author-actions","objective":"metadata","question":"What file and minimum metadata are central to a custom action at its action directory root?","options":["action.yml with name, description, and runs","package-lock.json with triggers","workflow.yml with jobs","README only"],"correct":0,"explanation":"Action metadata lives in action.yml (or action.yaml) and defines inputs, outputs and runs.","sources":["https://docs.github.com/actions/sharing-automations/creating-actions/metadata-syntax-for-github-actions"]},
-  {"id":"AA04","domain":"author-actions","objective":"outputs","question":"A composite action's output should expose a child step's generated value. Which metadata design is correct?","options":["declare outputs.<name>.value referencing steps.<id>.outputs","write GITHUB_ENV only","print a line to stdout","set a repository variable"],"correct":0,"explanation":"Composite metadata maps its declared output value to a step output.","sources":["https://docs.github.com/actions/sharing-automations/creating-actions/metadata-syntax-for-github-actions#outputs-for-composite-actions"]},
-  {"id":"AA05","domain":"author-actions","objective":"docker-actions","question":"An action requires a native binary and OS libraries that must be hermetic across consumers. Which type is appropriate?","options":["Docker container action","a starter workflow","a YAML anchor","an organization variable"],"correct":0,"explanation":"Docker actions package a container environment and entrypoint for dependencies requiring that isolation.","sources":["https://docs.github.com/actions/sharing-automations/creating-actions/creating-a-docker-container-action"]},
-  {"id":"AA06","domain":"author-actions","objective":"immutable-actions","question":"Why might `uses: vendor/action@v4` fail under immutable actions enforcement?","options":["a tag is mutable; enforcement can require an immutable reference","v4 always means Docker","actions cannot have versions","only local actions are allowed"],"correct":0,"explanation":"Immutable actions controls can require commit-SHA references rather than mutable tags/branches.","sources":["https://docs.github.com/actions/security-for-github-actions/security-guides/security-hardening-for-github-actions#using-third-party-actions"]},
-  {"id":"AA07","domain":"author-actions","objective":"distribution","question":"A company-only action must be usable by internal repositories but not listed publicly. Which distribution is best?","options":["private/internal repository action with permitted access","public Marketplace listing","a public gist","a cache archive"],"correct":0,"explanation":"Actions can be shared privately/internal to permitted repositories; Marketplace publishing is public distribution.","sources":["https://docs.github.com/actions/sharing-automations/creating-actions/about-custom-actions"]},
-  {"id":"AA08","domain":"author-actions","objective":"marketplace","question":"Before publishing an action to Marketplace, what release-oriented choice helps consumers identify a stable version?","options":["create a tagged release following versioning strategy","rename action.yml to workflow.yml","store it in an artifact","set matrix max-parallel"],"correct":0,"explanation":"Marketplace publication is tied to a release/tag; maintainers should use deliberate versioning.","sources":["https://docs.github.com/actions/sharing-automations/creating-actions/publishing-actions-in-github-marketplace"]},
-  {"id":"AA09","domain":"author-actions","objective":"troubleshooting","question":"A local action called as `./.github/actions/stamp` fails to load metadata. What should be checked first?","options":["the checked-out path contains action.yml/action.yaml at that root","whether the caller has workflow_dispatch","artifact retention","the job's summary"],"correct":0,"explanation":"A local action reference resolves to its directory and requires action metadata there; checkout must precede use.","sources":["https://docs.github.com/actions/sharing-automations/creating-actions/about-custom-actions"]},
-  {"id":"AA10","domain":"author-actions","objective":"workflow-commands","question":"A JavaScript action must safely expose a value to its caller. What mechanism should it use?","options":["the supported core output command/API","an arbitrary log string","a mutable tag","a runner label"],"correct":0,"explanation":"Custom actions use supported workflow commands/toolkit APIs to set outputs and communicate with workflows.","sources":["https://docs.github.com/actions/using-workflows/workflow-commands-for-github-actions"]},
-  {"id":"AA11","domain":"author-actions","objective":"versioning","question":"A security fix ships in action version 2.3.1. What consumer practice best prevents a later retag from silently changing reviewed code?","options":["pin to the reviewed full commit SHA","use @main","use an unversioned local path","disable all workflow permissions"],"correct":0,"explanation":"Full commit SHA pinning is the strongest immutable reference for third-party action code.","sources":["https://docs.github.com/actions/security-for-github-actions/security-guides/security-hardening-for-github-actions#using-third-party-actions"]},
-  {"id":"EN01","domain":"enterprise","objective":"runner-groups","question":"Only finance repositories may use production self-hosted runners. What is the primary control?","options":["a restricted self-hosted runner group assigned to selected repositories","an artifact retention setting","a starter workflow","a cache key"],"correct":0,"explanation":"Runner groups control which organizations/repositories can access self-hosted runners.","sources":["https://docs.github.com/actions/how-tos/manage-runners/self-hosted-runners/managing-access-to-self-hosted-runners-using-groups"]},
-  {"id":"EN02","domain":"enterprise","objective":"policies","question":"An enterprise wants to allow only selected actions and reusable workflows. What governance feature addresses that?","options":["Actions policy allowing selected actions/workflows","runner group membership","artifact attestation alone","matrix exclusion"],"correct":0,"explanation":"Enterprise/organization Actions policies control which actions and reusable workflows may be used.","sources":["https://docs.github.com/enterprise-cloud@latest/admin/managing-github-actions-for-your-enterprise/managing-github-actions-settings-for-your-enterprise#managing-github-actions-permissions-for-your-enterprise"]},
-  {"id":"EN03","domain":"enterprise","objective":"policy-vs-runners","question":"Why cannot an action allow-list replace runner groups?","options":["policy governs allowed code; runner groups govern runner access","they are aliases for the same setting","runner groups only manage artifacts","allow-lists provide static IPs"],"correct":0,"explanation":"These controls solve different governance problems: action provenance versus compute allocation.","sources":["https://docs.github.com/enterprise-cloud@latest/admin/managing-github-actions-for-your-enterprise"]},
-  {"id":"EN04","domain":"enterprise","objective":"networking","question":"A deployment requires predictable egress IP for a vendor allow-list. Which design needs explicit runner/network planning?","options":["use a supported static-IP/network option or controlled self-hosted runner","assume every hosted runner is static","use a YAML anchor","increase artifact retention"],"correct":0,"explanation":"Network/IP requirements depend on the runner offering and enterprise configuration; ephemeral hosted runner IPs should not be assumed static.","sources":["https://docs.github.com/actions/reference/github-hosted-runners-reference#ip-addresses-of-github-hosted-runners"]},
-  {"id":"EN05","domain":"enterprise","objective":"runners","question":"A self-hosted job stays queued while jobs request `self-hosted, linux, gpu`. What is the most relevant first check?","options":["an online runner accessible to the repo has all requested labels","the README badge","workflow artifact name","the caller's starter template"],"correct":0,"explanation":"Self-hosted routing requires matching labels and access to an online eligible runner.","sources":["https://docs.github.com/actions/how-tos/manage-runners/self-hosted-runners/using-self-hosted-runners-in-a-workflow"]},
-  {"id":"EN06","domain":"enterprise","objective":"runner-images","question":"A hosted image update removed a tool. What is the durable response?","options":["consult runner-image release notes and install/pin via setup, package manager, container, or curated image","keep retrying the same image","put the tool in a secret","change artifact retention"],"correct":0,"explanation":"Hosted images evolve; use documented image/toolcache information and provision required versions deliberately.","sources":["https://github.com/actions/runner-images"]},
-  {"id":"EN07","domain":"enterprise","objective":"secret-scopes","question":"A cloud key is valid only for production deployment and requires human approval. Where should it live?","options":["a protected production environment secret","an organization variable","a public repository secret","a cache"],"correct":0,"explanation":"Environment secrets can be protected by required reviewers and are appropriate for environment-specific credentials.","sources":["https://docs.github.com/actions/security-for-github-actions/security-guides/using-secrets-in-github-actions#using-secrets-in-a-workflow"]},
-  {"id":"EN08","domain":"enterprise","objective":"variables","question":"REGION is non-sensitive shared configuration for many repositories. What is usually suitable?","options":["organization configuration variable with selected repository access","a hard-coded secret","a job summary","an attestation"],"correct":0,"explanation":"Configuration variables store non-secret configuration and can be scoped at organization/repository/environment levels.","sources":["https://docs.github.com/actions/learn-github-actions/variables"]},
-  {"id":"EN09","domain":"enterprise","objective":"precedence","question":"The same configuration-variable name is defined at organization, repository, and environment levels. A job uses that environment. Which value is most specific?","options":["environment-level value","organization-level value","the oldest value","a value embedded in an action tag"],"correct":0,"explanation":"Environment configuration is the most specific scope when the job accesses that environment.","sources":["https://docs.github.com/actions/learn-github-actions/variables#configuration-variable-precedence"]},
-  {"id":"EN10","domain":"enterprise","objective":"rest-management","question":"An internal portal must enumerate and update organization Actions variables. Which API family should it use with proper authorization?","options":["GitHub REST Actions variables endpoints","workflow command files","matrix strategy API","artifact upload endpoint only"],"correct":0,"explanation":"GitHub REST provides endpoints for organization, repository, and environment Actions variables.","sources":["https://docs.github.com/rest/actions/variables"]},
-  {"id":"EN11","domain":"enterprise","objective":"rest-management","question":"A script must set an organization Actions retention cap. Which concept is being managed?","options":["the Actions retention limit for logs/artifacts","the cache key prefix","the runner label","a composite action output"],"correct":0,"explanation":"Actions permissions/settings REST endpoints expose retention limits for the organization/repository.","sources":["https://docs.github.com/rest/actions/permissions#set-github-actions-retention-limit-for-an-organization"]},
-  {"id":"EN12","domain":"enterprise","objective":"templates","question":"A platform team wants a central deployment workflow with inputs and secrets mapped by callers. What should it publish?","options":["reusable workflow using workflow_call","starter workflow only","a cache action","a runner group"],"correct":0,"explanation":"workflow_call makes a workflow reusable and lets callers pass declared inputs/secrets.","sources":["https://docs.github.com/actions/sharing-automations/reusing-workflows"]},
-  {"id":"EN13","domain":"enterprise","objective":"secrets-api","question":"Why does programmatic secret creation require more than sending plaintext to a REST endpoint?","options":["the secret value must be encrypted using the scope's public key","secrets are stored in artifacts","GITHUB_ENV encrypts secrets","a matrix generates the encryption key"],"correct":0,"explanation":"GitHub requires encrypting secret values with the public key for the relevant secret scope.","sources":["https://docs.github.com/rest/actions/secrets#about-secrets-in-github-actions"]},
-  {"id":"EN14","domain":"enterprise","objective":"enterprise-access","question":"Contractors may run approved CI but must never use production compute. Which paired controls are strongest?","options":["action policy plus production runner group restricted to finance repos","a public Marketplace listing plus cache","a deployment artifact plus YAML anchors","write-all token plus environment variable"],"correct":0,"explanation":"Policy limits code sources, while runner-group access keeps contractors away from production runners.","sources":["https://docs.github.com/enterprise-cloud@latest/admin/managing-github-actions-for-your-enterprise"]},
-  {"id":"EN15","domain":"enterprise","objective":"hosted-runners","question":"A company needs an additional tool on a GitHub-hosted runner. Which is a valid approach?","options":["setup action, package manager, container image, or install step","modify the immutable hosted image permanently","put the binary in a workflow trigger","use a status badge"],"correct":0,"explanation":"Hosted runner software is provisioned at runtime through setup/install/container approaches; its base image is managed by GitHub.","sources":["https://docs.github.com/actions/reference/github-hosted-runners-reference"]},
-  {"id":"SO01","domain":"secure-optimize","objective":"permissions-token","question":"A documentation workflow only reads repository content. What is the safest token setting?","options":["permissions: contents: read","permissions: write-all","a PAT with admin scope","id-token: write"],"correct":0,"explanation":"Set GITHUB_TOKEN permissions to the minimum required scope.","sources":["https://docs.github.com/actions/security-for-github-actions/security-guides/automatic-token-authentication"]},
-  {"id":"SO02","domain":"secure-optimize","objective":"oidc","question":"A deployment must obtain cloud credentials without storing a long-lived cloud secret. What is required?","options":["configure cloud OIDC trust and grant id-token: write","store cloud key in GITHUB_ENV","use a cache restore","grant write-all"],"correct":0,"explanation":"OIDC federation exchanges an Actions identity token for cloud credentials; id-token: write permits token request.","sources":["https://docs.github.com/actions/how-tos/secure-your-work/security-harden-deployments/oidc-in-cloud-providers"]},
-  {"id":"SO03","domain":"secure-optimize","objective":"injection","question":"A PR title can contain `$(curl attacker)`. Which pattern avoids command injection?","options":["pass the title via an environment variable and quote it in shell","embed github.event.pull_request.title directly in run","put title in a YAML anchor","use pull_request_target with checkout"],"correct":0,"explanation":"Treat untrusted context as data, avoid direct expression interpolation into shell, and quote variable expansion.","sources":["https://docs.github.com/actions/security-for-github-actions/security-guides/security-hardening-for-github-actions#understanding-the-risk-of-script-injections"]},
-  {"id":"SO04","domain":"secure-optimize","objective":"pinning","question":"What is the strongest pin for a third-party action used in a production deployment?","options":["full-length commit SHA","major-version tag","minor-version tag","main branch"],"correct":0,"explanation":"A full commit SHA is immutable and protects against mutable tags/branches being moved.","sources":["https://docs.github.com/actions/security-for-github-actions/security-guides/security-hardening-for-github-actions#using-third-party-actions"]},
-  {"id":"SO05","domain":"secure-optimize","objective":"environment-protection","question":"A deployment job must wait for designated reviewers before reading production credentials. What should the job reference?","options":["a protected environment","a repository label","a cache namespace","a runner image"],"correct":0,"explanation":"Environment protection rules and required reviewers gate jobs that reference the environment.","sources":["https://docs.github.com/actions/deployment/targeting-different-environments/using-environments-for-deployment"]},
-  {"id":"SO06","domain":"secure-optimize","objective":"attestations","question":"Before promoting a downloaded build, which attestation-verification property is essential in addition to the file itself?","options":["verify expected repository/identity and artifact digest/provenance","only check the artifact name","only check cache hit","regenerate a summary"],"correct":0,"explanation":"Attestation verification establishes provenance/identity for the artifact and must be tied to the expected source.","sources":["https://docs.github.com/actions/security-for-github-actions/using-artifact-attestations/using-artifact-attestations-to-establish-provenance-for-builds"]},
-  {"id":"SO07","domain":"secure-optimize","objective":"attestations","question":"Which permission is associated with generating artifact attestations in a workflow?","options":["attestations: write","issues: write","statuses: write","discussions: write"],"correct":0,"explanation":"Artifact attestation generation requires appropriate attestations permission, typically alongside contents read and id-token write as documented.","sources":["https://docs.github.com/actions/security-for-github-actions/using-artifact-attestations/using-artifact-attestations-to-establish-provenance-for-builds"]},
-  {"id":"SO08","domain":"secure-optimize","objective":"cost-retention","question":"Large dependency downloads recur every run, while a release binary must remain downloadable for 30 days. What pairing is best?","options":["cache dependencies; upload binary as artifact with retention policy","artifact dependencies; put binary in GITHUB_ENV","cache both with no retention","use a starter workflow"],"correct":0,"explanation":"Caches optimize dependency reuse; artifacts preserve run output and are governed by retention.","sources":["https://docs.github.com/actions/using-workflows/caching-dependencies-to-speed-up-workflows","https://docs.github.com/actions/using-workflows/storing-workflow-data-as-artifacts"]}
+  {
+    "id": "AM01",
+    "domain": "author-manage",
+    "objective": "triggers-inputs",
+    "question": "A release must be started by an operator who chooses a region and explicitly confirms deployment. Which design preserves a Boolean confirmation in expressions?",
+    "options": [
+      "workflow_dispatch input type boolean, then inputs.confirm",
+      "A string env variable set to 'true'",
+      "repository_dispatch with a JSON string",
+      "a secret named CONFIRM"
+    ],
+    "correct": 0,
+    "explanation": "workflow_dispatch supports typed Boolean inputs; the inputs context preserves Boolean values.",
+    "sources": [
+      "https://docs.github.com/actions/writing-workflows/workflow-syntax-for-github-actions#onworkflow_dispatchinputs"
+    ]
+  },
+  {
+    "id": "AM02",
+    "domain": "author-manage",
+    "objective": "reusable-inputs",
+    "question": "A caller must pass a deploy target and a cloud secret to a centrally maintained workflow. What is required in the called workflow?",
+    "options": [
+      "workflow_dispatch declarations only",
+      "on.workflow_call declarations for inputs and secrets",
+      "a composite action metadata file",
+      "repository variables only"
+    ],
+    "correct": 1,
+    "explanation": "A reusable workflow declares its call contract under workflow_call, including inputs and secrets.",
+    "sources": [
+      "https://docs.github.com/actions/sharing-automations/reusing-workflows"
+    ]
+  },
+  {
+    "id": "AM03",
+    "domain": "author-manage",
+    "objective": "job-outputs",
+    "question": "Job build computes a digest that deploy must consume. Which path crosses the job boundary?",
+    "options": [
+      "step writes GITHUB_ENV → deploy reads env",
+      "step prints the digest → deploy reads logs",
+      "step writes GITHUB_OUTPUT → job outputs maps it → needs.build.outputs.digest",
+      "step sets a repository variable"
+    ],
+    "correct": 2,
+    "explanation": "GITHUB_ENV is limited to later steps in the same job; map a step output to a job output and read it through needs.",
+    "sources": [
+      "https://docs.github.com/actions/writing-workflows/choosing-what-your-workflow-does/passing-information-between-jobs"
+    ]
+  },
+  {
+    "id": "AM04",
+    "domain": "author-manage",
+    "objective": "services",
+    "question": "A VM-hosted job needs PostgreSQL. What avoids starting tests before the database is usable?",
+    "options": [
+      "a cache restore",
+      "needs on a step",
+      "a job summary",
+      "services with a health check and mapped port"
+    ],
+    "correct": 3,
+    "explanation": "Service containers support health-check options and port mappings; the VM job reaches a mapped service at localhost.",
+    "sources": [
+      "https://docs.github.com/actions/using-containerized-services/creating-postgresql-service-containers"
+    ]
+  },
+  {
+    "id": "AM05",
+    "domain": "author-manage",
+    "objective": "matrix",
+    "question": "A four-variant matrix should keep running siblings after one failure while limiting concurrency to two. Which settings?",
+    "options": [
+      "fail-fast: false and max-parallel: 2",
+      "continue-on-error: true and max-parallel: 4",
+      "fail-fast: true and concurrency: 2",
+      "include: 2 and timeout-minutes: 2"
+    ],
+    "correct": 0,
+    "explanation": "fail-fast controls cancellation of in-progress/queued matrix jobs; max-parallel controls simultaneous jobs.",
+    "sources": [
+      "https://docs.github.com/actions/using-jobs/using-a-matrix-for-your-jobs"
+    ]
+  },
+  {
+    "id": "AM06",
+    "domain": "author-manage",
+    "objective": "matrix",
+    "question": "A test matrix has os=[ubuntu,windows] and node=[20,22], but Windows/20 is unsupported. Which is the clearest removal?",
+    "options": [
+      "matrix.include with only Ubuntu",
+      "matrix.exclude with os windows and node 20",
+      "job.if comparing matrix before expansion",
+      "remove Windows entirely"
+    ],
+    "correct": 1,
+    "explanation": "exclude removes a specific generated combination while retaining the remaining Cartesian product.",
+    "sources": [
+      "https://docs.github.com/actions/using-jobs/using-a-matrix-for-your-jobs#excluding-matrix-configurations"
+    ]
+  },
+  {
+    "id": "AM07",
+    "domain": "author-manage",
+    "objective": "anchors",
+    "question": "In a plain YAML troubleshooting simulation, `base: &base { timeout-minutes: 10, shell: bash }` is merged with `shell: pwsh`. What applies in that YAML document?",
+    "options": [
+      "timeout 10 and pwsh",
+      "only pwsh, no timeout",
+      "timeout 10 and bash",
+      "YAML anchors cannot merge mappings"
+    ],
+    "correct": 2,
+    "explanation": "In this plain-YAML merge-key simulation, an explicit mapping key overrides the merged anchor value while the other merged key remains. Treat this as parser troubleshooting, not a claim that a hosted workflow accepts YAML merge keys.",
+    "sources": [
+      "https://docs.github.com/actions/reference/workflows-and-actions/reusing-workflow-configurations#yaml-anchors-and-aliases"
+    ]
+  },
+  {
+    "id": "AM08",
+    "domain": "author-manage",
+    "objective": "contexts",
+    "question": "Which context is appropriate for a manual-dispatch `region` input that must retain its declared type?",
+    "options": [
+      "github.event.inputs.region",
+      "env.region",
+      "matrix.region",
+      "inputs.region"
+    ],
+    "correct": 3,
+    "explanation": "The inputs context provides typed values for workflow_dispatch and workflow_call inputs.",
+    "sources": [
+      "https://docs.github.com/actions/learn-github-actions/contexts#inputs-context"
+    ]
+  },
+  {
+    "id": "AM09",
+    "domain": "author-manage",
+    "objective": "environment-files",
+    "question": "A shell step sets COLOR for subsequent steps in the same job. Where should it write?",
+    "options": [
+      "$GITHUB_ENV",
+      "$GITHUB_OUTPUT",
+      "$GITHUB_STEP_SUMMARY",
+      "the workflow YAML"
+    ],
+    "correct": 0,
+    "explanation": "GITHUB_ENV exports environment variables to later steps in the current job.",
+    "sources": [
+      "https://docs.github.com/actions/using-workflows/workflow-commands-for-github-actions#setting-an-environment-variable"
+    ]
+  },
+  {
+    "id": "AM10",
+    "domain": "author-manage",
+    "objective": "summaries",
+    "question": "A team needs a rich Markdown test report visible in the run summary, not only raw logs. Which file command is correct?",
+    "options": [
+      "write a warning annotation",
+      "append Markdown to GITHUB_STEP_SUMMARY",
+      "upload a cache",
+      "set a job output"
+    ],
+    "correct": 1,
+    "explanation": "GITHUB_STEP_SUMMARY adds Markdown to the job summary.",
+    "sources": [
+      "https://docs.github.com/actions/using-workflows/workflow-commands-for-github-actions#adding-a-job-summary"
+    ]
+  },
+  {
+    "id": "AM11",
+    "domain": "author-manage",
+    "objective": "cache-artifacts",
+    "question": "Which statement is correct for a compiled package handed to a release job in the same run?",
+    "options": [
+      "Save a cache because artifacts cannot cross jobs",
+      "Use GITHUB_ENV because it crosses jobs",
+      "Upload an artifact; cache is for keyed dependency/data reuse",
+      "Use a starter workflow"
+    ],
+    "correct": 2,
+    "explanation": "Artifacts persist files for a workflow run/download; caches optimize reuse keyed data.",
+    "sources": [
+      "https://docs.github.com/actions/using-workflows/storing-workflow-data-as-artifacts"
+    ]
+  },
+  {
+    "id": "AM12",
+    "domain": "author-manage",
+    "objective": "runner-images",
+    "question": "Why should a workflow avoid assuming `windows-latest` always has the same compiler?",
+    "options": [
+      "Windows runners never contain compilers",
+      "matrix values cannot contain latest",
+      "only self-hosted runners have images",
+      "latest labels migrate with hosted runner-image changes"
+    ],
+    "correct": 3,
+    "explanation": "GitHub-hosted runner images change; release notes document migrations and installed software.",
+    "sources": [
+      "https://github.com/actions/runner-images"
+    ]
+  },
+  {
+    "id": "AM13",
+    "domain": "author-manage",
+    "objective": "expressions",
+    "question": "A job must run only after build succeeds and only on main. Which context reads build's declared output?",
+    "options": [
+      "needs.build.outputs.approved",
+      "steps.build.outputs.approved",
+      "runner.outputs.approved",
+      "github.outputs.approved"
+    ],
+    "correct": 0,
+    "explanation": "The needs context exposes outputs of prerequisite jobs.",
+    "sources": [
+      "https://docs.github.com/actions/learn-github-actions/contexts#needs-context"
+    ]
+  },
+  {
+    "id": "AM14",
+    "domain": "author-manage",
+    "objective": "permissions-events",
+    "question": "An issue-labeling workflow only needs to modify issues. What is the best permissions posture?",
+    "options": [
+      "write-all",
+      "set issues: write and other permissions minimally/none",
+      "store a PAT in every repository",
+      "id-token: write"
+    ],
+    "correct": 1,
+    "explanation": "Grant the minimum GITHUB_TOKEN permissions required by the workflow.",
+    "sources": [
+      "https://docs.github.com/actions/security-for-github-actions/security-guides/automatic-token-authentication"
+    ]
+  },
+  {
+    "id": "AM15",
+    "domain": "author-manage",
+    "objective": "retention",
+    "question": "An organization wants a standard artifact/log retention period across repositories programmatically. Where is the relevant capability?",
+    "options": [
+      "a matrix include rule",
+      "GITHUB_RETENTION env variable",
+      "GitHub Actions REST retention-limit endpoint",
+      "an action.yml output"
+    ],
+    "correct": 2,
+    "explanation": "Actions REST APIs provide organization/repository retention-limit management.",
+    "sources": [
+      "https://docs.github.com/rest/actions/permissions#set-github-actions-retention-limit-for-an-organization"
+    ]
+  },
+  {
+    "id": "CT01",
+    "domain": "consume-troubleshoot",
+    "objective": "matrix-diagnosis",
+    "question": "Only `test (ubuntu-latest, 22)` fails in a four-axis display. What should be rerun first after fixing the cause?",
+    "options": [
+      "all workflows in the repository",
+      "only the Windows jobs",
+      "the workflow file parser",
+      "that individual matrix job"
+    ],
+    "correct": 3,
+    "explanation": "GitHub supports rerunning failed jobs; target the failing matrix variation to limit noise/cost.",
+    "sources": [
+      "https://docs.github.com/en/actions/how-tos/manage-workflow-runs/re-run-workflows-and-jobs"
+    ]
+  },
+  {
+    "id": "CT02",
+    "domain": "consume-troubleshoot",
+    "objective": "logs",
+    "question": "A run has status failure and no artifact was uploaded. What is the first evidence source for the command exit code?",
+    "options": [
+      "the failed step's workflow log",
+      "artifact download",
+      "workflow badge",
+      "runner group settings"
+    ],
+    "correct": 0,
+    "explanation": "Step logs expose command output and failure details; artifacts are separate uploaded files.",
+    "sources": [
+      "https://docs.github.com/actions/how-tos/monitor-workflows/use-workflow-run-logs"
+    ]
+  },
+  {
+    "id": "CT03",
+    "domain": "consume-troubleshoot",
+    "objective": "artifacts-api",
+    "question": "A nightly auditor must list and download artifacts without using the UI. Which integration surface fits?",
+    "options": [
+      "YAML anchors",
+      "GitHub Actions REST API",
+      "a runner image release note",
+      "a status badge"
+    ],
+    "correct": 1,
+    "explanation": "Actions REST endpoints list/download workflow run artifacts for automation.",
+    "sources": [
+      "https://docs.github.com/rest/actions/artifacts"
+    ]
+  },
+  {
+    "id": "CT04",
+    "domain": "consume-troubleshoot",
+    "objective": "templates",
+    "question": "An organization wants a workflow offered to new repositories, after which each repository may modify its own copy. What is it?",
+    "options": [
+      "reusable workflow",
+      "composite action",
+      "starter workflow",
+      "Docker action"
+    ],
+    "correct": 2,
+    "explanation": "Starter workflows are templates copied into a repository; later edits are independent.",
+    "sources": [
+      "https://docs.github.com/en/actions/how-tos/reuse-automations/create-workflow-templates"
+    ]
+  },
+  {
+    "id": "CT05",
+    "domain": "consume-troubleshoot",
+    "objective": "reusable-vs-composite",
+    "question": "A central platform team must update a multi-job deployment graph once for all consumers. What should callers use?",
+    "options": [
+      "a starter workflow",
+      "a composite action",
+      "a cache key",
+      "a reusable workflow invoked with workflow_call"
+    ],
+    "correct": 3,
+    "explanation": "Reusable workflows are centrally maintained workflows called as jobs; composite actions encapsulate steps.",
+    "sources": [
+      "https://docs.github.com/actions/sharing-automations/reusing-workflows"
+    ]
+  },
+  {
+    "id": "CT06",
+    "domain": "consume-troubleshoot",
+    "objective": "disable-delete",
+    "question": "A workflow should stop auto-running temporarily while preserving a simple re-enable path. Which action?",
+    "options": [
+      "disable the workflow",
+      "delete the workflow file",
+      "delete all run logs",
+      "revoke every repository secret"
+    ],
+    "correct": 0,
+    "explanation": "Disabling stops runs without deleting the workflow configuration.",
+    "sources": [
+      "https://docs.github.com/en/actions/managing-workflow-runs-and-deployments/managing-workflow-runs/disabling-and-enabling-a-workflow"
+    ]
+  },
+  {
+    "id": "CT07",
+    "domain": "consume-troubleshoot",
+    "objective": "anchors",
+    "question": "A reviewer sees aliases in a failed workflow. What is the correct diagnostic approach?",
+    "options": [
+      "assume aliases execute shell commands",
+      "expand anchors/merge keys and then apply explicit-key precedence",
+      "ignore merged mappings because Actions rejects them",
+      "replace every anchor with a reusable workflow"
+    ],
+    "correct": 1,
+    "explanation": "Anchors/aliases are YAML reuse; understanding the expanded mapping is necessary for behavior analysis.",
+    "sources": [
+      "https://docs.github.com/actions/reference/workflows-and-actions/reusing-workflow-configurations#yaml-anchors-and-aliases"
+    ]
+  },
+  {
+    "id": "CT08",
+    "domain": "consume-troubleshoot",
+    "objective": "triggers",
+    "question": "A workflow did not run after a docs-only commit. Which configuration should be inspected before runner health?",
+    "options": [
+      "artifact retention",
+      "action Marketplace listing",
+      "event branch/path filters",
+      "job summary Markdown"
+    ],
+    "correct": 2,
+    "explanation": "Trigger branch/path filters determine whether an event creates a run.",
+    "sources": [
+      "https://docs.github.com/actions/writing-workflows/choosing-when-your-workflow-runs/triggering-a-workflow"
+    ]
+  },
+  {
+    "id": "CT09",
+    "domain": "consume-troubleshoot",
+    "objective": "nonpublic-templates",
+    "question": "A private organization template should be available to members but not publicly visible. What capability is relevant?",
+    "options": [
+      "a public Marketplace action",
+      "a public fork",
+      "an artifact",
+      "non-public organization starter workflow templates"
+    ],
+    "correct": 3,
+    "explanation": "Organizations can create and manage private/internal starter workflow templates.",
+    "sources": [
+      "https://docs.github.com/en/actions/how-tos/reuse-automations/create-workflow-templates"
+    ]
+  },
+  {
+    "id": "CT10",
+    "domain": "consume-troubleshoot",
+    "objective": "artifacts",
+    "question": "A user says an expected artifact is missing. Which statement best guides diagnosis?",
+    "options": [
+      "an artifact exists only if its upload step ran and succeeded under its conditions",
+      "all logs automatically become artifacts",
+      "caches appear in the artifact panel",
+      "GITHUB_OUTPUT creates artifacts"
+    ],
+    "correct": 0,
+    "explanation": "Artifacts are produced by explicit upload actions/steps and their conditional execution matters.",
+    "sources": [
+      "https://docs.github.com/actions/using-workflows/storing-workflow-data-as-artifacts"
+    ]
+  },
+  {
+    "id": "CT11",
+    "domain": "consume-troubleshoot",
+    "objective": "workflow-history",
+    "question": "A run was started manually with `workflow_dispatch`. Where does the selected input normally appear for diagnosis?",
+    "options": [
+      "only in a cache key",
+      "run event/context and workflow logs",
+      "only in the repository README",
+      "the action Marketplace page"
+    ],
+    "correct": 1,
+    "explanation": "Manual event data is available through workflow contexts and can be logged safely when non-sensitive.",
+    "sources": [
+      "https://docs.github.com/actions/learn-github-actions/contexts#github-context"
+    ]
+  },
+  {
+    "id": "AA01",
+    "domain": "author-actions",
+    "objective": "action-types",
+    "question": "An action needs to call Node APIs and return structured outputs without a container. Which action type fits best?",
+    "options": [
+      "Docker action only",
+      "starter workflow",
+      "JavaScript action",
+      "reusable workflow"
+    ],
+    "correct": 2,
+    "explanation": "JavaScript actions run Node-based code; composite actions combine workflow steps and Docker actions package containers.",
+    "sources": [
+      "https://docs.github.com/actions/sharing-automations/creating-actions/about-custom-actions"
+    ]
+  },
+  {
+    "id": "AA02",
+    "domain": "author-actions",
+    "objective": "action-types",
+    "question": "A reusable action is only checkout, setup, and three portable shell commands. What is usually the simplest packaging?",
+    "options": [
+      "Docker action",
+      "a runner group",
+      "a starter workflow",
+      "composite action"
+    ],
+    "correct": 3,
+    "explanation": "Composite actions group multiple workflow steps without requiring a Docker image or JavaScript program.",
+    "sources": [
+      "https://docs.github.com/actions/sharing-automations/creating-actions/creating-a-composite-action"
+    ]
+  },
+  {
+    "id": "AA03",
+    "domain": "author-actions",
+    "objective": "metadata",
+    "question": "What file and minimum metadata are central to a custom action at its action directory root?",
+    "options": [
+      "action.yml with name, description, and runs",
+      "package-lock.json with triggers",
+      "workflow.yml with jobs",
+      "README only"
+    ],
+    "correct": 0,
+    "explanation": "Action metadata lives in action.yml (or action.yaml) and defines inputs, outputs and runs.",
+    "sources": [
+      "https://docs.github.com/en/actions/reference/workflows-and-actions/metadata-syntax"
+    ]
+  },
+  {
+    "id": "AA04",
+    "domain": "author-actions",
+    "objective": "outputs",
+    "question": "A composite action's output should expose a child step's generated value. Which metadata design is correct?",
+    "options": [
+      "write GITHUB_ENV only",
+      "declare outputs.<name>.value referencing steps.<id>.outputs",
+      "print a line to stdout",
+      "set a repository variable"
+    ],
+    "correct": 1,
+    "explanation": "Composite metadata maps its declared output value to a step output.",
+    "sources": [
+      "https://docs.github.com/en/actions/reference/workflows-and-actions/metadata-syntax"
+    ]
+  },
+  {
+    "id": "AA05",
+    "domain": "author-actions",
+    "objective": "docker-actions",
+    "question": "An action requires a native binary and OS libraries that must be hermetic across consumers. Which type is appropriate?",
+    "options": [
+      "a starter workflow",
+      "a YAML anchor",
+      "Docker container action",
+      "an organization variable"
+    ],
+    "correct": 2,
+    "explanation": "Docker actions package a container environment and entrypoint for dependencies requiring that isolation.",
+    "sources": [
+      "https://docs.github.com/actions/sharing-automations/creating-actions/creating-a-docker-container-action"
+    ]
+  },
+  {
+    "id": "AA06",
+    "domain": "author-actions",
+    "objective": "immutable-actions",
+    "question": "Why might `uses: vendor/action@v4` fail when an organization policy requires full-SHA action references?",
+    "options": [
+      "v4 always means Docker",
+      "actions cannot have versions",
+      "only local actions are allowed",
+      "a tag is mutable; enforcement can require an immutable reference"
+    ],
+    "correct": 3,
+    "explanation": "A configured organization or repository policy can require commit-SHA references rather than mutable tags or branches; GitHub does not universally reject tags by default.",
+    "sources": [
+      "https://docs.github.com/actions/security-for-github-actions/security-guides/security-hardening-for-github-actions#using-third-party-actions"
+    ]
+  },
+  {
+    "id": "AA07",
+    "domain": "author-actions",
+    "objective": "distribution",
+    "question": "A company-only action must be usable by internal repositories but not listed publicly. Which distribution is best?",
+    "options": [
+      "private/internal repository action with permitted access",
+      "public Marketplace listing",
+      "a public gist",
+      "a cache archive"
+    ],
+    "correct": 0,
+    "explanation": "Actions can be shared privately/internal to permitted repositories; Marketplace publishing is public distribution.",
+    "sources": [
+      "https://docs.github.com/actions/sharing-automations/creating-actions/about-custom-actions"
+    ]
+  },
+  {
+    "id": "AA08",
+    "domain": "author-actions",
+    "objective": "marketplace",
+    "question": "Before publishing an action to Marketplace, what release-oriented choice helps consumers identify a stable version?",
+    "options": [
+      "rename action.yml to workflow.yml",
+      "create a tagged release following versioning strategy",
+      "store it in an artifact",
+      "set matrix max-parallel"
+    ],
+    "correct": 1,
+    "explanation": "Marketplace publication is tied to a release/tag; maintainers should use deliberate versioning.",
+    "sources": [
+      "https://docs.github.com/actions/sharing-automations/creating-actions/publishing-actions-in-github-marketplace"
+    ]
+  },
+  {
+    "id": "AA09",
+    "domain": "author-actions",
+    "objective": "troubleshooting",
+    "question": "A local action called as `./.github/actions/stamp` fails to load metadata. What should be checked first?",
+    "options": [
+      "whether the caller has workflow_dispatch",
+      "artifact retention",
+      "the checked-out path contains action.yml/action.yaml at that root",
+      "the job's summary"
+    ],
+    "correct": 2,
+    "explanation": "A local action reference resolves to its directory and requires action metadata there; checkout must precede use.",
+    "sources": [
+      "https://docs.github.com/actions/sharing-automations/creating-actions/about-custom-actions"
+    ]
+  },
+  {
+    "id": "AA10",
+    "domain": "author-actions",
+    "objective": "workflow-commands",
+    "question": "A JavaScript action must safely expose a value to its caller. What mechanism should it use?",
+    "options": [
+      "an arbitrary log string",
+      "a mutable tag",
+      "a runner label",
+      "the supported core output command/API"
+    ],
+    "correct": 3,
+    "explanation": "Custom actions use supported workflow commands/toolkit APIs to set outputs and communicate with workflows.",
+    "sources": [
+      "https://docs.github.com/actions/using-workflows/workflow-commands-for-github-actions"
+    ]
+  },
+  {
+    "id": "AA11",
+    "domain": "author-actions",
+    "objective": "versioning",
+    "question": "A security fix ships in action version 2.3.1. What consumer practice best prevents a later retag from silently changing reviewed code?",
+    "options": [
+      "pin to the reviewed full commit SHA",
+      "use @main",
+      "use an unversioned local path",
+      "disable all workflow permissions"
+    ],
+    "correct": 0,
+    "explanation": "Full commit SHA pinning is the strongest immutable reference for third-party action code.",
+    "sources": [
+      "https://docs.github.com/actions/security-for-github-actions/security-guides/security-hardening-for-github-actions#using-third-party-actions"
+    ]
+  },
+  {
+    "id": "EN01",
+    "domain": "enterprise",
+    "objective": "runner-groups",
+    "question": "Only finance repositories may use production self-hosted runners. What is the primary control?",
+    "options": [
+      "an artifact retention setting",
+      "a restricted self-hosted runner group assigned to selected repositories",
+      "a starter workflow",
+      "a cache key"
+    ],
+    "correct": 1,
+    "explanation": "Runner groups control which organizations/repositories can access self-hosted runners.",
+    "sources": [
+      "https://docs.github.com/en/actions/how-tos/manage-runners/self-hosted-runners/manage-access"
+    ]
+  },
+  {
+    "id": "EN02",
+    "domain": "enterprise",
+    "objective": "policies",
+    "question": "An enterprise wants to allow only selected actions and reusable workflows. What governance feature addresses that?",
+    "options": [
+      "runner group membership",
+      "artifact attestation alone",
+      "Actions policy allowing selected actions/workflows",
+      "matrix exclusion"
+    ],
+    "correct": 2,
+    "explanation": "Enterprise/organization Actions policies control which actions and reusable workflows may be used.",
+    "sources": [
+      "https://docs.github.com/en/enterprise-cloud%40latest/admin/enforcing-policies/enforcing-policies-for-your-enterprise/enforcing-policies-for-github-actions-in-your-enterprise"
+    ]
+  },
+  {
+    "id": "EN03",
+    "domain": "enterprise",
+    "objective": "policy-vs-runners",
+    "question": "Why cannot an action allow-list replace runner groups?",
+    "options": [
+      "they are aliases for the same setting",
+      "runner groups only manage artifacts",
+      "allow-lists provide static IPs",
+      "policy governs allowed code; runner groups govern runner access"
+    ],
+    "correct": 3,
+    "explanation": "These controls solve different governance problems: action provenance versus compute allocation.",
+    "sources": [
+      "https://docs.github.com/enterprise-cloud@latest/admin/managing-github-actions-for-your-enterprise"
+    ]
+  },
+  {
+    "id": "EN04",
+    "domain": "enterprise",
+    "objective": "networking",
+    "question": "A deployment requires predictable egress IP for a vendor allow-list. Which design needs explicit runner/network planning?",
+    "options": [
+      "use a supported static-IP/network option or controlled self-hosted runner",
+      "assume every hosted runner is static",
+      "use a YAML anchor",
+      "increase artifact retention"
+    ],
+    "correct": 0,
+    "explanation": "Network/IP requirements depend on the runner offering and enterprise configuration; ephemeral hosted runner IPs should not be assumed static.",
+    "sources": [
+      "https://docs.github.com/actions/reference/github-hosted-runners-reference#ip-addresses-of-github-hosted-runners"
+    ]
+  },
+  {
+    "id": "EN05",
+    "domain": "enterprise",
+    "objective": "runners",
+    "question": "A self-hosted job stays queued while jobs request `self-hosted, linux, gpu`. What is the most relevant first check?",
+    "options": [
+      "the README badge",
+      "an online runner accessible to the repo has all requested labels",
+      "workflow artifact name",
+      "the caller's starter template"
+    ],
+    "correct": 1,
+    "explanation": "Self-hosted routing requires matching labels and access to an online eligible runner.",
+    "sources": [
+      "https://docs.github.com/en/actions/how-tos/manage-runners/self-hosted-runners/use-in-a-workflow"
+    ]
+  },
+  {
+    "id": "EN06",
+    "domain": "enterprise",
+    "objective": "runner-images",
+    "question": "A hosted image update removed a tool. What is the durable response?",
+    "options": [
+      "keep retrying the same image",
+      "put the tool in a secret",
+      "consult runner-image release notes and install/pin via setup, package manager, container, or curated image",
+      "change artifact retention"
+    ],
+    "correct": 2,
+    "explanation": "Hosted images evolve; use documented image/toolcache information and provision required versions deliberately.",
+    "sources": [
+      "https://github.com/actions/runner-images"
+    ]
+  },
+  {
+    "id": "EN07",
+    "domain": "enterprise",
+    "objective": "secret-scopes",
+    "question": "A cloud key is valid only for production deployment and requires human approval. Where should it live?",
+    "options": [
+      "an organization variable",
+      "a public repository secret",
+      "a cache",
+      "a protected production environment secret"
+    ],
+    "correct": 3,
+    "explanation": "Environment secrets can be protected by required reviewers and are appropriate for environment-specific credentials.",
+    "sources": [
+      "https://docs.github.com/actions/security-for-github-actions/security-guides/using-secrets-in-github-actions#using-secrets-in-a-workflow"
+    ]
+  },
+  {
+    "id": "EN08",
+    "domain": "enterprise",
+    "objective": "variables",
+    "question": "REGION is non-sensitive shared configuration for many repositories. What is usually suitable?",
+    "options": [
+      "organization configuration variable with selected repository access",
+      "a hard-coded secret",
+      "a job summary",
+      "an attestation"
+    ],
+    "correct": 0,
+    "explanation": "Configuration variables store non-secret configuration and can be scoped at organization/repository/environment levels.",
+    "sources": [
+      "https://docs.github.com/actions/learn-github-actions/variables"
+    ]
+  },
+  {
+    "id": "EN09",
+    "domain": "enterprise",
+    "objective": "precedence",
+    "question": "The same configuration-variable name is defined at organization, repository, and environment levels. A job uses that environment. Which value is most specific?",
+    "options": [
+      "organization-level value",
+      "environment-level value",
+      "the oldest value",
+      "a value embedded in an action tag"
+    ],
+    "correct": 1,
+    "explanation": "Environment configuration is the most specific scope when the job accesses that environment.",
+    "sources": [
+      "https://docs.github.com/actions/learn-github-actions/variables#configuration-variable-precedence"
+    ]
+  },
+  {
+    "id": "EN10",
+    "domain": "enterprise",
+    "objective": "rest-management",
+    "question": "An internal portal must enumerate and update organization Actions variables. Which API family should it use with proper authorization?",
+    "options": [
+      "workflow command files",
+      "matrix strategy API",
+      "GitHub REST Actions variables endpoints",
+      "artifact upload endpoint only"
+    ],
+    "correct": 2,
+    "explanation": "GitHub REST provides endpoints for organization, repository, and environment Actions variables.",
+    "sources": [
+      "https://docs.github.com/rest/actions/variables"
+    ]
+  },
+  {
+    "id": "EN11",
+    "domain": "enterprise",
+    "objective": "rest-management",
+    "question": "A script must set an organization Actions retention cap. Which concept is being managed?",
+    "options": [
+      "the cache key prefix",
+      "the runner label",
+      "a composite action output",
+      "the Actions retention limit for logs/artifacts"
+    ],
+    "correct": 3,
+    "explanation": "Actions permissions/settings REST endpoints expose retention limits for the organization/repository.",
+    "sources": [
+      "https://docs.github.com/rest/actions/permissions#set-github-actions-retention-limit-for-an-organization"
+    ]
+  },
+  {
+    "id": "EN12",
+    "domain": "enterprise",
+    "objective": "templates",
+    "question": "A platform team wants a central deployment workflow with inputs and secrets mapped by callers. What should it publish?",
+    "options": [
+      "reusable workflow using workflow_call",
+      "starter workflow only",
+      "a cache action",
+      "a runner group"
+    ],
+    "correct": 0,
+    "explanation": "workflow_call makes a workflow reusable and lets callers pass declared inputs/secrets.",
+    "sources": [
+      "https://docs.github.com/actions/sharing-automations/reusing-workflows"
+    ]
+  },
+  {
+    "id": "EN13",
+    "domain": "enterprise",
+    "objective": "secrets-api",
+    "question": "Why does programmatic secret creation require more than sending plaintext to a REST endpoint?",
+    "options": [
+      "secrets are stored in artifacts",
+      "the secret value must be encrypted using the scope's public key",
+      "GITHUB_ENV encrypts secrets",
+      "a matrix generates the encryption key"
+    ],
+    "correct": 1,
+    "explanation": "GitHub requires encrypting secret values with the public key for the relevant secret scope.",
+    "sources": [
+      "https://docs.github.com/rest/actions/secrets#about-secrets-in-github-actions"
+    ]
+  },
+  {
+    "id": "EN14",
+    "domain": "enterprise",
+    "objective": "enterprise-access",
+    "question": "Contractors may run approved CI but must never use production compute. Which paired controls are strongest?",
+    "options": [
+      "a public Marketplace listing plus cache",
+      "a deployment artifact plus YAML anchors",
+      "action policy plus production runner group restricted to finance repos",
+      "write-all token plus environment variable"
+    ],
+    "correct": 2,
+    "explanation": "Policy limits code sources, while runner-group access keeps contractors away from production runners.",
+    "sources": [
+      "https://docs.github.com/enterprise-cloud@latest/admin/managing-github-actions-for-your-enterprise"
+    ]
+  },
+  {
+    "id": "EN15",
+    "domain": "enterprise",
+    "objective": "hosted-runners",
+    "question": "A company needs an additional tool on a GitHub-hosted runner. Which is a valid approach?",
+    "options": [
+      "modify the immutable hosted image permanently",
+      "put the binary in a workflow trigger",
+      "use a status badge",
+      "setup action, package manager, container image, or install step"
+    ],
+    "correct": 3,
+    "explanation": "Hosted runner software is provisioned at runtime through setup/install/container approaches; its base image is managed by GitHub.",
+    "sources": [
+      "https://docs.github.com/actions/reference/github-hosted-runners-reference"
+    ]
+  },
+  {
+    "id": "SO01",
+    "domain": "secure-optimize",
+    "objective": "permissions-token",
+    "question": "A documentation workflow only reads repository content. What is the safest token setting?",
+    "options": [
+      "permissions: contents: read",
+      "permissions: write-all",
+      "a PAT with admin scope",
+      "id-token: write"
+    ],
+    "correct": 0,
+    "explanation": "Set GITHUB_TOKEN permissions to the minimum required scope.",
+    "sources": [
+      "https://docs.github.com/actions/security-for-github-actions/security-guides/automatic-token-authentication"
+    ]
+  },
+  {
+    "id": "SO02",
+    "domain": "secure-optimize",
+    "objective": "oidc",
+    "question": "A deployment must obtain cloud credentials without storing a long-lived cloud secret. What is required?",
+    "options": [
+      "store cloud key in GITHUB_ENV",
+      "configure cloud OIDC trust and grant id-token: write",
+      "use a cache restore",
+      "grant write-all"
+    ],
+    "correct": 1,
+    "explanation": "OIDC federation exchanges an Actions identity token for cloud credentials; id-token: write permits token request.",
+    "sources": [
+      "https://docs.github.com/actions/how-tos/secure-your-work/security-harden-deployments/oidc-in-cloud-providers"
+    ]
+  },
+  {
+    "id": "SO03",
+    "domain": "secure-optimize",
+    "objective": "injection",
+    "question": "A PR title can contain `$(curl attacker)`. Which pattern avoids command injection?",
+    "options": [
+      "embed github.event.pull_request.title directly in run",
+      "put title in a YAML anchor",
+      "pass the title via an environment variable and quote it in shell",
+      "use pull_request_target with checkout"
+    ],
+    "correct": 2,
+    "explanation": "Treat untrusted context as data, avoid direct expression interpolation into shell, and quote variable expansion.",
+    "sources": [
+      "https://docs.github.com/actions/security-for-github-actions/security-guides/security-hardening-for-github-actions#understanding-the-risk-of-script-injections"
+    ]
+  },
+  {
+    "id": "SO04",
+    "domain": "secure-optimize",
+    "objective": "pinning",
+    "question": "What is the strongest pin for a third-party action used in a production deployment?",
+    "options": [
+      "major-version tag",
+      "minor-version tag",
+      "main branch",
+      "full-length commit SHA"
+    ],
+    "correct": 3,
+    "explanation": "A full commit SHA is immutable and protects against mutable tags/branches being moved.",
+    "sources": [
+      "https://docs.github.com/actions/security-for-github-actions/security-guides/security-hardening-for-github-actions#using-third-party-actions"
+    ]
+  },
+  {
+    "id": "SO05",
+    "domain": "secure-optimize",
+    "objective": "environment-protection",
+    "question": "A deployment job must wait for designated reviewers before reading production credentials. What should the job reference?",
+    "options": [
+      "a protected environment",
+      "a repository label",
+      "a cache namespace",
+      "a runner image"
+    ],
+    "correct": 0,
+    "explanation": "Environment protection rules and required reviewers gate jobs that reference the environment.",
+    "sources": [
+      "https://docs.github.com/actions/deployment/targeting-different-environments/using-environments-for-deployment"
+    ]
+  },
+  {
+    "id": "SO06",
+    "domain": "secure-optimize",
+    "objective": "attestations",
+    "question": "Before promoting a downloaded build, which attestation-verification property is essential in addition to the file itself?",
+    "options": [
+      "only check the artifact name",
+      "verify expected repository/identity and artifact digest/provenance",
+      "only check cache hit",
+      "regenerate a summary"
+    ],
+    "correct": 1,
+    "explanation": "Attestation verification establishes provenance/identity for the artifact and must be tied to the expected source.",
+    "sources": [
+      "https://docs.github.com/actions/security-for-github-actions/using-artifact-attestations/using-artifact-attestations-to-establish-provenance-for-builds"
+    ]
+  },
+  {
+    "id": "SO07",
+    "domain": "secure-optimize",
+    "objective": "attestations",
+    "question": "Which permission is associated with generating artifact attestations in a workflow?",
+    "options": [
+      "issues: write",
+      "statuses: write",
+      "attestations: write",
+      "discussions: write"
+    ],
+    "correct": 2,
+    "explanation": "Artifact attestation generation requires appropriate attestations permission, typically alongside contents read and id-token write as documented.",
+    "sources": [
+      "https://docs.github.com/actions/security-for-github-actions/using-artifact-attestations/using-artifact-attestations-to-establish-provenance-for-builds"
+    ]
+  },
+  {
+    "id": "SO08",
+    "domain": "secure-optimize",
+    "objective": "cost-retention",
+    "question": "Large dependency downloads recur every run, while a release binary must remain downloadable for 30 days. What pairing is best?",
+    "options": [
+      "artifact dependencies; put binary in GITHUB_ENV",
+      "cache both with no retention",
+      "use a starter workflow",
+      "cache dependencies; upload binary as artifact with retention policy"
+    ],
+    "correct": 3,
+    "explanation": "Caches optimize dependency reuse; artifacts preserve run output and are governed by retention.",
+    "sources": [
+      "https://docs.github.com/actions/using-workflows/caching-dependencies-to-speed-up-workflows",
+      "https://docs.github.com/actions/using-workflows/storing-workflow-data-as-artifacts"
+    ]
+  }
 ]

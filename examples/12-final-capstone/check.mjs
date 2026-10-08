@@ -9,6 +9,8 @@ const required = [
   ['step output', /GITHUB_OUTPUT/],
   ['job output', /outputs:[\s\S]*steps\.meta\.outputs/],
   ['needs output', /needs\.prepare\.outputs/],
+  ['reusable workflow caller', /uses:\s*\.\/\.github\/workflows\/reusable-risk\.yml/],
+  ['reusable workflow output consumption', /needs\.risk\.outputs\.risk/],
   ['matrix completion', /fail-fast:\s*false/],
   ['parallel cap', /max-parallel:/],
   ['artifact', /upload-artifact@[0-9a-f]{40}/],
@@ -27,4 +29,3 @@ if (problems.length) {
 } else {
   console.log('Capstone structural checks pass. Explain every choice aloud.');
 }
-

@@ -19,6 +19,15 @@ test('workflow safety and coverage validator passes', async () => {
   assert.equal(result.stderr, '');
 });
 
+test('lab-summary bridges its untrusted title through a quoted environment variable', async () => {
+  const action = await readFile(join(projectRoot, '.github/actions/lab-summary/action.yml'), 'utf8');
+  const runScript = action.slice(action.indexOf('      run: |'));
+
+  assert.match(action, /LAB_SUMMARY_TITLE: \$\{\{ inputs\.title \}\}/);
+  assert.match(runScript, /"\$LAB_SUMMARY_TITLE"/);
+  assert.doesNotMatch(runScript, /\$\{\{\s*inputs\.title\s*\}\}/);
+});
+
 test('risk-summary action reads its declared input and writes GitHub output files', async () => {
   const tempDirectory = await mkdtemp(join(tmpdir(), 'gh200-risk-action-'));
   const outputPath = join(tempDirectory, 'output');

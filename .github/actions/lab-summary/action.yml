@@ -9,9 +9,11 @@ runs:
   steps:
     - name: Write learning summary
       shell: bash
+      env:
+        LAB_SUMMARY_TITLE: ${{ inputs.title }}
       run: |
         {
-          echo "### ${{ inputs.title }}"
+          printf '### %s\n' "$LAB_SUMMARY_TITLE"
           echo
           echo "This job exercised a local composite action without external credentials."
         } >> "$GITHUB_STEP_SUMMARY"

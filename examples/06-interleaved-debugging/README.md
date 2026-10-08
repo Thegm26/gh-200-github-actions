@@ -1,8 +1,8 @@
 # 06 — interleaved hard scenarios
 
-## Exact target time
+## Prerequisites and focused goal
 
-10 minutes (02:00–02:10).
+Complete examples 01–05. Pick the smallest reuse or repair abstraction for each scenario.
 
 ## Objective and domain
 
@@ -33,7 +33,7 @@ Five decisions name job output mapping, `fail-fast: false`, reusable workflow, c
 diff -u examples/06-interleaved-debugging/solution.md examples/06-interleaved-debugging/scenarios.md || true
 ```
 
-Score one point for the answer and one for rejecting the wrong abstraction: target 8/10.
+Score one point for the answer and one for rejecting the wrong abstraction. Repeat the linked canonical lab for each miss.
 
 ## Answer or solution location
 
@@ -44,4 +44,3 @@ Open [`solution.md`](solution.md) after writing all answers.
 - [Job outputs](https://docs.github.com/actions/using-jobs/defining-outputs-for-jobs)
 - [Matrix failure handling](https://docs.github.com/actions/using-jobs/using-a-matrix-for-your-jobs#handling-failures)
 - [Avoiding duplication](https://docs.github.com/actions/concepts/workflows-and-actions/avoiding-duplication)
-

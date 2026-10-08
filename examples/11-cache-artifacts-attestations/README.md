@@ -1,8 +1,8 @@
 # 11 — cache, artifacts, packages, retention, and attestations
 
-## Exact target time
+## Prerequisites and focused goal
 
-20 minutes (03:55–04:15).
+Complete canonical lab 16 first. Preserve one build result and explain why it is not a dependency cache.
 
 ## Objective and domain
 
@@ -38,7 +38,7 @@ Checklist: a cache is never treated as authoritative release evidence; verificat
 
 ## Answer or solution location
 
-Use [`solution.workflow.yml.txt`](solution.workflow.yml.txt) and [`solution.md`](solution.md).
+Use [`solution.workflow.yml.txt`](solution.workflow.yml.txt) and [`solution.md`](solution.md). Local digest verification models a trust decision; it is not a GitHub-signed attestation or a hosted retention/API proof.
 
 ## Primary official links
 
@@ -47,4 +47,3 @@ Use [`solution.workflow.yml.txt`](solution.workflow.yml.txt) and [`solution.md`]
 - [Artifact attestations](https://docs.github.com/actions/security-for-github-actions/using-artifact-attestations)
 - [Verifying attestations with GitHub CLI](https://cli.github.com/manual/gh_attestation_verify)
 - [Publishing Node.js packages](https://docs.github.com/actions/publishing-packages/publishing-nodejs-packages)
-

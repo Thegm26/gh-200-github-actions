@@ -1,16 +1,25 @@
 name: secure build pattern
-on: pull_request
-permissions: { contents: read, id-token: write, attestations: write }
+on: workflow_dispatch
+permissions: { contents: read }
 jobs:
   build:
     runs-on: ubuntu-latest
-    environment: production
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
       - name: Treat untrusted title as data
-        env: { PR_TITLE: ${{ github.event.pull_request.title }} }
+        env:
+          PR_TITLE: ${{ github.event.pull_request.title }}
         run: printf '%s\n' "$PR_TITLE"
-      - name: Federate to cloud
-        run: echo "Use provider action pinned to its reviewed full commit SHA"
-      - name: Verify before deploy
+      - name: Verify before trust or deploy
         run: gh attestation verify artifact.tar.gz --repo "$GITHUB_REPOSITORY"
+  attest-example:
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
+      attestations: write
+    steps:
+      - name: Explain the job-scoped generation contract
+        run: >-
+          echo 'A real provenance-generation job needs id-token: write and attestations: write; verification alone does not.'

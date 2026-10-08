@@ -23,18 +23,23 @@ function readJson(request) {
   return new Promise((resolve, reject) => {
     let size = 0;
     let body = '';
+    let settled = false;
 
     request.setEncoding('utf8');
     request.on('data', (chunk) => {
+      if (settled) return;
       size += Buffer.byteLength(chunk);
       if (size > MAX_BODY_BYTES) {
+        settled = true;
+        body = '';
         reject(Object.assign(new Error('Request body exceeds 16 KiB.'), { statusCode: 413 }));
-        request.destroy();
         return;
       }
       body += chunk;
     });
     request.on('end', () => {
+      if (settled) return;
+      settled = true;
       if (!body) {
         reject(Object.assign(new Error('Request body must contain JSON.'), { statusCode: 400 }));
         return;
@@ -49,7 +54,11 @@ function readJson(request) {
         reject(Object.assign(new Error(error.message === 'Request body must be a JSON object.' ? error.message : 'Request body must be valid JSON.'), { statusCode: 400 }));
       }
     });
-    request.on('error', reject);
+    request.on('error', (error) => {
+      if (settled) return;
+      settled = true;
+      reject(error);
+    });
   });
 }
 

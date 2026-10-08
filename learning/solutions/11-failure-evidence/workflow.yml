@@ -1,0 +1,3 @@
+name: evidence
+on: {workflow_dispatch: {}}
+jobs: {test: {runs-on: ubuntu-latest, steps: [{run: 'exit 1'}, {if: '${{ always() }}', name: evidence, run: 'echo evidence >> "$GITHUB_STEP_SUMMARY"'}]}}

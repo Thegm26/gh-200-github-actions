@@ -1,8 +1,8 @@
 # 10 — permissions, identity, injection, pinning, and environments
 
-## Exact target time
+## Prerequisites and focused goal
 
-25 minutes (03:30–03:55).
+Complete canonical labs 13–15 first. Reduce one workflow's trust boundary without deploying.
 
 ## Objective and domain
 
@@ -12,7 +12,7 @@ Secure and optimize automation: apply least-privilege `GITHUB_TOKEN` permissions
 
 - Repair inactive `insecure.workflow.yml.txt`.
 - Complete `identity-table.md`.
-- Compare with `solution.workflow.yml.txt` and `solution.md` after minute 20.
+- Compare with `solution.workflow.yml.txt` and `solution.md` only after a complete attempt.
 
 ## Tasks
 
@@ -37,7 +37,7 @@ Checklist: no `write-all`; no `@main` or short tag; no direct untrusted context 
 
 ## Answer or solution location
 
-Use [`solution.workflow.yml.txt`](solution.workflow.yml.txt), [`solution.md`](solution.md), and [`identity-table.solution.md`](identity-table.solution.md).
+Use [`solution.workflow.yml.txt`](solution.workflow.yml.txt), [`solution.md`](solution.md), and [`identity-table.solution.md`](identity-table.solution.md). The regex checker is deliberately limited; manually verify every job has only needed permissions and that OIDC is granted only to a job which actually federates. A full SHA may be required by an organization/repository policy; immutable release tags are also a supported action-release strategy, so do not claim GitHub universally rejects tags.
 
 ## Primary official links
 
@@ -45,4 +45,3 @@ Use [`solution.workflow.yml.txt`](solution.workflow.yml.txt), [`solution.md`](so
 - [`GITHUB_TOKEN` permissions](https://docs.github.com/actions/security-for-github-actions/security-guides/automatic-token-authentication)
 - [OIDC in cloud providers](https://docs.github.com/actions/security-for-github-actions/security-hardening-your-deployments/about-security-hardening-with-openid-connect)
 - [Deployments and environments](https://docs.github.com/actions/managing-workflow-runs-and-deployments/managing-deployments/managing-environments-for-deployment)
-

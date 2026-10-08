@@ -12,8 +12,6 @@ on:
 
 permissions:
   contents: read
-  id-token: write
-  attestations: write
 
 concurrency:
   group: package-learning-${{ github.ref }}
@@ -39,5 +37,7 @@ jobs:
         shell: bash
         run: |
           echo '### Attestation and OIDC learning notes' >> "$GITHUB_STEP_SUMMARY"
-          echo 'This manual-only exercise grants the minimal permissions needed to study the concepts.' >> "$GITHUB_STEP_SUMMARY"
+          echo 'This manual-only exercise keeps its active permissions at `contents: read`.' >> "$GITHUB_STEP_SUMMARY"
+          echo 'For OIDC, grant `id-token: write` at job scope only to the job that requests a token.' >> "$GITHUB_STEP_SUMMARY"
+          echo 'For artifact attestations, that job needs `attestations: write` and `id-token: write`.' >> "$GITHUB_STEP_SUMMARY"
           echo 'It intentionally does not request a cloud token, publish a package, deploy, or create an attestation.' >> "$GITHUB_STEP_SUMMARY"

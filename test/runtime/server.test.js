@@ -56,6 +56,23 @@ test('build-risk rejects invalid metrics and unexpected routes', async () => {
   });
 });
 
+test('build-risk returns a JSON 413 response for bodies larger than 16 KiB', async () => {
+  await withServer(async (baseUrl) => {
+    const response = await fetch(`${baseUrl}/v1/build-risk`, {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ padding: 'x'.repeat((16 * 1024) + 1) })
+    });
+
+    assert.equal(response.status, 413);
+    assert.match(response.headers.get('content-type'), /^application\/json/);
+    const body = await response.json();
+    assert.equal(body.error, 'invalid_request');
+    assert.equal(body.message, 'Request body exceeds 16 KiB.');
+    assert.match(body.requestId, /^[0-9a-f-]{36}$/);
+  });
+});
+
 test('scoreBuildRisk validates direct callers', () => {
   assert.throws(() => scoreBuildRisk({ failedJobs: 0, totalJobs: 0, openIncidents: 0, changeFailureRate: 0 }), /greater than zero/);
 });
