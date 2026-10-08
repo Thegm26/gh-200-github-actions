@@ -56,6 +56,13 @@ try {
     assert.equal(await test.page.locator('#path .stage-card').count(), 4, 'overview contains four topic bubbles');
     assert.equal(await test.page.locator('#path .map-lesson').count(), 0, 'overview does not expose the lesson list');
     await start(test.page);
+    const solution = test.page.locator('details').filter({ has: test.page.getByText('View solution', { exact: true }) });
+    assert.equal(await solution.count(), 1, 'lesson has the renamed solution disclosure');
+    assert.equal(await test.page.getByText('View a separate solution', { exact: true }).count(), 0, 'old solution disclosure is absent');
+    assert.equal(await test.page.getByText('Checks your YAML; nothing is run on GitHub.', { exact: true }).count(), 0, 'removed check note is absent');
+    await solution.locator('summary').click();
+    assert.notEqual(await solution.getAttribute('open'), null, 'solution disclosure opens');
+    assert.match(await solution.locator('.solution-code').textContent(), /name:/, 'open disclosure shows the answer');
     await test.page.locator('#yaml-editor').focus();
     await test.page.locator('#yaml-editor').press('End');
     await test.page.locator('#yaml-editor').press(' ');
