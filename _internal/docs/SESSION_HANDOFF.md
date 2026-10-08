@@ -1,6 +1,16 @@
 # Session Handoff
 
-## Bubble release gate — current authoritative record (2026-10-09 UTC)
+## Reference-roadmap redesign — current authoritative release record (2026-10-09 UTC)
+
+- The published circles, lavender/cream palette, and stacked-card interpretation were explicitly rejected. `/root/reference_ui_redesign` owns a reference-led local visual replacement across `visual/` and the browser regression only; curriculum, runtime data, hands-on, workflows, package dependencies, commits, publication, CI, and learner jobs remain out of scope.
+- Design direction: roadmap.sh-like light canvas and compact navy chrome; black-bordered yellow chapter rectangles, pale-yellow lesson rectangles, solid blue trunk lines, dotted blue branches, and generous intentional whitespace. One root map contains the fixed four-chapter trunk and all 17 direct lesson buttons; chapter headings are non-interactive and every lesson Back returns to the same map.
+- Product contract: one root map holds four non-interactive chapter headings and all 17 direct lesson branches; no intermediate chapter menu or progress text exists. Incomplete nodes/headings are yellow; completed ones are green with a tick. Back returns to the originating branch, with context-safe focus and visibility on mobile. Unreachable legacy `stageView`/`selectStage` helpers are accepted nonblocking because no UI route reaches them.
+- Canonical selected-tree fingerprint (handoff excluded): `e63135cc4cb50f1ddf6ee5406c35072acfcf9c749466d4746fc1c7e851270b09` across 317 files. Protected `.practice/01-first-workflow/workflow.yml` SHA-256 remains `406479bd330fc144bc86081d4d984de87f14696e474ce24906f23522dd718435`.
+- Fresh primary gates passed: `/tmp/gh200-release-primary-check.log` (47 tests plus validators), `/tmp/gh200-release-primary-browser.log`, and `/tmp/gh200-release-primary-hands-on.log` (17/17). The browser suite covers SVG/mobile rendering distinctions, pairwise map non-overlap, all 17 mobile lesson/Back cycles, return focus, storage recovery, completion/invalidation color changes, quizzes, references, and downloads. Independent viewport-bound probes confirmed all returned mobile branches are visible with at least 11.59px bottom margin; this is independent evidence, not a suite assertion.
+- Independent reviews are complete: A (`/root/reference_visual_review`) passed fresh exact-hash isolated, connected, and final-cohesion review; B (`/root/reference_integration_review`) passed fresh exact-hash isolated, connected, and cohesion review; the monitor independently confirmed scope, hash, and evidence. Current visual captures are `/tmp/gh200-rereview-root-{360,768,1440}-{initial,part,all}.png`.
+- Release status: **READY**. Only the primary may commit, push, and make the Pages decision. No commit, push, deployment, CI dispatch, or learner job has occurred in this redesign record. All records below are historical and subordinate to this section.
+
+## Bubble release gate — historical/superseded record (2026-10-09 UTC)
 
 - Frozen canonical tree fingerprint is `02ecaa96e3ddf9ec40d3ca19e3c5fd3cef44700176de31cf31b57c8ca3644f19` across 317 selected files; this handoff is excluded. Protected `.practice/01-first-workflow/workflow.yml` remains SHA-256 `406479bd330fc144bc86081d4d984de87f14696e474ce24906f23522dd718435`.
 - Primary fresh local evidence passed: 47 tests (30 main + 17 learning) in `/tmp/gh200-bubbles-primary-check.log`; browser regression in `/tmp/gh200-bubbles-primary-browser.log`; hands-on verifier 17/17 in `/tmp/gh200-bubbles-primary-hands-on.log`. The local `gh200-course` tmux server on port 4173 serves the corrected `visual/` route.
@@ -16,7 +26,7 @@
 - The rejected stacked rectangle roadmap was replaced locally with a compact, centred vertical path of circular topic nodes in the required order: Foundations, Connect jobs, Reuse and debug, Secure delivery. Topic lesson maps use the same circle-and-line treatment, with no visible numeric counters, lesson badges, or connector arrows. Navigation, browser-local persistence, completion, and automatic next-lesson routing remain intact.
 - Browser regression now asserts circle target size and shape, centred connector endpoints, containment, topic order, omitted visible numeric counters, every topic/back route, and existing all-lesson completion flows. Fresh headless evidence passed: `/tmp/gh200-roadmap-bubble-check.log` (`npm run check`) and `/tmp/gh200-roadmap-bubble-browser.log` (`GH200_BROWSER_EXECUTABLE=/opt/brave.com/brave/brave npm run test:browser`); root/topic captures at `/tmp/gh200-roadmap-{root,topic}-{360,768,1440}.png` were reviewed. Independent Sol re-review is pending. No commit, push, publication, GUI launch, configuration, or remote action occurred in this correction.
 
-## UI finish — frozen for independent review (current — 2026-10-09 UTC)
+## UI finish — historical record (2026-10-09 UTC)
 
 - Owner `/root/ui_finish` completed the bounded visual/hands-on correction. No commit, push, Pages publication, Actions dispatch, GUI launch, or Codex configuration change occurred.
 - Lesson layout keeps Learn / editor / goal as three desktop columns, with the editor dominant (440px minimum), all feedback/hints/completion controls nested in the editor column, nowrap YAML with editor scrolling, and a two-column tablet fallback. The lesson parent now expands with its wide main content; grid-child and header containment is asserted at 360, 700, 720, 740, 760, 768, 1024, 1180, 1200, and 1440px. The grid becomes single-column through 740px, preventing its two-column minimum tracks from overflowing. Lesson-only header spacing is compact so the desktop editor begins at 263px with a 32px heading. Fresh lesson captures are `/tmp/gh200-ui-finish-lesson-{360,1440}.png`; all current captures have no horizontal overflow. At 1440px the filter select, review toggle, and quiet count share one aligned control row.
@@ -26,7 +36,7 @@
 - Protected `.practice/01-first-workflow/workflow.yml` remains SHA-256 `406479bd330fc144bc86081d4d984de87f14696e474ce24906f23522dd718435`.
 - Release status: the tree is frozen pending the two independent Sol UI reviews and the primary Pages release decision. Earlier review counts and pre-UI evidence are not final evidence for this tree.
 
-## Layout simplification kickoff (active — 2026-10-09 UTC)
+## Layout simplification kickoff (historical — 2026-10-09 UTC)
 
 - Acceptance/owner: `/root/simplify_layout` owns the coupled local layout migration: learner entry points become `visual/` and `hands-on/`; maintenance material moves under `_internal/`; `.github/` and protected root `.practice/` remain. Baseline is clean `b712e33`; release remains pending.
 - Required evidence: preserve the `.practice/01-first-workflow/workflow.yml` SHA-256 `406479bd330fc144bc86081d4d984de87f14696e474ce24906f23522dd718435`; inspect all live routes; run `npm run check`, `npm run test:browser`, and `npm run verify:hands-on` with logs under `/tmp/gh200-layout-*.log`.

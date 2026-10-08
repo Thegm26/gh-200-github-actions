@@ -35,7 +35,7 @@ async function freshPage(url, viewport) {
     if (!requestUrl.startsWith(url.startsWith('file:') ? 'file:' : `http://127.0.0.1:${server.address().port}`)) external.push(requestUrl);
   });
   await page.goto(url);
-  await page.getByRole('heading', { name: 'Learning path' }).waitFor();
+  await page.getByRole('heading', { name: 'GitHub Actions roadmap' }).waitFor();
   return { context, page, errors, external };
 }
 
@@ -55,28 +55,38 @@ async function assertLessonContained(page) {
   });
 }
 
-async function assertCenteredPath(page, nodeSelector, connectorSelector, label) {
+async function assertRoadmapGeometry(page, label) {
+  await page.waitForFunction(() => document.querySelectorAll('#path .map-lines path').length === 20);
   const geometry = await page.evaluate(({ nodeSelector, connectorSelector }) => {
     const rect = (node) => { const box = node.getBoundingClientRect(); return { left: box.left, right: box.right, top: box.top, bottom: box.bottom, width: box.width, height: box.height, center: box.left + box.width / 2 }; };
-    return { viewport: window.innerWidth, overflow: document.documentElement.scrollWidth, nodes: [...document.querySelectorAll(nodeSelector)].map(rect), connectors: [...document.querySelectorAll(connectorSelector)].map(rect) };
-  }, { nodeSelector, connectorSelector });
+    const paths = [...document.querySelectorAll('#path .map-lines path')];
+    return { viewport: window.innerWidth, overflow: document.documentElement.scrollWidth, topics: [...document.querySelectorAll('#path .stage-card')].map(rect), lessons: [...document.querySelectorAll('#path .map-lesson')].map(rect), paths: paths.map((path) => path.getTotalLength()) };
+  }, { nodeSelector: '#path .stage-card', connectorSelector: '#path .roadmap-connector' });
   assert.equal(geometry.overflow, geometry.viewport, `${label} has no horizontal overflow`);
-  geometry.nodes.forEach((node, index) => {
-    assert.ok(node.width >= 44 && node.height >= 44, `${label} node ${index + 1} keeps a 44px target`);
-    assert.ok(Math.abs(node.width - node.height) <= 2, `${label} node ${index + 1} is circular`);
+  assert.equal(geometry.topics.length, 4, `${label} has four topic nodes`);
+  assert.equal(geometry.lessons.length, 17, `${label} exposes every lesson as a branch`);
+  geometry.topics.concat(geometry.lessons).forEach((node, index) => {
+    assert.ok(node.width >= 44 && node.height >= 34, `${label} node ${index + 1} keeps a usable rectangle target`);
+    assert.ok(node.width > node.height, `${label} node ${index + 1} is a horizontal rectangle, not a circle`);
     assert.ok(node.left >= 0 && node.right <= geometry.viewport, `${label} node ${index + 1} stays contained`);
   });
-  assert.equal(geometry.connectors.length, Math.max(geometry.nodes.length - 1, 0), `${label} has one connector between adjacent nodes`);
-  geometry.connectors.forEach((connector, index) => {
-    const above = geometry.nodes[index]; const below = geometry.nodes[index + 1];
-    assert.ok(Math.abs(connector.center - above.center) <= 1 && Math.abs(connector.center - below.center) <= 1, `${label} connector ${index + 1} is centred`);
-    assert.ok(Math.abs(connector.top - above.bottom) <= 1 && Math.abs(connector.bottom - below.top) <= 1, `${label} connector ${index + 1} meets both node boundaries`);
-  });
+  assert.equal(geometry.paths.length, 20, `${label} has three trunk and seventeen measured branch paths`);
+  geometry.paths.forEach((length, index) => assert.ok(length > 8, `${label} SVG path ${index + 1} has visible length`));
+}
+
+async function assertMapNoOverlap(page, label) {
+  const nodes = await page.locator('#path .stage-card, #path .map-lesson').evaluateAll((items) => items.map((item) => {
+    const rect = item.getBoundingClientRect();
+    return { label: item.getAttribute('aria-label') || item.textContent, left: rect.left, right: rect.right, top: rect.top, bottom: rect.bottom };
+  }));
+  for (let index = 0; index < nodes.length; index += 1) for (let other = index + 1; other < nodes.length; other += 1) {
+    const a = nodes[index]; const b = nodes[other];
+    assert.equal(a.left < b.right && b.left < a.right && a.top < b.bottom && b.top < a.bottom, false, `${label}: ${a.label} overlaps ${b.label}`);
+  }
 }
 
 async function start(page) {
-  await page.locator('#path .stage-card').first().click();
-  await page.locator('.lesson-bubble').first().click();
+  await page.locator('#path .map-lesson').first().click();
   await page.getByRole('button', { name: 'Test this YAML' }).waitFor();
 }
 
@@ -84,11 +94,10 @@ try {
   for (const url of [fileUrl, httpUrl, `${httpUrl}gh-200-github-actions/`]) {
     const test = await freshPage(url, { width: 360, height: 740 });
     assert.equal(await test.page.locator('.stepper').count(), 0, 'numbered phase bar is absent');
-    assert.equal(await test.page.locator('#path .stage-card').count(), 4, 'overview contains four topic bubbles');
+    assert.equal(await test.page.locator('#path .stage-card').count(), 4, 'overview contains four topic rectangles');
     assert.deepEqual(await test.page.locator('#path .stage-card b').allTextContents(), ['Foundations', 'Connect jobs', 'Reuse and debug', 'Secure delivery'], 'overview has the requested topic order');
     assert.equal(await test.page.getByText(/\d+\/\d+ complete/).count(), 0, 'overview shows no visible numeric topic counters');
-    await assertCenteredPath(test.page, '#path .stage-card', '#path .roadmap-connector', 'roadmap');
-    assert.equal(await test.page.locator('#path .map-lesson').count(), 0, 'overview does not expose the lesson list');
+    await assertRoadmapGeometry(test.page, 'roadmap');
     await start(test.page);
     assert.equal(await test.page.locator('.task-card').count(), 1, 'lesson has one concise task card');
     assert.equal(await test.page.locator('.learn-card .task').count(), 0, 'learn card has no buried task block');
@@ -127,29 +136,34 @@ try {
   }
 
   const stages = await freshPage(httpUrl, { width: 1440, height: 900 });
-  const names = await stages.page.evaluate(() => [...new Set(window.GH200Course.lessons.map((lesson) => lesson.stage))]);
-  assert.equal(await stages.page.locator('#path .stage-card').count(), 4, 'roadmap contains only topics');
-  await assertCenteredPath(stages.page, '#path .stage-card', '#path .roadmap-connector', 'desktop roadmap');
+  const names = await stages.page.evaluate(() => window.GH200Course.lessons.map((lesson) => lesson.title));
+  assert.equal(await stages.page.locator('button.stage-card').count(), 0, 'chapter headings do not create an intermediate menu');
+  await assertRoadmapGeometry(stages.page, 'desktop roadmap');
   assert.equal(await stages.page.locator('#progress-count').count(), 0, 'top bar does not duplicate lesson progress');
   for (let i = 0; i < names.length; i += 1) {
     await stages.page.goto(httpUrl);
-    await stages.page.locator('#path .stage-card').nth(i).click();
+    const branch = stages.page.locator('#path .map-lesson').nth(i);
+    await branch.click();
     await stages.page.getByRole('heading', { name: names[i] }).waitFor();
-    assert.ok(await stages.page.locator('.lesson-bubble').count() > 0, 'stage exposes its lesson bubbles');
-    assert.equal(await stages.page.locator('.bubble-number').count(), 0, 'lesson map has no numbered badges');
-    assert.equal(await stages.page.locator('.lesson-bubble').evaluateAll((nodes) => nodes.filter((node) => /^Lesson \d/.test(node.getAttribute('aria-label') || '')).length), 0, 'lesson map aria labels have no numeric lesson prefixes');
-    assert.equal(await stages.page.locator('.lesson-flow').evaluate((node) => /\b(null|undefined|After the lesson above)\b/.test(node.textContent)), false, 'lesson map omits empty and redundant helper text');
-    assert.equal(await stages.page.locator('.lesson-map-state.next-state').count(), 1, 'exactly one unfinished lesson is marked next');
-    assert.equal(await stages.page.locator('.lesson-connector').count(), (await stages.page.locator('.lesson-bubble').count()) - 1, 'adjacent lessons are linked by downward connectors');
-    await assertCenteredPath(stages.page, '.lesson-bubble', '.lesson-connector', `${names[i]} lesson path`);
-    const mapTitles = await stages.page.locator('.lesson-bubble b').allTextContents();
-    const runtimeTitles = await stages.page.evaluate((stage) => window.GH200Course.lessons.filter((lesson) => lesson.stage === stage).map((lesson) => lesson.title), names[i]);
-    assert.deepEqual(mapTitles, runtimeTitles, 'lesson map order matches runtime order');
     await stages.page.getByRole('button', { name: 'Back to roadmap' }).click();
-    await stages.page.getByRole('heading', { name: 'Learning path' }).waitFor();
+    await stages.page.locator('#path .map-lesson').nth(i).waitFor();
+    assert.equal(await stages.page.locator('#path .map-lesson').count(), 17, 'Back returns to the full root map');
   }
   await assertNoOverflow(stages.page);
   await stages.context.close();
+
+  const mobileMap = await freshPage(httpUrl, { width: 360, height: 740 });
+  await assertMapNoOverlap(mobileMap.page, '360px root map');
+  for (let index = 0; index < 17; index += 1) {
+    const branch = mobileMap.page.locator('#path .map-lesson').nth(index);
+    await branch.click();
+    await mobileMap.page.getByRole('button', { name: 'Back to roadmap' }).click();
+    await mobileMap.page.locator('#path .map-lesson').nth(index).waitFor();
+    await mobileMap.page.waitForTimeout(30);
+    assert.equal(await mobileMap.page.evaluate((i) => document.activeElement === document.querySelectorAll('#path .map-lesson')[i], index), true, `360px Back restores focus to branch ${index + 1}`);
+    await assertMapNoOverlap(mobileMap.page, `360px map after branch ${index + 1}`);
+  }
+  await mobileMap.context.close();
 
   const route = await freshPage(httpUrl, { width: 1440, height: 900 });
   await start(route.page);
@@ -172,15 +186,21 @@ try {
       assert.equal(await route.page.locator('#lesson-continue').count(), 0, 'completion advances immediately without a continuation button');
     }
     else {
-      await route.page.getByRole('heading', { name: 'Learning path' }).waitFor();
+      await route.page.getByRole('heading', { name: 'GitHub Actions roadmap' }).waitFor();
       assert.equal(await route.page.getByText('You have completed all 17 lessons.', { exact: true }).count(), 0, 'last completion returns directly to the roadmap');
     }
   }
   await route.page.reload();
   await route.page.getByRole('link', { name: 'GH-200 practice' }).click();
-  assert.match(await route.page.locator('#path .stage-card').first().textContent(), /Done/, 'completion appears on the roadmap');
-  await route.page.locator('#path .stage-card').last().click();
-  await route.page.locator('.lesson-bubble').last().click();
+  assert.match(await route.page.locator('#path .stage-card').first().textContent(), /✓/, 'completion appears on the roadmap');
+  assert.match(await route.page.locator('#path .stage-card').first().evaluate((node) => getComputedStyle(node).backgroundColor), /rgb\(233, 247, 239\)/, 'fully completed chapter is green');
+  await route.page.locator('#path .stage-card').first().hover();
+  assert.match(await route.page.locator('#path .stage-card').first().evaluate((node) => getComputedStyle(node).backgroundColor), /rgb\(233, 247, 239\)/, 'completed chapter remains green on hover');
+  await route.page.locator('#path .map-lesson').first().click();
+  await route.page.locator('#yaml-editor').fill('name: invalidated chapter');
+  await route.page.getByRole('button', { name: 'Back to roadmap' }).click();
+  assert.match(await route.page.locator('#path .stage-card').first().evaluate((node) => getComputedStyle(node).backgroundColor), /rgb\(255, 235, 59\)/, 'editing a completed lesson returns its chapter heading to yellow');
+  await route.page.locator('#path .map-lesson').last().click();
   assert.equal(await route.page.locator('#lesson-continue').count(), 0, 'reopened final lesson has no continuation panel');
   assert.equal(await route.page.getByRole('button', { name: 'See your completion summary' }).count(), 0, 'reopened final lesson has no completion-summary action');
   assert.deepEqual(route.errors, [], 'route has no page errors');
@@ -225,10 +245,9 @@ try {
   await persistence.page.getByRole('button', { name: 'Test this YAML' }).click();
   await persistence.page.getByRole('button', { name: 'Mark as done' }).click();
   await persistence.page.getByRole('heading', { name: await persistence.page.evaluate(() => window.GH200Course.lessons[1].title) }).waitFor();
-  await persistence.page.getByRole('button', { name: /Back to Foundations/ }).click();
-  assert.equal(await persistence.page.locator('.lesson-map-state.next-state').count(), 1, 'completion leaves exactly one next marker');
-  assert.equal(await persistence.page.locator('.lesson-map-state.next-state').textContent(), 'Start', 'completion moves the minimal next marker to the following lesson');
-  await persistence.page.locator('.lesson-bubble').first().click();
+  await persistence.page.getByRole('button', { name: 'Back to roadmap' }).click();
+  assert.equal(await persistence.page.getByText('Start', { exact:true }).count(), 0, 'roadmap has no progress text labels');
+  await persistence.page.locator('#path .map-lesson').first().click();
   await persistence.page.reload();
   assert.equal(await persistence.page.locator('#lesson-status').textContent(), 'Completed', 'completed state is shown once in the lesson header after reload');
   assert.equal(await persistence.page.locator('.completed-help').count(), 0, 'completed state has no repeated bottom message');
@@ -237,23 +256,23 @@ try {
   assert.equal(await persistence.page.locator('#lesson-status').textContent(), '', 'editing removes stale completed status');
   assert.equal(await persistence.page.locator('.completed-help').count(), 0, 'editing removes stale completed message');
   assert.equal(await persistence.page.getByRole('button', { name: 'Mark as done' }).isDisabled(), true, 'edited draft must pass again');
-  await persistence.page.getByRole('button', { name: /Back to Foundations/ }).click();
-  assert.equal(await persistence.page.locator('.lesson-map-state.next-state').textContent(), 'Start', 'editing invalidation restores the minimal next marker');
-  await persistence.page.locator('.lesson-bubble').first().click();
+  await persistence.page.getByRole('button', { name: 'Back to roadmap' }).click();
+  assert.equal(await persistence.page.getByText('Start', { exact:true }).count(), 0, 'editing invalidation keeps the map free of progress labels');
+  await persistence.page.locator('#path .map-lesson').first().click();
   await persistence.page.locator('#yaml-editor').fill(firstSolution);
   await persistence.page.getByRole('button', { name: 'Test this YAML' }).click();
   assert.equal(await persistence.page.getByRole('button', { name: 'Mark as done' }).isDisabled(), false, 'passing the current edit enables completion');
   await persistence.page.getByRole('button', { name: 'Mark as done' }).click();
   await persistence.page.getByRole('heading', { name: await persistence.page.evaluate(() => window.GH200Course.lessons[1].title) }).waitFor();
-  await persistence.page.getByRole('button', { name: /Back to Foundations/ }).click();
-  await persistence.page.locator('.lesson-bubble').first().click();
+  await persistence.page.getByRole('button', { name: 'Back to roadmap' }).click();
+  await persistence.page.locator('#path .map-lesson').first().click();
   assert.equal(await persistence.page.locator('#lesson-status').textContent(), 'Completed', 'completion is restored after the edited draft passes');
   assert.equal(await persistence.page.locator('.completed-help').count(), 0, 'restored completion has no repeated bottom message');
   await persistence.page.locator('#yaml-editor').fill('name: unfinished draft');
-  await persistence.page.getByRole('button', { name: /Back to Foundations/ }).click();
-  await persistence.page.locator('.lesson-bubble').nth(1).click();
-  await persistence.page.getByRole('button', { name: /Back to Foundations/ }).click();
-  await persistence.page.locator('.lesson-bubble').first().click();
+  await persistence.page.getByRole('button', { name: 'Back to roadmap' }).click();
+  await persistence.page.locator('#path .map-lesson').nth(1).click();
+  await persistence.page.getByRole('button', { name: 'Back to roadmap' }).click();
+  await persistence.page.locator('#path .map-lesson').first().click();
   assert.equal(await persistence.page.locator('#yaml-editor').inputValue(), 'name: unfinished draft');
   await persistence.page.reload();
   assert.equal(await persistence.page.locator('#yaml-editor').inputValue(), 'name: unfinished draft', 'unfinished draft survives reload');
@@ -335,10 +354,11 @@ try {
   await retry.context.close();
 
   const malformed = await browser.newContext({ viewport: { width: 360, height: 740 } });
-  await malformed.addInitScript(() => localStorage.setItem('actions-academy-gh200-v1', JSON.stringify({ selected: 4, drafts: 'bad', completed: [] })));
+  await malformed.addInitScript(() => localStorage.setItem('actions-academy-gh200-v1', JSON.stringify({ selected: 4, stage: 'Foundations', drafts: 'bad', completed: [] })));
   const malformedPage = await malformed.newPage();
   await malformedPage.goto(httpUrl);
-  await malformedPage.getByRole('heading', { name: 'Learning path' }).waitFor();
+  await malformedPage.getByRole('heading', { name: 'GitHub Actions roadmap' }).waitFor();
+  assert.equal(await malformedPage.locator('#path .map-lesson').count(), 17, 'legacy saved stage recovers to the one root roadmap');
   await malformed.close();
 
   const blocked = await browser.newContext({ viewport: { width: 360, height: 740 } });
