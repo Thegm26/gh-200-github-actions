@@ -44,26 +44,22 @@ async function assertNoOverflow(page) {
 }
 
 async function start(page) {
-  await page.getByRole('button', { name: 'Start with lesson 01' }).click();
+  await page.locator('#path .stage-card').first().click();
+  await page.locator('.lesson-bubble').first().click();
   await page.getByRole('button', { name: 'Test this YAML' }).waitFor();
-}
-
-async function assertCurrentStep(page, name) {
-  assert.equal(await page.locator('.step.active[aria-current="step"]').count(), 1, 'exactly one step is current');
-  assert.equal(await page.locator('.step.active').textContent(), name);
 }
 
 try {
   for (const url of [fileUrl, httpUrl]) {
     const test = await freshPage(url, { width: 360, height: 740 });
+    assert.equal(await test.page.locator('.stepper').count(), 0, 'numbered phase bar is absent');
+    assert.equal(await test.page.locator('#path .stage-card').count(), 4, 'overview contains four topic bubbles');
+    assert.equal(await test.page.locator('#path .map-lesson').count(), 0, 'overview does not expose the lesson list');
     await start(test.page);
-    await assertCurrentStep(test.page, '1 Learn');
     await test.page.locator('#yaml-editor').focus();
     await test.page.locator('#yaml-editor').press('End');
     await test.page.locator('#yaml-editor').press(' ');
-    await assertCurrentStep(test.page, '2 Write');
     await test.page.getByRole('button', { name: 'Test this YAML' }).click();
-    await assertCurrentStep(test.page, '3 Test');
     assert.equal(await test.page.getByRole('button', { name: 'Mark as done' }).isDisabled(), true, 'starter must not be marked complete');
     await assertNoOverflow(test.page);
     assert.deepEqual(test.errors, [], 'page errors');
@@ -72,14 +68,15 @@ try {
   }
 
   const stages = await freshPage(httpUrl, { width: 1440, height: 900 });
-  const starts = ['01', '05', '09', '12'];
-  assert.equal(await stages.page.locator('#path .map-lesson').count(), 17, 'the flowchart contains every lesson');
-  for (let i = 0; i < starts.length; i += 1) {
+  const names = await stages.page.evaluate(() => [...new Set(window.GH200Course.lessons.map((lesson) => lesson.stage))]);
+  assert.equal(await stages.page.locator('#path .stage-card').count(), 4, 'roadmap contains only topics');
+  for (let i = 0; i < names.length; i += 1) {
     await stages.page.goto(httpUrl);
-    if (i > 0) await stages.page.getByRole('link', { name: /Actions Academy/ }).click();
     await stages.page.locator('#path .stage-card').nth(i).click();
-    await stages.page.getByRole('heading', { level: 1 }).waitFor();
-    assert.match(await stages.page.locator('.eyebrow').first().textContent(), new RegExp('Lesson ' + starts[i]));
+    await stages.page.getByRole('heading', { name: names[i] }).waitFor();
+    assert.ok(await stages.page.locator('.lesson-bubble').count() > 0, 'stage exposes its lesson bubbles');
+    await stages.page.getByRole('button', { name: '← Back to roadmap' }).click();
+    await stages.page.getByRole('heading', { name: 'Your GitHub Actions learning path' }).waitFor();
   }
   await assertNoOverflow(stages.page);
   await stages.context.close();
@@ -100,7 +97,7 @@ try {
   await route.page.reload();
   assert.match(await route.page.locator('#progress-count').textContent(), /17 of 17/, 'completed progress survives reload');
   await route.page.getByRole('link', { name: /Actions Academy/ }).click();
-  assert.equal(await route.page.locator('#path .map-lesson.done').count(), 17, 'completion appears on every map node');
+  assert.match(await route.page.locator('#path .stage-card').first().textContent(), /✓ Complete/, 'completion appears on the roadmap');
   assert.deepEqual(route.errors, [], 'route has no page errors');
   assert.deepEqual(route.external, [], 'route has no external requests');
   await route.context.close();
@@ -111,14 +108,25 @@ try {
   await persistence.page.locator('#yaml-editor').fill(firstSolution);
   await persistence.page.getByRole('button', { name: 'Test this YAML' }).click();
   await persistence.page.getByRole('button', { name: 'Mark as done' }).click();
-  await assertCurrentStep(persistence.page, '4 Done');
+  assert.equal(await persistence.page.getByRole('button', { name: 'Mark as done' }).count(), 0, 'completed lesson needs no repeat confirmation');
+  await persistence.page.reload();
+  assert.match(await persistence.page.locator('.completed-help').textContent(), /Completed\./, 'completed state is unambiguous after reload');
   await persistence.page.locator('#yaml-editor').fill('name: changed after completion');
   assert.match(await persistence.page.locator('#progress-count').textContent(), /0 of 17/, 'editing removes stale completion from progress');
   assert.equal(await persistence.page.locator('#lesson-continue').count(), 0, 'editing removes stale continuation');
   assert.equal(await persistence.page.locator('#lesson-status').textContent(), 'Practice now', 'editing removes stale completed status');
+  assert.equal(await persistence.page.locator('.completed-help').count(), 0, 'editing removes stale completed message');
+  assert.equal(await persistence.page.getByRole('button', { name: 'Mark as done' }).isDisabled(), true, 'edited draft must pass again');
+  await persistence.page.locator('#yaml-editor').fill(firstSolution);
+  await persistence.page.getByRole('button', { name: 'Test this YAML' }).click();
+  assert.equal(await persistence.page.getByRole('button', { name: 'Mark as done' }).isDisabled(), false, 'passing the current edit enables completion');
+  await persistence.page.getByRole('button', { name: 'Mark as done' }).click();
+  assert.match(await persistence.page.locator('.completed-help').textContent(), /Completed\./, 'completion is restored after the edited draft passes');
   await persistence.page.locator('#yaml-editor').fill('name: unfinished draft');
-  await persistence.page.getByRole('button', { name: /Lesson 02:/ }).click();
-  await persistence.page.getByRole('button', { name: /Lesson 01:/ }).click();
+  await persistence.page.getByRole('button', { name: /Back to Foundations/ }).click();
+  await persistence.page.locator('.lesson-bubble').nth(1).click();
+  await persistence.page.getByRole('button', { name: /Back to Foundations/ }).click();
+  await persistence.page.locator('.lesson-bubble').first().click();
   assert.equal(await persistence.page.locator('#yaml-editor').inputValue(), 'name: unfinished draft');
   await persistence.page.reload();
   assert.equal(await persistence.page.locator('#yaml-editor').inputValue(), 'name: unfinished draft', 'unfinished draft survives reload');
