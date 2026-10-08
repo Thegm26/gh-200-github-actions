@@ -70,11 +70,20 @@ try {
   const stages = await freshPage(httpUrl, { width: 1440, height: 900 });
   const names = await stages.page.evaluate(() => [...new Set(window.GH200Course.lessons.map((lesson) => lesson.stage))]);
   assert.equal(await stages.page.locator('#path .stage-card').count(), 4, 'roadmap contains only topics');
+  assert.equal(await stages.page.locator('#progress-count').count(), 0, 'top bar does not duplicate lesson progress');
   for (let i = 0; i < names.length; i += 1) {
     await stages.page.goto(httpUrl);
     await stages.page.locator('#path .stage-card').nth(i).click();
     await stages.page.getByRole('heading', { name: names[i] }).waitFor();
     assert.ok(await stages.page.locator('.lesson-bubble').count() > 0, 'stage exposes its lesson bubbles');
+    assert.equal(await stages.page.locator('.bubble-number').count(), 0, 'lesson map has no numbered badges');
+    assert.equal(await stages.page.locator('.lesson-bubble').evaluateAll((nodes) => nodes.filter((node) => /^Lesson \d/.test(node.getAttribute('aria-label') || '')).length), 0, 'lesson map aria labels have no numeric lesson prefixes');
+    assert.equal(await stages.page.locator('.lesson-flow').evaluate((node) => /\b(null|undefined|After the lesson above)\b/.test(node.textContent)), false, 'lesson map omits empty and redundant helper text');
+    assert.equal(await stages.page.locator('.lesson-map-state.next-state').count(), 1, 'exactly one unfinished lesson is marked next');
+    assert.equal(await stages.page.locator('.lesson-connector').count(), (await stages.page.locator('.lesson-bubble').count()) - 1, 'adjacent lessons are linked by downward connectors');
+    const mapTitles = await stages.page.locator('.lesson-bubble b').allTextContents();
+    const runtimeTitles = await stages.page.evaluate((stage) => window.GH200Course.lessons.filter((lesson) => lesson.stage === stage).map((lesson) => lesson.title), names[i]);
+    assert.deepEqual(mapTitles, runtimeTitles, 'lesson map order matches runtime order');
     await stages.page.getByRole('button', { name: '← Back to roadmap' }).click();
     await stages.page.getByRole('heading', { name: 'Your GitHub Actions learning path' }).waitFor();
   }
@@ -89,14 +98,15 @@ try {
     await route.page.getByRole('button', { name: 'Test this YAML' }).click();
     await route.page.getByText('Looks good — this draft meets the exercise checks.').waitFor();
     await route.page.getByRole('button', { name: 'Mark as done' }).click();
-    if (index < 16) await route.page.getByRole('button', { name: new RegExp('Continue to lesson ' + String(index + 2).padStart(2, '0')) }).click();
+    if (index < 16) {
+      const nextTitle = await route.page.evaluate((i) => window.GH200Course.lessons[i + 1].title, index);
+      await route.page.getByRole('button', { name: 'Continue: ' + nextTitle }).click();
+    }
     else await route.page.getByRole('button', { name: 'See your completion summary' }).click();
   }
   await route.page.getByRole('heading', { name: 'You have completed all 17 lessons.' }).waitFor();
-  assert.match(await route.page.locator('#progress-count').textContent(), /17 of 17/);
   await route.page.reload();
-  assert.match(await route.page.locator('#progress-count').textContent(), /17 of 17/, 'completed progress survives reload');
-  await route.page.getByRole('link', { name: /Actions Academy/ }).click();
+  await route.page.getByRole('link', { name: 'GH-200 practice' }).click();
   assert.match(await route.page.locator('#path .stage-card').first().textContent(), /✓ Complete/, 'completion appears on the roadmap');
   assert.deepEqual(route.errors, [], 'route has no page errors');
   assert.deepEqual(route.external, [], 'route has no external requests');
@@ -109,14 +119,20 @@ try {
   await persistence.page.getByRole('button', { name: 'Test this YAML' }).click();
   await persistence.page.getByRole('button', { name: 'Mark as done' }).click();
   assert.equal(await persistence.page.getByRole('button', { name: 'Mark as done' }).count(), 0, 'completed lesson needs no repeat confirmation');
+  await persistence.page.getByRole('button', { name: /Back to Foundations/ }).click();
+  assert.equal(await persistence.page.locator('.lesson-map-state.next-state').count(), 1, 'completion leaves exactly one next marker');
+  assert.equal(await persistence.page.locator('.lesson-map-state.next-state').textContent(), 'Up next', 'completion moves next marker to the following lesson');
+  await persistence.page.locator('.lesson-bubble').first().click();
   await persistence.page.reload();
   assert.match(await persistence.page.locator('.completed-help').textContent(), /Completed\./, 'completed state is unambiguous after reload');
   await persistence.page.locator('#yaml-editor').fill('name: changed after completion');
-  assert.match(await persistence.page.locator('#progress-count').textContent(), /0 of 17/, 'editing removes stale completion from progress');
   assert.equal(await persistence.page.locator('#lesson-continue').count(), 0, 'editing removes stale continuation');
   assert.equal(await persistence.page.locator('#lesson-status').textContent(), 'Practice now', 'editing removes stale completed status');
   assert.equal(await persistence.page.locator('.completed-help').count(), 0, 'editing removes stale completed message');
   assert.equal(await persistence.page.getByRole('button', { name: 'Mark as done' }).isDisabled(), true, 'edited draft must pass again');
+  await persistence.page.getByRole('button', { name: /Back to Foundations/ }).click();
+  assert.equal(await persistence.page.locator('.lesson-map-state.next-state').textContent(), 'Start here', 'editing invalidation restores the earlier next marker');
+  await persistence.page.locator('.lesson-bubble').first().click();
   await persistence.page.locator('#yaml-editor').fill(firstSolution);
   await persistence.page.getByRole('button', { name: 'Test this YAML' }).click();
   assert.equal(await persistence.page.getByRole('button', { name: 'Mark as done' }).isDisabled(), false, 'passing the current edit enables completion');
@@ -148,6 +164,7 @@ try {
     assert.ok(firstQuestion, 'runtime publishes source-derived practice questions');
     assert.ok(Array.isArray(firstQuestion.sources) && firstQuestion.sources.length, 'questions include official sources');
     assert.ok(await library.page.locator('#question-domain option').count() > 1, 'domain filter is populated');
+    assert.ok(await library.page.locator('#question-domain option', { hasText: 'Author and manage workflows' }).count(), 'domain option uses an official readable name');
     await library.page.locator('#question-domain').selectOption(firstQuestion.domain);
     await library.page.locator(`input[name="practice-answer"][value="${firstQuestion.correct}"]`).check();
     await library.page.getByRole('button', { name: 'Check answer' }).click();
@@ -159,9 +176,14 @@ try {
     await library.page.getByRole('heading', { name: 'References' }).waitFor();
     await library.page.getByRole('heading', { name: 'Exam practice resources' }).waitFor();
     assert.match(await library.page.locator('#exam-practice').textContent(), /not released past exam papers/i, 'exam area rejects past-paper claim');
-    assert.ok(await library.page.locator('#exam-practice a').count() >= 2, 'exam area includes official assessment and sandbox links');
+    assert.ok(await library.page.locator('.compact-reference .reference-open').count() >= 2, 'exam resources expose their external links');
+    assert.equal(await library.page.locator('#exam-practice .reference-details').count(), 0, 'links-only exam resources have no fake offline content or downloads');
+    const snapshot = library.page.locator('[data-reference-id="github-docs-workflow-syntax-snapshot"]');
+    await assert.equal(await snapshot.locator('details.reference-details').getAttribute('open'), null, 'content-backed reference details start closed');
+    await assert.match(await snapshot.locator('.reference-badge').textContent(), /Official/, 'primary reference has an official badge');
     const download = library.page.waitForEvent('download');
-    await library.page.locator('#exam-practice').getByRole('button', { name: /Download/ }).first().click();
+    await snapshot.locator('details.reference-details > summary').click();
+    await snapshot.getByRole('button', { name: /Download source snapshot/ }).click();
     const artifact = await download;
     assert.match(artifact.suggestedFilename(), /\.md$/, 'reference download is Markdown');
     const downloaded = await readFile(await artifact.path(), 'utf8');
