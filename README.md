@@ -4,27 +4,56 @@ This is a beginner-first, local practice course for the [Microsoft GH-200 study 
 
 ## Start here
 
-Prerequisites: Git, Node.js 18+ and npm (Node 22+ is recommended). A GitHub account and `gh` CLI are optional until the GitHub sandbox runbook.
+The primary learning path needs only a modern browser. Clone this repository or download and unzip it, then open [index.html](index.html). It works offline, including from `file://`; no install, account, or server is needed. Your browser keeps lesson drafts and completed checks locally.
+
+To clone it:
 
 ```bash
 git clone https://github.com/Thegm26/gh-200-github-actions.git
 cd gh-200-github-actions
-npm install
 ```
 
-Install once, then open [Exercise 01 — Your first workflow](exercises/01-first-workflow/README.md).
+For an optional local URL, Node.js 18+ can serve the same static course without installing packages:
 
-Each numbered folder is a small, safe local exercise: read its explanation, edit the named YAML file, run its `node exercises/.../check.mjs` command, then move to the linked next exercise. The check fails first on purpose and tells you what to change. It only reads that exercise folder; nothing is copied, reset, or sent to GitHub.
+```bash
+node scripts/serve-course.mjs
+# then open http://127.0.0.1:4173
+```
 
-## Your first red → green exercise
+The browser has three sections:
 
-Open [01 — Your first workflow](exercises/01-first-workflow/README.md). It explains manual triggers, names [workflow.yml](exercises/01-first-workflow/workflow.yml) as the only file to edit, and gives this check:
+- **Learning path** — 17 connected lessons with a YAML editor, local feedback, and saved progress.
+- **Practice questions** — 86 original questions with explanations, domain filtering, and an incorrect-answer review loop.
+- **References** — 16 clearly labeled primary or secondary resources, offline notes/snapshots where supplied, the cheat sheet, blueprint coverage, and an **Exam practice resources** area. These resources are not released past exam papers.
+
+The sections below describe the optional direct terminal exercises and maintainer checks.
+
+## Optional direct terminal exercise
+
+The original adjacent-file route needs Node.js 18+ plus `npm install` once because its checker uses the YAML package. Open [Exercise 01 — Your first workflow](exercises/01-first-workflow/README.md), edit its YAML, and run:
 
 ```bash
 node exercises/01-first-workflow/check.mjs
 ```
 
-After you have tried, compare with the separate immutable solution linked from that exercise. `npm run check` is for repository maintainers; your exercise check is the learning feedback.
+Each numbered folder is a small, safe local exercise: read its explanation, edit the named YAML file, run its `node exercises/.../check.mjs` command, then move to the linked next exercise. The check fails first on purpose and tells you what to change. It only reads that exercise folder; nothing is copied, reset, or sent to GitHub.
+
+## Maintainer setup
+
+Repository maintainers need Node.js 18+ and npm (Node 22+ recommended):
+
+```bash
+npm install
+```
+
+Run `npm run check` for the repository gate. The optional browser regression needs Chromium once on the maintainer machine:
+
+```bash
+npx playwright-core install chromium
+npm run test:browser
+```
+
+Set `GH200_BROWSER_EXECUTABLE` to use an already-installed Chromium, or `GH200_PLAYWRIGHT_MODULE` to point at a compatible external Playwright module. Learners never need these tools.
 
 ## Course map
 
@@ -35,7 +64,7 @@ The older [`examples/`](examples) remain useful focused reference exercises and 
 ## Readiness loop
 
 1. Complete each exercise green at least once.
-2. Run the seeded quizzes: `npm run quiz -- --domain <tag> --count 8 --seed practice`.
+2. Open **Practice questions** in the browser, filter to a domain, then review missed answers and their official links. The CLI quiz (`npm run quiz -- --domain <tag> --count 8 --seed practice`) remains optional.
 3. Record each missed objective, redo its linked lab without the solution, then answer the explanation in your own words.
 4. Use [CHEAT_SHEET.md](docs/CHEAT_SHEET.md) for distinctions, not as a substitute for the exercise.
 5. Reopen the relevant exercise README and redo its YAML without the solution.

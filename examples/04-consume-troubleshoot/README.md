@@ -41,7 +41,7 @@ Use [`solution.md`](solution.md) only after completing `attempt.md`. The local c
 
 ## Primary official links
 
-- [Viewing workflow run history](https://docs.github.com/actions/monitoring-and-troubleshooting-workflows/viewing-workflow-run-history)
+- [Viewing workflow run history](https://docs.github.com/en/actions/how-tos/monitor-workflows/view-workflow-run-history)
 - [Re-running workflows and jobs](https://docs.github.com/actions/managing-workflow-runs-and-deployments/managing-workflow-runs/re-running-workflows-and-jobs)
 - [Downloading workflow artifacts](https://docs.github.com/actions/managing-workflow-runs/downloading-workflow-artifacts)
 - [Reusing workflows](https://docs.github.com/actions/sharing-automations/reusing-workflows)

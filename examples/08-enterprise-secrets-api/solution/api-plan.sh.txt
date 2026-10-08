@@ -1,5 +1,4 @@
 # Illustrative only. Requires explicit authorization, authentication, and real placeholders.
 gh api /orgs/ORG/actions/variables
 gh api /repos/OWNER/REPO/actions/secrets/public-key
-gh api --method PUT /organizations/ORG_ID/actions/permissions/artifact-and-log-retention --field days=30
-
+gh api --method PUT /orgs/ORG/actions/permissions/artifact-and-log-retention --field days=30

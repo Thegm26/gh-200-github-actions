@@ -1,5 +1,11 @@
 # Start here
 
+## Clickable offline course
+
+Open `index.html` in a modern browser. The **Learning path** (17 YAML lessons), **Practice questions** (86 original questions), and **References** (offline study notes, source snapshots, cheat sheet, coverage map, and an Exam practice resources area) work directly from `file://` with no package installation. To use a local URL instead, run `node scripts/serve-course.mjs` and open `http://127.0.0.1:4173`.
+
+The browser checker gives immediate practice feedback. Exam-practice links are clearly labeled resources, not released past exam papers. The adjacent exercise `check.mjs` commands below remain the optional direct-study reference route.
+
 ## What this course changes
 
 Every canonical exercise is already visible in `exercises/<id>/`: read `README.md`, edit the adjacent YAML, and run the adjacent `check.mjs`. Nothing in the local exercises changes a GitHub repository, copies files, or resets an attempt.

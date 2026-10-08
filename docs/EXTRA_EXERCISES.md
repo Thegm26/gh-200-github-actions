@@ -49,3 +49,56 @@ These are optional, one-concept extensions. Create the named files under your ig
 **Write:** `.practice/extra-attestation/verification-notes.md`.
 
 **Scenario:** run `node examples/11-cache-artifacts-attestations/make-artifact.mjs` followed by `node examples/11-cache-artifacts-attestations/verify-artifact.mjs`, then record the subject digest, expected repository/identity constraints, and the failure you would expect after changing the artifact. **Pass:** state that this is a local digest model, not a GitHub-signed attestation, and that a verifier must check both identity expectations and digest. [Primary reference: artifact attestations](https://docs.github.com/actions/security-for-github-actions/using-artifact-attestations)
+
+## 9. Editor validation, schema completion, and metadata help
+
+**Write:** `.practice/extra-editor/workflow.yml` and `.practice/extra-editor/.vscode/settings.json`. The file is outside `.github/workflows`, so GitHub cannot discover or run it.
+
+**Setup:** install or enable the [GitHub Actions VS Code extension](https://github.com/github/vscode-github-actions) and the [Red Hat YAML extension](https://github.com/redhat-developer/vscode-yaml). Open `.practice/extra-editor` as the VS Code folder, then put this explicit association in its `.vscode/settings.json` so the inactive YAML gets the workflow schema:
+
+```json
+{
+  "yaml.schemas": {
+    "https://json.schemastore.org/github-workflow.json": "workflow.yml"
+  }
+}
+```
+
+**Scenario:** start with this sketch and observe the schema diagnostic on `run-on`:
+
+```yaml
+name: editor-check
+on: workflow_dispatch
+jobs:
+  check:
+    run-on: ubuntu-latest
+    steps:
+      - run: echo hello
+```
+
+Then replace `run-on` with `runs-on: ubuntu-latest`, use completion to inspect `workflow_dispatch` input keys, and save. Do not move the sketch into `.github/workflows` or run it.
+
+**Pass:** show the diagnostic before the correction, then show no schema error for the corrected key; explain that completion and metadata help support authoring but do not prove a hosted workflow will run. The GH-200 study guide names VS Code Actions tooling, schema completion, metadata IntelliSense, and validation as authoring skills. [Primary reference: GH-200 study guide](https://learn.microsoft.com/en-us/credentials/certifications/resources/study-guides/gh-200)
+
+## 10. Matrix coverage and concurrency-cost model
+
+**Write:** `.practice/extra-matrix/optimization.yml.txt` and `.practice/extra-matrix/decision.md`. Keep the workflow sketch inactive.
+
+**Scenario:** begin with `os: [ubuntu-latest, windows-latest]` and `node: [20, 22, 24]`, which creates six jobs. Your coverage policy is Linux on all three Node versions and Windows only on Node 22. Add `exclude` entries for the two unsupported Windows combinations and set `max-parallel: 2`.
+
+```yaml
+strategy:
+  matrix:
+    os: [ubuntu-latest, windows-latest]
+    node: [20, 22, 24]
+    exclude:
+      - os: windows-latest
+        node: 20
+      - os: windows-latest
+        node: 24
+  max-parallel: 2
+```
+
+**Expected result:** list the four remaining jobs: Ubuntu/20, Ubuntu/22, Ubuntu/24, and Windows/22. In `decision.md`, model five minutes per job: the six-job matrix is 30 runner-minutes and the four-job matrix is 20 runner-minutes. State separately that `max-parallel: 2` caps peak concurrency but, by itself, does not guarantee less billed work or lower cost; real duration, runner type, platform billing, cache behavior, and failures still matter.
+
+**Pass:** identify exactly two excluded rows, exactly four remaining jobs, and the 30-to-20 runner-minute model. Mark the model as a planning estimate rather than observed billing. [Primary reference: matrix strategy](https://docs.github.com/actions/using-jobs/using-a-matrix-for-your-jobs)
