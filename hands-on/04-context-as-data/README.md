@@ -11,7 +11,8 @@ Commit and push, then use **Run workflow** with the default `$(printf changed)` 
 
 ## Exact repair
 
-Pass `inputs.message` through `env` as `EVENT_TEXT`, then print it with `printf '%s\\n' "$EVENT_TEXT"`. Keep the expected value as the single-quoted literal `$(printf changed)`; do not use `eval` or another shell evaluation mechanism.
+Pass `inputs.message` through `env` as `EVENT_TEXT`, then print it with `printf '%s\
+' "$EVENT_TEXT"`. Keep the expected value as the single-quoted literal `$(printf changed)`; do not use `eval` or another shell evaluation mechanism.
 
 ## New evidence
 
@@ -24,3 +25,5 @@ Commit and push the repaired workflow, then start a **new** manual run at that c
     git rm .github/workflows/gh200-lab.yml
 
 Commit and push cleanup when finished.
+
+[Back to setup](../SETUP.md) · [Next case: 05](../05-job-output/README.md)

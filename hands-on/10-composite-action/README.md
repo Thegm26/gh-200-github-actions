@@ -31,3 +31,5 @@ Commit and push. Open Actions and choose Run workflow. Use a new manual dispatch
     git rm .github/actions/gh200-greeting/action.yml
 
 Then remove the empty local action directory if it remains empty, commit, and push cleanup.
+
+[Back to setup](../SETUP.md) · [Next case: 11](../11-failure-evidence/README.md)

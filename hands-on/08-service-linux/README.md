@@ -11,7 +11,7 @@ Redis socket connection to port 6380 fails.
 
 ## Exact repair
 
-Use port 6379 and the health option in solution.yml.txt.
+Change the socket target in the Python command from port `6380` to `6379`; leave the existing `ports: ["6379:6379"]` mapping unchanged. Under `services.redis.options`, add `--health-cmd "redis-cli ping" --health-interval 5s --health-timeout 3s --health-retries 10`.
 
 ## New evidence
 
@@ -23,3 +23,5 @@ Commit and push. Open Actions and choose Run workflow. Use a new manual dispatch
     git rm .github/workflows/gh200-lab.yml
 
 Commit and push cleanup.
+
+[Back to setup](../SETUP.md) · [Next case: 09](../09-reusable-call/README.md)

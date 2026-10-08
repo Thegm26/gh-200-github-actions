@@ -14,4 +14,4 @@ jobs:
         options: --health-cmd "redis-cli ping" --health-interval 5s --health-timeout 3s --health-retries 10
     steps:
       - shell: bash
-        run: python3 -c 'import socket; s=socket.create_connection(("127.0.0.1",6379),2); s.sendall(b"PING\\r\\n"); assert b"+PONG" in s.recv(64)'
+        run: python3 -c 'import socket; s=socket.create_connection(("127.0.0.1",6379),2); s.sendall(b"PING\r\n"); assert b"+PONG" in s.recv(64)'

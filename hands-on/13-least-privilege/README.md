@@ -25,3 +25,5 @@ Commit and push. Open Actions and choose Run workflow. Use a new manual dispatch
     git rm .github/gh200-policy.yml
 
 Commit and push cleanup.
+
+[Back to setup](../SETUP.md) · [Next case: 14](../14-oidc-job/README.md)

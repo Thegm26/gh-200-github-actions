@@ -31,3 +31,5 @@ The workflow is read-only and has a five-minute timeout.
     git rm -r .github/gh200-sha-pin
 
 Commit and push cleanup when finished.
+
+[Back to setup](../SETUP.md) · [Next case: 16](../16-upload-artifact/README.md)

@@ -11,7 +11,7 @@ The starter requests matrix Node 22 but setup-node installs Node 20. The real jo
 
 ## Exact repair
 
-Set setup-node node-version to the matrix node expression; the solution checks actual Node major for both 20 and 22 rows.
+Set setup-node node-version to the matrix node expression and restore the matrix list to both 20 and 22; the solution checks each row.
 
 ## New evidence
 
@@ -23,3 +23,5 @@ Commit and push. Open Actions and choose Run workflow. Use a new manual dispatch
     git rm .github/workflows/gh200-lab.yml
 
 Commit and push cleanup.
+
+[Back to setup](../SETUP.md) · [Next case: 08](../08-service-linux/README.md)

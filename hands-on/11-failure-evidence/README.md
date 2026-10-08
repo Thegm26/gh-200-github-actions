@@ -24,3 +24,5 @@ Every version is read-only and has a five-minute timeout.
     git rm .github/workflows/gh200-lab.yml
 
 Commit and push cleanup when finished.
+
+[Back to setup](../SETUP.md) · [Next case: 12](../12-runner-policy/README.md)

@@ -23,3 +23,5 @@ Commit and push. Open Actions and choose Run workflow. Use a new manual dispatch
     git rm .github/workflows/gh200-lab.yml
 
 Commit and push cleanup.
+
+[Back to hands-on setup](../README.md)

@@ -31,3 +31,5 @@ The executing workflow has `contents: read`, a five-minute timeout, an approved 
     git rm -r .github/gh200-runner-policy
 
 Commit and push cleanup when finished.
+
+[Back to setup](../SETUP.md) · [Next case: 13](../13-least-privilege/README.md)

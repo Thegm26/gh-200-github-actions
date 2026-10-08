@@ -11,7 +11,7 @@
 
 ## Exact repair
 
-Add `mkdir -p dist && printf artifact > dist/result.txt` before upload.
+Add `mkdir -p dist && printf artifact > dist/result.txt` before upload; the solution also adds an optional final-content assertion.
 
 ## New evidence
 
@@ -23,3 +23,5 @@ Commit and push. Open Actions and choose Run workflow. Use a new manual dispatch
     git rm .github/workflows/gh200-lab.yml
 
 Commit and push cleanup.
+
+[Back to setup](../SETUP.md) · [Next case: 17](../17-capstone-gate/README.md)

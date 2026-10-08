@@ -13,4 +13,4 @@ jobs:
         ports: ["6379:6379"]
     steps:
       - shell: bash
-        run: python3 -c 'import socket; s=socket.create_connection(("127.0.0.1",6380),2); s.sendall(b"PING\\r\\n"); assert b"+PONG" in s.recv(64)'
+        run: python3 -c 'import socket; s=socket.create_connection(("127.0.0.1",6380),2); s.sendall(b"PING\r\n"); assert b"+PONG" in s.recv(64)'

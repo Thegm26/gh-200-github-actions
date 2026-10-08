@@ -15,11 +15,11 @@ Create the branch with `git switch -c gh200-path-lab`. In VS Code, create `lab-i
     git commit -m "Add lab input"
     git push origin gh200-path-lab
 
-No run appears because the starter watches `docs/**`, not `lab-inputs/**`.
+No run appears because the starter watches `_internal/docs/**`, not `lab-inputs/**`.
 
 ## Exact repair
 
-Change the starter's `paths` value from `docs/**` to `lab-inputs/**`. Edit `lab-inputs/hello.txt`, commit, and push again on `gh200-path-lab`. This push creates a run whose only step prints `hello`.
+Change the starter's `paths` value from `_internal/docs/**` to `lab-inputs/**`. Edit `lab-inputs/hello.txt`, commit, and push again on `gh200-path-lab`. This push creates a run whose only step prints `hello`.
 
 ## New evidence
 
@@ -46,3 +46,5 @@ Then switch to your default branch (`main` below; substitute your branch name if
     git push origin main
 
 Retain `gh200-path-lab`; without the active workflow file, later pushes to it are inactive. Do not delete the branch or an existing backup blindly.
+
+[Back to setup](../SETUP.md) · [Next case: 04](../04-context-as-data/README.md)

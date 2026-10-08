@@ -11,7 +11,12 @@ No Run workflow button: starter lacks workflow_dispatch.
 
 ## Exact repair
 
-Add `on:\n  workflow_dispatch: {}`.
+Add this trigger:
+
+```yaml
+on:
+  workflow_dispatch: {}
+```
 
 ## New evidence
 
@@ -23,3 +28,5 @@ Commit and push. Open Actions and choose Run workflow. Use a new manual dispatch
     git rm .github/workflows/gh200-lab.yml
 
 Commit and push cleanup.
+
+[Back to setup](../SETUP.md) · [Next case: 02](../02-job-and-runner/README.md)

@@ -1,0 +1,8 @@
+[
+  { "event": "push", "branch": "main", "paths": ["_internal/src/server.js"], "expected": "run" },
+  { "event": "push", "branch": "main", "paths": ["_internal/docs/README.md"], "expected": "skip" },
+  { "event": "push", "branch": "feature", "paths": ["_internal/src/server.js"], "expected": "skip" },
+  { "event": "workflow_dispatch", "deploy": true, "target": "staging", "expected": "run" },
+  { "event": "workflow_dispatch", "deploy": false, "target": "dev", "expected": "skip" }
+]
+

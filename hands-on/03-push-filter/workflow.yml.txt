@@ -3,7 +3,7 @@ on:
   workflow_dispatch: {}
   push:
     branches: [gh200-path-lab]
-    paths: [docs/**]
+    paths: [_internal/docs/**]
 permissions:
   contents: read
 jobs:
