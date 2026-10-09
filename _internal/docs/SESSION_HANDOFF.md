@@ -4,7 +4,7 @@
 
 - Removed the Practice **Review mistakes** control and correct/answered score line; the focus-area filter, question flow, retry, paging, keyboard behavior, answers, and exact **Source** links remain.
 - Legacy saved `reviewWrong`/`reviewQueue` state now normalizes off during load, preventing an empty trapped practice view while preserving saved answers, filter, and safe index clamping.
-- Fresh evidence: `/tmp/gh200-practice-no-review-browser.log` and `/tmp/gh200-practice-no-review-check.log` both exited 0. Canonical selected-tree fingerprint excluding this handoff: `5c80a2faa316dae4110623e8ff39d13d918fff95a6378575ba9210b01d2fb031` (317 files). No commit or deployment occurred.
+- Fresh evidence: `/tmp/gh200-practice-no-review-browser.log` and `/tmp/gh200-practice-no-review-check.log` both exited 0. Canonical selected-tree fingerprint excluding this handoff: `5c80a2faa316dae4110623e8ff39d13d918fff95a6378575ba9210b01d2fb031` (317 files). A/B bounded independent reviews passed at 360/1440 including legacy-review migration. Published `main` commit: `83233d1`; Pages commit: `fcd54c75d99ee96995ce48c95d3021e06161d6bd`. Live app assets are byte-exact and a headless mobile Practice smoke passed filter-only UI and correct-answer flow. Pages job `37863209798` was still in progress at last check; completion is not claimed here.
 
 ## Practice and References refinement — current authoritative release record (2026-10-09 UTC)
 
