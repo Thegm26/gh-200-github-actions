@@ -337,16 +337,14 @@ try {
   assert.equal(await retry.page.evaluate(() => document.activeElement.value), String(wrong), 'keyboard/radio selection retains focus after rerender');
   await retry.page.getByRole('button', { name: 'Check answer' }).click();
   assert.equal(await retry.page.getByRole('button', { name: 'Try again' }).count(), 1, 'wrong answer offers one concise retry');
-  await retry.page.locator('.review-toggle input').check();
   await retry.page.getByRole('button', { name: 'Try again' }).click();
-  assert.equal(await retry.page.locator('[data-question-id]').getAttribute('data-question-id'), retryQuestion.id, 'retry stays in review queue');
+  assert.equal(await retry.page.locator('[data-question-id]').getAttribute('data-question-id'), retryQuestion.id, 'retry stays on the current question');
   await retry.page.reload();
   await retry.page.locator(`input[name="practice-answer"][value="${retryQuestion.correct}"]`).check();
   await retry.page.getByRole('button', { name: 'Check answer' }).click();
   await retry.page.getByText('Correct.').waitFor();
   assert.equal(await retry.page.getByRole('button', { name: 'Try again' }).count(), 0, 'correct answer leaves Next as the primary progression');
-  await retry.page.getByRole('button', { name: 'Next' }).click();
-  await retry.page.getByRole('heading', { name: 'No matching questions' }).waitFor();
+  assert.equal(await retry.page.locator('.review-toggle, .practice-count').count(), 0, 'Practice omits the retired review and score controls');
   await retry.context.close();
 
   const malformed = await browser.newContext({ viewport: { width: 360, height: 740 } });
@@ -356,6 +354,15 @@ try {
   await malformedPage.getByRole('heading', { name: 'GitHub Actions roadmap' }).waitFor();
   assert.equal(await malformedPage.locator('#path .map-lesson').count(), 17, 'legacy saved stage recovers to the one root roadmap');
   await malformed.close();
+
+  const legacyReview = await browser.newContext({ viewport: { width: 360, height: 740 } });
+  await legacyReview.addInitScript(() => localStorage.setItem('actions-academy-gh200-v1', JSON.stringify({ view:'practice', reviewWrong:true, reviewQueue:['missing'], practiceFilter:'', practiceIndex:99, practice:{} })));
+  const legacyReviewPage = await legacyReview.newPage();
+  await legacyReviewPage.goto(httpUrl);
+  await legacyReviewPage.getByRole('heading', { name:'Practice questions' }).waitFor();
+  assert.equal(await legacyReviewPage.locator('[data-question-id]').count(), 1, 'legacy review state recovers to a normal question');
+  assert.equal(await legacyReviewPage.locator('.review-toggle, .practice-count').count(), 0, 'legacy recovery exposes no retired controls');
+  await legacyReview.close();
 
   const blocked = await browser.newContext({ viewport: { width: 360, height: 740 } });
   await blocked.addInitScript(() => { Storage.prototype.getItem = () => { throw new Error('blocked'); }; Storage.prototype.setItem = () => { throw new Error('blocked'); }; });

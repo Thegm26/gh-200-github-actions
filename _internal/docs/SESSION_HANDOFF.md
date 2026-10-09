@@ -1,5 +1,11 @@
 # Session Handoff
 
+## Practice simplification — active local record (2026-10-09 UTC)
+
+- Removed the Practice **Review mistakes** control and correct/answered score line; the focus-area filter, question flow, retry, paging, keyboard behavior, answers, and exact **Source** links remain.
+- Legacy saved `reviewWrong`/`reviewQueue` state now normalizes off during load, preventing an empty trapped practice view while preserving saved answers, filter, and safe index clamping.
+- Fresh evidence: `/tmp/gh200-practice-no-review-browser.log` and `/tmp/gh200-practice-no-review-check.log` both exited 0. Canonical selected-tree fingerprint excluding this handoff: `5c80a2faa316dae4110623e8ff39d13d918fff95a6378575ba9210b01d2fb031` (317 files). No commit or deployment occurred.
+
 ## Practice and References refinement — current authoritative release record (2026-10-09 UTC)
 
 - Scope/owner: `/root/reference_ui_redesign` owns the frozen Practice and References presentation refinement in `visual/web/app.js`, `visual/web/styles.css`, and browser coverage. The previously released roadmap baseline is `dcae1de` on `main`; Pages commit `4440f27` deployed successfully in job `37861054062`.
